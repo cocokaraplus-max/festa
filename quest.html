@@ -598,6 +598,18 @@ window.__FQ_Q0 = location.search;</script>
     <div id="quests"></div>
   </section>
 
+  <!-- == fq-gacha2-v1 : ガチャへの道（チーム・ログポース・ガチャ券） ==
+       ★中身は下の fq-gacha2-v1 のスクリプトが入れる。ここは入れものだけ。
+       ★前の「クエスト（4つのミッション）」と「獲得した景品」は、スクリプトが隠す（消してはいない） -->
+  <section id="g2Sec" data-tab="quest">
+    <div class="sec-h hand"><span class="em">🧭</span>ガチャへの道</div>
+    <div id="g2Team" class="g2-team"></div>
+    <div id="g2Nav" class="g2-nav"><div class="g2-nav-k">つぎの行き先</div><div class="g2-nav-v">読み込み中…</div></div>
+    <div id="g2Cats" class="g2-cats"></div>
+    <button type="button" class="btn g2-ticket" id="g2TicketBtn" style="display:none">🎟 ガチャ券を見せる</button>
+    <div id="g2Results" class="g2-results"></div>
+  </section>
+
   <!-- == fq-shindan-v1 == -->
   <section id="shindanSec" data-tab="shindan">
     <div class="sec-h hand"><span class="em">🔮</span>福祉タイプ診断</div>
@@ -887,7 +899,7 @@ var QUESTS=[
   {key:'check',img:'img/app/m_check.png',title:'適性診断を受ける',desc:'診断ブースのQRを読み取る',test:function(c){return c==='check';}},
   {key:'event',img:'img/app/m_event.png',title:'ホールのイベントに参加',desc:'ホール画面に出るQRを読み取る',test:function(c){return c.indexOf('event')===0;}}
 ];
-var VALID=['jigyosho','talk_A','talk_B','talk_C','check','event_1','event_2'];
+var VALID=['jigyosho','talk_A','talk_B','talk_C','check','event_1','event_2','f3_exp','f3_talk','f3_see','f4_exp','f4_talk','f4_see']; /* fq-gacha2-v1: 6種類のQR */
 // r = レア度(1:通常 2:チャンス 3:激アツ/地域協賛賞 4:特賞・大当たり)
 var PRIZES=[
   {kind:'イベント賞',name:'お菓子の詰め合わせ',em:'🍬',r:1},
@@ -939,8 +951,9 @@ function scan(code){
   if(S.scanned.indexOf(base)!==-1){toast('このQRはもう読み取り済みだよ');render();return;}
   var wasAll=allDone();
   S.scanned.push(base); save();
-  var label={jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
-  toast('✅ '+label+'  +1pt');
+  var label={f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「見る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「見る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
+  toast('✅ '+label+(/^f[34]_/.test(base)?'':'  +1pt'));   /* fq-gacha2-v1: 新しいQRはポイント表示なし */
+  if(window.fqG2Refresh) setTimeout(window.fqG2Refresh, 1200);
   render();
   if(!wasAll && allDone()){ setTimeout(showRevive, 700); }
 }
@@ -2767,6 +2780,280 @@ if ('serviceWorker' in navigator) {
 
   setTimeout(load, 1200);
   setInterval(load, 60000);          /* 受付が開いた／締まったのを拾う */
+})();
+</script>
+<!-- == fq-gacha2-v1 : 新しいガチャ（チーム・ログポース・ガチャ券・受付で読み取り） ==
+     ★決まり：3階・4階の「体験」「話を聞く」「見る」を1つずつ → ガチャ券1枚。1人2回まで
+     ★ガチャ券のQRを受付のスタッフが読む（uketsuke.html）と、ここで「ガチャをまわす」が押せる
+     ★当たり外れ・券・チームの行き先は、すべてサーバー（fq_gacha2.sql）が決める。ここは表示だけ
+     ★前のポイントのガチャ（fq_draw）は使わない。drawGacha をここで差し替えている -->
+<style>
+  #rankSec{display:none!important}                     /* ランキングは表示だけ止める（消してはいない） */
+  .g2-team{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 12px;}
+  .g2-team .g2-tl{flex:1 1 auto;font-weight:800;font-size:14px;}
+  .g2-team button{border:2px solid var(--ink);background:#fff;border-radius:10px;padding:8px 12px;font-weight:900;font-family:inherit;font-size:14px;color:var(--ink);}
+  .g2-team button.main{background:#B4205F;border-color:#B4205F;color:#fff;}
+  .g2-team .g2-choose{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
+  .g2-team .g2-choose button{padding:12px 6px;font-size:15px;}
+  .g2-team .g2-q{width:100%;font-size:13px;color:var(--muted);font-weight:700;}
+  .g2-nav{border:3px solid var(--ink);border-radius:var(--r);padding:12px 14px;text-align:center;background:#fff;margin-bottom:12px;}
+  .g2-nav-k{font-size:13px;font-weight:800;color:var(--muted);}
+  .g2-nav-v{font-size:24px;font-weight:900;line-height:1.35;margin-top:2px;}
+  .g2-nav-v .fl{display:inline-block;background:var(--ink);color:#fff;border-radius:8px;padding:0 10px;margin-right:6px;}
+  .g2-nav-s{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:6px;line-height:1.6;}
+  .g2-nav.exp{background:#FBE3D6;border-color:#C2410C;} .g2-nav.talk{background:#DCEBF6;border-color:#0B6AA8;}
+  .g2-nav.see{background:#DCF0E1;border-color:#1E7B3A;} .g2-nav.uke{background:#FCE4EE;border-color:#B4205F;}
+  .g2-cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:6px;}
+  .g2-cat{border-radius:12px;padding:8px 4px;text-align:center;font-weight:900;font-size:15px;background:#EFE9DE;color:#5A4A3E;}
+  .g2-cat small{display:block;font-size:11px;font-weight:700;margin-top:2px;}
+  .g2-cat.on.exp{background:#C2410C;color:#fff;} .g2-cat.on.talk{background:#0B6AA8;color:#fff;} .g2-cat.on.see{background:#1E7B3A;color:#fff;}
+  .g2-round{font-size:12.5px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:10px;}
+  .g2-ticket{background:#F5E83A!important;color:var(--ink)!important;border:3px solid var(--ink)!important;box-shadow:0 5px 0 var(--ink)!important;margin:4px 0 12px;width:100%;font-size:18px;}
+  .g2-results{display:flex;flex-direction:column;gap:6px;}
+  .g2-res{display:flex;gap:10px;align-items:center;background:#fbf6ea;border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13.5px;font-weight:800;}
+  .g2-res .no{font-size:22px;font-weight:900;color:#B4205F;min-width:52px;text-align:center;}
+  .g2-res small{display:block;font-weight:700;color:var(--muted);font-size:12px;}
+  .g2-qr{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:10px;margin:10px auto;width:230px;max-width:100%;}
+  .g2-qr svg{display:block;width:100%;height:auto;}
+  .g2-big{font-size:20px;font-weight:900;margin:4px 0;}
+  .g2-note{font-size:13px;font-weight:700;color:var(--muted);line-height:1.7;margin:6px 0 0;}
+  .g2-ok{background:#1E7B3A;color:#fff;border-radius:12px;padding:10px;font-weight:900;font-size:18px;margin:8px 0;}
+</style>
+<div class="modal" id="g2TicketModal">
+  <div class="modal-card">
+    <div class="g2-big" id="g2TkH">ガチャ券</div>
+    <div id="g2TkBody"></div>
+    <button class="btn" data-act="close" data-mod="g2TicketModal" id="g2TkClose" style="margin-top:10px">とじる</button>
+  </div>
+</div>
+<div class="modal" id="g2TeamModal">
+  <div class="modal-card">
+    <div class="g2-big">チームのQR</div>
+    <div class="g2-qr" id="g2TeamQr"></div>
+    <p class="g2-note">いっしょにまわる人に、このQRを<b>スマホのカメラ</b>で読んでもらってね。<br>同じチームになると、<b>全員に同じ行き先</b>が出ます（10人まで）。</p>
+    <div class="g2-note" id="g2TeamCnt"></div>
+    <button class="btn" data-act="close" data-mod="g2TeamModal" style="margin-top:10px">とじる</button>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var cfg = window.FQ_CONFIG || {};
+  var REAL = !!(cfg.SUPABASE_URL && cfg.SUPABASE_URL.indexOf('YOUR-PROJECT')<0 && cfg.SUPABASE_ANON_KEY && window.supabase);
+  if(!REAL) return;
+  var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){ return null; } }
+  function secret(){ return ls('fq_secret_v1') || ''; }
+  var CAT = {exp:'体験', talk:'話を聞く', see:'見る'};
+  var G = null;                // サーバーから聞いた状態
+  var SOLO = 'fq_g2_solo_v1';  // 「ひとりでまわる」を選んだ
+
+  /* ---- 前の表示を隠す（消してはいない） ---- */
+  (function(){
+    var q=$('quests'); if(q && q.closest('section')) q.closest('section').style.display='none';
+    var p=$('prizes'); if(p && p.closest('section')) p.closest('section').style.display='none';
+    var st=$('steps'); if(st) st.style.display='none';
+    var pt=$('pt'); if(pt && pt.closest('.ptchip')) pt.closest('.ptchip').style.display='none';
+    var pm=document.querySelector('#prizeModal p'); if(pm) pm.textContent='受付のスタッフから、この番号の引換券を受け取ってね。';
+  })();
+
+  function base(){ return location.origin + location.pathname.replace(/[^\/]*$/, ''); }
+  function qrSvg(text){
+    try{ var q=qrcode(0,'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize:6, margin:2, scalable:true}); }
+    catch(e){ return '<span class="empty">QRを出せませんでした</span>'; }
+  }
+
+  /* ---- 状態を聞く ---- */
+  var busyState=false, fastUntil=0, timer=null;
+  function refresh(){
+    clearTimeout(timer);
+    var sec=secret();
+    if(!sec){ timer=setTimeout(refresh, 1500); return; }
+    if(busyState){ timer=setTimeout(refresh, 1000); return; }
+    busyState=true;
+    sb.rpc('fq_g2_state', {p_recog:String(DID), p_secret:sec}).then(function(res){
+      busyState=false;
+      var d=res && res.data;
+      if(d && d.ok){ var before=G; G=d; paint(); tickWatch(before); }
+      schedule();
+    }).catch(function(){ busyState=false; schedule(); });
+  }
+  function schedule(){
+    var fast = Date.now() < fastUntil || ($('g2TicketModal').classList.contains('show'));
+    timer=setTimeout(refresh, fast ? 2500 : 20000);
+  }
+  window.fqG2Refresh = function(){ fastUntil = Date.now()+15000; refresh(); };
+
+  /* ---- 画面 ---- */
+  function paint(){
+    if(!G) return;
+    var m=G.member, drawn=m.drawn|0, earned=m.earned|0;
+    // チーム
+    var tm=$('g2Team');
+    if(G.team){
+      tm.innerHTML='<div class="g2-tl">👫 チーム（'+G.team.count+'人）</div>'
+        +'<button type="button" class="main" data-g2="teamqr">チームのQR</button>'
+        +'<button type="button" data-g2="leave">ぬける</button>';
+    } else if(ls(SOLO)==='1'){
+      tm.innerHTML='<div class="g2-tl">🚶 ひとりでまわっています</div><button type="button" data-g2="team">チームにする</button>';
+    } else {
+      tm.innerHTML='<div class="g2-q">友だちや家族といっしょ？　ひとり？</div><div class="g2-choose">'
+        +'<button type="button" class="main" data-g2="team">チームでまわる</button>'
+        +'<button type="button" data-g2="solo">ひとりでまわる</button></div>';
+    }
+    // 行き先
+    var nav=G.nav||{}, nv=$('g2Nav'), cls='g2-nav', v='', s='';
+    var me_done = drawn>=2;
+    if(nav.kind==='booth'){
+      cls+=' '+nav.cat;
+      v='<span class="fl">'+nav.floor+'階</span>'+esc(nav.label);
+      s='そのブースで体験・お話・見学を終えたら、<b>QRを見せてもらって</b>読み取ろう。';
+      if(G.team) s+='<br>チームのみんなに同じ行き先が出ています。';
+      if(me_done) s='あなたはガチャを2回まわしました。チームのみんなのつぎの行き先です。';
+      else if(G.ticket) s+='<br>あなたのガチャ券は、1Fの受付で使えます。';
+    } else if(nav.kind==='uketsuke'){
+      cls+=' uke'; v='1Fの受付へ行こう！';
+      s='受付で<b>ガチャ券</b>を見せると、ガチャがまわせます。';
+    } else {
+      v='📖 図鑑の8か所めぐりへ！';
+      s='ガチャは1人2回まで。会場のキャラのQRを集めよう。<br><button type="button" class="linkbtn" data-g2="zukan">図鑑をひらく</button>';
+    }
+    nv.className=cls;
+    nv.innerHTML='<div class="g2-nav-k">'+(nav.kind==='zukan'?'つぎは':'つぎの行き先')+'</div><div class="g2-nav-v">'+v+'</div><div class="g2-nav-s">'+s+'</div>';
+    // そろったカテゴリ（いまの回）
+    var ct=$('g2Cats');
+    if(drawn>=2){ ct.innerHTML=''; }
+    else {
+      var round = earned>drawn ? drawn+1 : drawn+1;
+      ct.innerHTML=['exp','talk','see'].map(function(c){
+        var n=(m.n&&m.n[c])|0, on = n>=round;
+        var fl=(m.floors&&m.floors[c])||[];
+        return '<div class="g2-cat '+c+(on?' on':'')+'">'+CAT[c]+(on?' ✓':'')+'<small>'+(on?(fl[fl.length-1]+'階で読んだ'):'まだ')+'</small></div>';
+      }).join('')+'<div class="g2-round" style="grid-column:1/-1">ガチャ '+(drawn+1)+'回目にむけて（1人2回まで）</div>';
+    }
+    // ガチャ券
+    var tb=$('g2TicketBtn');
+    if(G.ticket){ tb.style.display=''; tb.textContent='🎟 ガチャ券を見せる（'+G.ticket.round+'回目）'; }
+    else tb.style.display='none';
+    // 結果
+    $('g2Results').innerHTML=(G.results||[]).map(function(r){
+      if(r.is_win) return '<div class="g2-res"><div class="no">'+(r.prize_no!=null?esc(r.prize_no)+'番':'🎁')+'</div><div>'+r.round+'回目：あたり！ '+esc(r.prize_name||'')
+        +'<small>'+(r.handed?'引換券を受け取りました':'受付で、この番号の引換券を受け取ってね')+'</small></div></div>';
+      return '<div class="g2-res"><div class="no">—</div><div>'+r.round+'回目：はずれ<small>大抽選会の対象です</small></div></div>';
+    }).join('');
+    paintTicketModal();
+    if(window.render) window.render();
+  }
+
+  /* ---- ガチャ券の画面 ---- */
+  function paintTicketModal(){
+    var md=$('g2TicketModal'); if(!md.classList.contains('show')) return;
+    var t=G && G.ticket, b=$('g2TkBody');
+    if(!t){ b.innerHTML='<p class="g2-note">いまは使えるガチャ券がありません。</p>'; return; }
+    $('g2TkH').textContent='ガチャ券（'+t.round+'回目）';
+    if(t.status==='unlocked'){
+      b.innerHTML='<div class="g2-ok">OK！ ガチャがまわせます</div>'
+        +'<button type="button" class="btn btn-gacha" data-g2="drawnow" style="width:100%;font-size:20px">ガチャをまわす</button>';
+    } else {
+      b.innerHTML='<div class="g2-qr">'+qrSvg(base()+'uketsuke.html?t='+encodeURIComponent(t.token))+'</div>'
+        +'<p class="g2-note"><b>受付のスタッフに、この画面を見せてね。</b><br>スタッフが読み取ると「ガチャをまわす」が出ます。</p>';
+    }
+  }
+  function tickWatch(before){
+    // 受付で読まれた瞬間を知らせる
+    if(G && G.ticket && G.ticket.status==='unlocked' && !(before && before.ticket && before.ticket.status==='unlocked')){
+      if(typeof toast==='function') toast('🎉 ガチャがまわせるよ！');
+      try{ if(navigator.vibrate) navigator.vibrate(150); }catch(e){}
+    }
+  }
+
+  /* ---- ガチャ：サーバーが当たり外れを決める ---- */
+  window.drawGacha = function(){
+    if(window.busy) return;
+    if(!(G && G.ticket && G.ticket.status==='unlocked')){ if(typeof toast==='function') toast('受付でガチャ券を見せてね'); return; }
+    var sec=secret(); if(!sec) return;
+    window.busy=true; busy=true; var gb=$('gachaBtn'); if(gb) gb.disabled=true;
+    $('g2TicketModal').classList.remove('show');
+    sb.rpc('fq_g2_draw', {p_recog:String(DID), p_secret:sec}).then(function(res){
+      var d=res && res.data;
+      if(!d){ throw (res && res.error) || new Error('no data'); }
+      if(!d.ok){ busy=false; window.busy=false; toast(d.reason==='not_unlocked'?'受付でガチャ券を見せてね':'もう一度ためしてね'); refresh(); return; }
+      if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
+      var lv=Math.max(1, Math.min(4, d.rarity|0)), revive=false;
+      if(lv===4){ var rr=Math.random(); revive = rr<0.4?false:(rr<0.7?1:2); }
+      var p={ em:({1:'🎁',2:'🎀',3:'🎫',4:'🌈'})[lv]||'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('引換券 '+d.prize_no+'番'):''), r:lv };
+      runFx(lv, function(){ busy=false; window.busy=false; showPrize(p, lv); confetti(lv); refresh(); }, revive);
+    }).catch(function(e){
+      console.warn('fq_g2_draw失敗', e); busy=false; window.busy=false; refresh();
+      toast('つながりませんでした。電波の良い場所でもう一度押してね');
+    });
+  };
+
+  /* ---- ボタンの状態 ---- */
+  var _render = window.render;
+  window.render = function(){
+    if(_render) _render();
+    var btn=$('gachaBtn'), hint=$('gachaHint');
+    var t=G && G.ticket, drawn=G ? (G.member.drawn|0) : 0;
+    if(btn){ btn.disabled = !(t && t.status==='unlocked') || !!window.busy; btn.textContent='ガチャをまわす'; }
+    if(hint){
+      if(!G) hint.innerHTML='読み込み中…（電波の良い場所で開いてね）';
+      else if(t && t.status==='unlocked') hint.innerHTML='<b>受付で読み取りOK！</b> ボタンを押してね';
+      else if(t) hint.innerHTML='<b>ガチャ券</b>があります。1Fの受付で見せてね';
+      else if(drawn>=2) hint.innerHTML='🎊 ガチャは2回まわしました。図鑑のキャラ集めへ！';
+      else hint.innerHTML='「体験」「話を聞く」「見る」を1つずつそろえると、ガチャ券がもらえます';
+    }
+  };
+
+  /* ---- ボタン ---- */
+  document.addEventListener('click', function(ev){
+    var b=ev.target.closest && ev.target.closest('[data-g2]'); if(!b) return;
+    var a=b.getAttribute('data-g2'), sec=secret();
+    if(a==='solo'){ ls(SOLO,'1'); paint(); return; }
+    if(a==='zukan'){ if(window.FQ_TAB) window.FQ_TAB('zukan', true); return; }
+    if(a==='drawnow'){ window.drawGacha(); return; }
+    if(!sec){ toast('電波の良い場所で開き直してね'); return; }
+    if(a==='team' || a==='teamqr'){
+      sb.rpc('fq_team_create', {p_recog:String(DID), p_secret:sec}).then(function(res){
+        var d=res && res.data; if(!d || !d.ok){ toast('つくれませんでした。もう一度ためしてね'); return; }
+        ls(SOLO,null);
+        $('g2TeamQr').innerHTML=qrSvg(base()+'?team='+encodeURIComponent(d.code));
+        $('g2TeamCnt').textContent='いまのチーム：'+d.count+'人';
+        $('g2TeamModal').classList.add('show');
+        window.fqG2Refresh();
+      }).catch(function(){ toast('つながりませんでした'); });
+    } else if(a==='leave'){
+      if(!confirm('チームをぬけて、ひとりでまわりますか？')) return;
+      sb.rpc('fq_team_leave', {p_recog:String(DID), p_secret:sec}).then(function(){ ls(SOLO,'1'); window.fqG2Refresh(); });
+    }
+  });
+  $('g2TicketBtn').addEventListener('click', function(){
+    $('g2TicketModal').classList.add('show'); paintTicketModal(); window.fqG2Refresh();
+  });
+
+  /* ---- チームのQRから来た（?team=） ---- */
+  (function(){
+    var code=''; try{ code=new URLSearchParams(location.search).get('team')||''; }catch(e){}
+    if(!code) return;
+    try{ if(history.replaceState) history.replaceState(null,'',location.pathname); }catch(e){}
+    function tryJoin(n){
+      var sec=secret();
+      if(!sec){ if(n<20) setTimeout(function(){ tryJoin(n+1); }, 800); return; }
+      if(!confirm('友だちのチームに入りますか？（全員に同じ行き先が出ます）')) return;
+      sb.rpc('fq_team_join', {p_recog:String(DID), p_secret:sec, p_code:code}).then(function(res){
+        var d=res && res.data;
+        if(d && d.ok){ ls(SOLO,null); toast('👫 チームに入りました（'+d.count+'人）'); window.fqG2Refresh(); }
+        else toast(d && d.reason==='full' ? 'このチームは10人でいっぱいです' : 'チームが見つかりませんでした');
+      }).catch(function(){ toast('つながりませんでした。もう一度QRを読んでね'); });
+    }
+    setTimeout(function(){ tryJoin(0); }, 600);
+  })();
+
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') window.fqG2Refresh(); });
+  window.addEventListener('online', function(){ window.fqG2Refresh(); });
+  refresh();
 })();
 </script>
 </body>

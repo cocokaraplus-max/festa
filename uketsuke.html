@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>福祉クエスト 受付（ガチャ）</title>
+<!-- == fq-gacha2-v1 : 1F 受付のスタッフ用ページ ==
+     ・お客さんの「ガチャ券」の QR を、受付の端末のふつうのカメラで読むと、このページが開く（?t=券の番号）
+     ・読んだ瞬間に、お客さんのスマホに「ガチャをまわす」が出る（fq_ticket_unlock）
+     ・お客さんがまわすと、ここに結果が出る。当たりなら「12番 ○○賞」→ 紙の引換券を渡して「渡しました」
+     ・はじめての端末は、受付の暗証番号を 1 回だけ入れる。端末に「受付の鍵」が残る
+       ★暗証番号そのものは端末に残さない。鍵だけ（localStorage の fq_staff_v1）
+     ・暗証番号を知らない人（お客さんの仲間など）がこのページを開いても、何も起きない
+     ★本当に正しいかはサーバー（fq_gacha2.sql の関数）が決める。この画面は表示だけ -->
+<style>
+  :root{ --ink:#36271E; --muted:#6E6052; --yellow:#F5E83A; --pink:#B4205F; --ok:#1E7B3A; --bg:#FFFDF5; --card:#FFFFFF; --line:#E4DCC8; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Hiragino Kaku Gothic ProN','Yu Gothic','Noto Sans JP',sans-serif; }
+  .wrap{ max-width:520px; margin:0 auto; padding:16px 16px 60px; }
+  h1{ font-size:18px; margin:0 0 12px; text-align:center; letter-spacing:.06em; background:var(--yellow); border:3px solid var(--ink); border-radius:14px; padding:10px; }
+  h1 small{ display:block; font-size:12px; font-weight:700; margin-top:2px; }
+  .card{ background:var(--card); border:3px solid var(--ink); border-radius:16px; padding:16px; margin-bottom:14px; }
+  .big{ font-size:22px; font-weight:900; text-align:center; padding:14px 8px; border-radius:12px; margin-bottom:12px; color:#fff; line-height:1.4; }
+  .big.ok{ background:var(--ok); } .big.ng{ background:#7a7a7a; } .big.bad{ background:#C2410C; } .big.wait{ background:#9C8A6A; }
+  .big.win{ background:var(--pink); font-size:20px; }
+  .big.win .no{ display:block; font-size:56px; line-height:1.1; margin:4px 0; }
+  .row{ display:flex; gap:8px; padding:6px 0; border-bottom:1px dashed var(--line); font-size:16px; }
+  .row:last-child{ border-bottom:none; }
+  .row .k{ min-width:80px; color:var(--muted); font-weight:700; font-size:13px; padding-top:3px; }
+  .row .v{ flex:1; font-weight:800; word-break:break-all; }
+  label{ display:block; font-size:13px; font-weight:800; color:var(--muted); margin:12px 0 6px; }
+  input{ width:100%; font-size:20px; padding:12px; border:2px solid #CFC4AE; border-radius:12px; font-family:inherit; background:#fff; }
+  .btn{ display:block; width:100%; margin-top:14px; border:3px solid var(--ink); border-radius:12px; padding:15px; font-size:18px; font-weight:900; font-family:inherit; cursor:pointer;
+        background:var(--yellow); color:var(--ink); }
+  .btn.hand{ background:var(--pink); color:#fff; border-color:var(--pink); font-size:20px; }
+  .btn:disabled{ opacity:.5; }
+  .btn.sub{ background:#fff; font-size:14px; padding:10px; border-width:2px; }
+  .msg{ margin-top:10px; font-weight:800; font-size:14px; text-align:center; min-height:1.2em; }
+  .msg.err{ color:#C2410C; } .msg.good{ color:var(--ok); }
+  .note{ font-size:13px; line-height:1.75; color:var(--muted); font-weight:600; margin:0; }
+  .hide{ display:none; }
+  .pend{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px dashed var(--line); }
+  .pend:last-child{ border-bottom:none; }
+  .pend .pn{ font-size:26px; font-weight:900; min-width:64px; text-align:center; color:var(--pink); }
+  .pend .pt{ flex:1; font-weight:800; font-size:14px; line-height:1.5; }
+  .pend .pt small{ display:block; color:var(--muted); font-weight:700; font-size:12px; }
+  .pend button{ border:2px solid var(--pink); background:#fff; color:var(--pink); font-weight:900; border-radius:10px; padding:8px 10px; font-family:inherit; font-size:14px; }
+  .who{ text-align:center; font-size:12px; color:var(--muted); font-weight:700; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>福祉クエスト　1F 受付<small>ガチャ券の読み取り（スタッフ用）</small></h1>
+  <div class="who hide" id="who"></div>
+
+  <!-- はじめての端末：暗証番号 -->
+  <div class="card hide" id="loginBox">
+    <div style="font-weight:900;font-size:16px;margin-bottom:4px">この端末を受付にする</div>
+    <p class="note">受付の暗証番号を入れてください。<b>この端末で1回だけ</b>です。次からは、ガチャ券のQRを読むだけで使えます。</p>
+    <label for="lbl">この端末の呼び名（例：受付1）</label>
+    <input id="lbl" type="text" maxlength="20" autocomplete="off" placeholder="受付1">
+    <label for="pass">受付の暗証番号</label>
+    <input id="pass" type="password" autocomplete="off">
+    <button class="btn" id="loginBtn">この端末を受付にする</button>
+    <div class="msg" id="loginMsg"></div>
+  </div>
+
+  <!-- 読んだガチャ券 -->
+  <div class="card hide" id="tBox">
+    <div class="big wait" id="tBig">確かめています…</div>
+    <div id="tRows"></div>
+    <p class="note" id="tNote"></p>
+    <button class="btn hand hide" id="handBtn">引換券を渡しました</button>
+    <div class="msg" id="tMsg"></div>
+  </div>
+
+  <!-- まだ渡していない当たり -->
+  <div class="card hide" id="pBox">
+    <div style="font-weight:900;font-size:16px;margin-bottom:6px">まだ渡していない当たり</div>
+    <div id="pList"><p class="note">ありません。</p></div>
+  </div>
+
+  <div class="card hide" id="helpBox">
+    <p class="note">
+      ・お客さんの<b>ガチャ券のQR</b>を、この端末の<b>ふつうのカメラ</b>で読んでください。この画面が開きます。<br>
+      ・「OK」と出たら、お客さんのスマホに「ガチャをまわす」が出ます。押してもらってください。<br>
+      ・当たりなら、ここに<b>番号と景品</b>が出ます。その番号の引換券を渡して「引換券を渡しました」を押してください。<br>
+      ・<b>いつも同じブラウザ</b>で開いてください（ほかのブラウザでは、もう一度暗証番号が要ります）。
+    </p>
+    <button class="btn sub" id="logoutBtn">この端末の受付をやめる</button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  'use strict';
+  var cfg = window.FQ_CONFIG || {};
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function show(id, on){ $(id).classList.toggle('hide', !on); }
+  if (!(cfg.SUPABASE_URL && window.supabase)) { document.body.insertAdjacentHTML('beforeend','<p class="msg err">設定が読み込めませんでした。</p>'); return; }
+  var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  function rpc(fn, args){ return sb.rpc(fn, args).then(function(r){ if (r.error) throw r.error; return r.data || {}; }); }
+
+  var KEY = 'fq_staff_v1', LKEY = 'fq_staff_label_v1';
+  function getStaff(){ try{ return localStorage.getItem(KEY) || ''; }catch(e){ return ''; } }
+  function setStaff(v, l){ try{ if (v) { localStorage.setItem(KEY, v); localStorage.setItem(LKEY, l||''); } else { localStorage.removeItem(KEY); } }catch(e){} }
+  var token = ''; try{ token = new URLSearchParams(location.search).get('t') || ''; }catch(e){}
+
+  function staffLost(){
+    setStaff('');
+    show('tBox', false); show('pBox', false); show('helpBox', false); show('who', false);
+    show('loginBox', true);
+    $('loginMsg').textContent = 'もう一度、暗証番号を入れてください。'; $('loginMsg').className = 'msg err';
+  }
+
+  // ---- 暗証番号 ----
+  $('loginBtn').addEventListener('click', function(){
+    var b = this; b.disabled = true; $('loginMsg').textContent = '';
+    var lbl = $('lbl').value.trim() || '受付';
+    rpc('fq_staff_login', {p_pass: $('pass').value, p_label: lbl}).then(function(d){
+      b.disabled = false;
+      if (d.ok) { setStaff(d.staff, lbl); $('pass').value = ''; start(); return; }
+      $('loginMsg').className = 'msg err';
+      $('loginMsg').textContent = d.reason === 'locked' ? 'まちがいが続いたので、10分ほど止まっています。少し待ってください。' : '暗証番号がちがいます。';
+    }).catch(function(e){ b.disabled = false; $('loginMsg').className='msg err'; $('loginMsg').textContent = 'つながりませんでした（' + (e.message||e) + '）。'; });
+  });
+  $('logoutBtn').addEventListener('click', function(){
+    if (!confirm('この端末の受付をやめますか？（もう一度使うときは暗証番号が要ります）')) return;
+    setStaff(''); location.href = location.pathname;
+  });
+
+  // ---- ガチャ券 ----
+  var watchTimer = null, lastTicket = null;
+  function rows(t){
+    return '<div class="row"><div class="k">ガチャ</div><div class="v">' + t.round + '回目</div></div>'
+         + '<div class="row"><div class="k">認識番号</div><div class="v">' + esc(t.recog_no) + '</div></div>'
+         + '<div class="row"><div class="k">なまえ</div><div class="v">' + (esc(t.nickname) || '（なし）') + '</div></div>';
+  }
+  function paint(t){
+    lastTicket = t;
+    var big = $('tBig'), note = $('tNote');
+    $('tRows').innerHTML = rows(t);
+    show('handBtn', false);
+    if (t.status === 'unlocked') {
+      big.className = 'big ok'; big.innerHTML = 'OK！ ' + t.round + '回目のガチャ券';
+      note.innerHTML = 'お客さんのスマホに<b>「ガチャをまわす」</b>が出ています。押してもらってください。<br>まわすと、ここに結果が出ます。';
+    } else if (t.status === 'drawn' && t.is_win) {
+      big.className = 'big win';
+      big.innerHTML = 'あたり！<span class="no">' + (t.prize_no != null ? esc(t.prize_no) + '番' : '') + '</span>' + esc(t.prize_name || '');
+      if (t.handed) { note.innerHTML = '<b>引換券は渡し済みです。</b>'; }
+      else { note.innerHTML = 'この番号の<b>紙の引換券</b>を渡して、下のボタンを押してください。'; show('handBtn', true); }
+    } else if (t.status === 'drawn') {
+      big.className = 'big ng'; big.innerHTML = 'はずれ';
+      note.innerHTML = '大抽選会の対象です。「最後の大抽選会もお楽しみに！」とお伝えください。';
+    } else {
+      big.className = 'big wait'; big.innerHTML = '確かめています…'; note.textContent = '';
+    }
+  }
+  function watch(){
+    clearTimeout(watchTimer);
+    if (!token) return;
+    rpc('fq_ticket_watch', {p_staff: getStaff(), p_token: token}).then(function(d){
+      if (!d.ok) { if (d.reason === 'staff') return staffLost(); return; }
+      paint(d.ticket);
+      if (d.ticket.status !== 'drawn') watchTimer = setTimeout(watch, 2000);
+    }).catch(function(){ watchTimer = setTimeout(watch, 4000); });
+  }
+  function openTicket(){
+    show('tBox', true);
+    rpc('fq_ticket_unlock', {p_staff: getStaff(), p_token: token}).then(function(d){
+      if (!d.ok) {
+        if (d.reason === 'staff') return staffLost();
+        $('tBig').className = 'big bad'; $('tBig').textContent = 'このガチャ券は見つかりません';
+        $('tNote').innerHTML = 'お客さんのアプリの画面を、もう一度ひらき直してもらってください。';
+        return;
+      }
+      paint(d.ticket);
+      if (d.ticket.status !== 'drawn') watchTimer = setTimeout(watch, 2000);
+    }).catch(function(e){
+      $('tBig').className = 'big bad'; $('tBig').textContent = 'つながりませんでした';
+      $('tNote').textContent = '電波の良い場所で、もう一度読み取ってください。（' + (e.message||e) + '）';
+    });
+  }
+  function hand(tok, done){
+    rpc('fq_ticket_hand', {p_staff: getStaff(), p_token: tok}).then(function(d){
+      if (!d.ok) { if (d.reason === 'staff') return staffLost(); return; }
+      done && done(d.ticket); loadPending();
+    }).catch(function(e){ alert('つながりませんでした（' + (e.message||e) + '）'); });
+  }
+  $('handBtn').addEventListener('click', function(){
+    var b = this; b.disabled = true;
+    hand(token, function(t){ b.disabled = false; paint(t); $('tMsg').className = 'msg good'; $('tMsg').textContent = '渡しました。'; });
+  });
+
+  // ---- まだ渡していない当たり ----
+  var pendTimer = null;
+  function loadPending(){
+    clearTimeout(pendTimer);
+    rpc('fq_staff_pending', {p_staff: getStaff()}).then(function(d){
+      if (!d.ok) { if (d.reason === 'staff') return staffLost(); return; }
+      show('pBox', true);
+      var L = d.list || [];
+      $('pList').innerHTML = L.length ? L.map(function(x){
+        var t = x.ticket;
+        return '<div class="pend"><div class="pn">' + (t.prize_no != null ? esc(t.prize_no) : '—') + '</div>'
+          + '<div class="pt">' + esc(t.prize_name) + '<small>認識番号 ' + esc(t.recog_no) + (t.nickname ? '／' + esc(t.nickname) : '') + '</small></div>'
+          + '<button type="button" data-hand="' + esc(x.token) + '">渡しました</button></div>';
+      }).join('') : '<p class="note">ありません。</p>';
+      pendTimer = setTimeout(loadPending, 15000);
+    }).catch(function(){ pendTimer = setTimeout(loadPending, 20000); });
+  }
+  $('pList').addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-hand]'); if (!b) return;
+    b.disabled = true;
+    var tok = b.getAttribute('data-hand');
+    hand(tok, function(t){ if (tok === token) paint(t); });
+  });
+
+  function start(){
+    show('loginBox', false); show('helpBox', true);
+    var l = ''; try{ l = localStorage.getItem(LKEY) || ''; }catch(e){}
+    $('who').textContent = 'この端末：' + (l || '受付'); show('who', true);
+    if (token) openTicket();
+    loadPending();
+  }
+  if (getStaff()) start(); else { show('loginBox', true); show('helpBox', false); }
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible' && getStaff()) { loadPending(); if (token && lastTicket && lastTicket.status !== 'drawn') watch(); } });
+})();
+</script>
+</body>
+</html>
