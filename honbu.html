@@ -551,7 +551,7 @@ boot();
       <h3>景品</h3>
       <div class="vscroll"><table class="vtbl"><thead><tr><th>景品の名前</th><th>演出</th><th>用意する数</th><th>残り</th><th>使えるお店</th><th>内容（券に出る）</th><th>有効期限</th><th>番号</th><th></th></tr></thead><tbody id="vPrizes"></tbody></table></div>
       <div class="lprow" style="margin-top:10px;"><button class="lpbtn sm" id="vAddPrize">景品を足す</button></div>
-      <p class="lpnote"><b>★番号（fq-gacha2-v1）</b>：受付の画面とお客さんの画面に「12番」のように出ます。紙の引換券にも同じ番号を書いておいてください。<br>演出は当たったときの色（青1・緑2・赤3・虹4）。「用意する数」を変えると、残りも同じだけ増減します。会場で渡す景品は、お店を「本部」にしておくと、本部の受付で同じように使用済みにできます。</p>
+      <p class="lpnote"><b>★番号（fq-gacha2-v1）</b>：受付の画面とお客さんの画面に「12番」のように出ます。紙の引換券にも同じ番号を書いておいてください。<br><b>演出（fq-gacha-play-v1）</b>：当たったときの演出を景品ごとに選べます（通常あたり／虹色・反転停止（爆竹）／フリーズ・覚醒／ネガ反転・ひび割れ）。下にいくほど派手です。釣りでは「ネガ反転・ひび割れ」が超大物になります。「用意する数」を変えると、残りも同じだけ増減します。会場で渡す景品は、お店を「本部」にしておくと、本部の受付で同じように使用済みにできます。</p>
 
       <h3>会場のQRに入れるURL（印刷用）</h3>
       <div id="vCodes" class="vsmall"></div>
@@ -608,7 +608,8 @@ boot();
   }
   function prizeRow(x){
     x = x || {id:'', name:'', rarity:1, initial_stock:0, stock:0, shop_id:'', description:'', expires_on:'', sort:(DATA.prizes||[]).length+1};
-    var rs = [1,2,3,4].map(function(r){ return '<option value="'+r+'"'+((x.rarity|0)===r?' selected':'')+'>'+['','青','緑','赤','虹'][r]+'</option>'; }).join('');
+    /* fq-gacha-play-v1: 演出は4つ（gacha_play.html の段階と同じ番号） */
+    var rs = [1,2,3,4].map(function(r){ var cur=Math.min(4, Math.max(1, x.rarity|0)); return '<option value="'+r+'"'+(cur===r?' selected':'')+'>'+['','通常あたり','虹色・反転停止（爆竹）','フリーズ・覚醒','ネガ反転・ひび割れ'][r]+'</option>'; }).join('');
     return '<tr data-prize="'+esc(x.id)+'"><td><input class="nm" value="'+esc(x.name)+'"></td><td><select class="rr">'+rs+'</select></td>'
       + '<td><input class="n ini" type="number" min="0" value="'+esc(x.initial_stock)+'"></td><td>'+esc(x.stock)+'</td>'
       + '<td><select class="sh">'+shopOptions(x.shop_id)+'</select></td><td><input class="ds" value="'+esc(x.description)+'"></td>'

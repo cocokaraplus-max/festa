@@ -2980,6 +2980,8 @@ if ('serviceWorker' in navigator) {
       var d=res && res.data;
       if(!d){ throw (res && res.error) || new Error('no data'); }
       if(!d.ok){ busy=false; window.busy=false; toast(d.reason==='not_unlocked'?'受付でガチャ券を見せてね':'もう一度ためしてね'); refresh(); return; }
+      /* == fq-gacha-play-v1 : お客さんが遊びを選ぶ演出（gacha_play.html）。開けないときは今までの演出 == */
+      if(window.fqPlay && window.fqPlay(d)) return;
       if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
       var lv=Math.max(1, Math.min(4, d.rarity|0)), revive=false;
       if(lv===4){ var rr=Math.random(); revive = rr<0.4?false:(rr<0.7?1:2); }
@@ -2989,6 +2991,47 @@ if ('serviceWorker' in navigator) {
       console.warn('fq_g2_draw失敗', e); busy=false; window.busy=false; refresh();
       toast('つながりませんでした。電波の良い場所でもう一度押してね');
     });
+  };
+
+  /* == fq-gacha-play-v1 ==
+     ★演出の段階（m）は、景品の「演出」の設定（rarity）で決まる。1＝通常 2＝虹色・反転停止 3＝フリーズ・覚醒 4＝ネガ反転・ひび割れ */
+  var playFrame = null;
+  window.fqPlay = function(d){
+    if(playFrame) return false;
+    var r = d.win ? (d.rarity|0) : 0;
+    var m = !d.win ? 0 : Math.max(1, Math.min(4, r));
+    var url = 'gacha_play.html#m=' + m + '&p=' + encodeURIComponent(d.prize_name || '') + '&n=' + encodeURIComponent(d.prize_no == null ? '' : d.prize_no);
+    var ok = false;
+    var fr = document.createElement('iframe');
+    fr.src = url; fr.title = 'ガチャ';
+    fr.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:200;background:#000;';
+    playFrame = fr;
+    function finish(){
+      window.removeEventListener('message', onMsg);
+      if(fr.parentNode) fr.parentNode.removeChild(fr);
+      playFrame = null; busy = false; window.busy = false;
+      if(d.win && typeof toast === 'function') toast('🎁 受付で' + (d.prize_no != null ? ' ' + d.prize_no + '番の' : '') + '引換券を受け取ってね');
+      refresh();
+    }
+    function onMsg(ev){
+      if(ev.origin !== location.origin || !ev.data || !ev.data.fq) return;
+      if(ev.data.fq === 'g2ready') ok = true;
+      if(ev.data.fq === 'g2done') finish();
+    }
+    window.addEventListener('message', onMsg);
+    document.body.appendChild(fr);
+    /* 開けなかったら（電波が弱いなど）、今までの演出に切りかえる */
+    setTimeout(function(){
+      if(ok || !playFrame) return;
+      window.removeEventListener('message', onMsg);
+      if(fr.parentNode) fr.parentNode.removeChild(fr);
+      playFrame = null;
+      if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
+      var lv = Math.max(1, Math.min(4, d.rarity|0));
+      var p = { em:'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('引換券 '+d.prize_no+'番'):''), r:lv };
+      runFx(lv, function(){ busy=false; window.busy=false; showPrize(p, lv); confetti(lv); refresh(); }, false);
+    }, 8000);
+    return true;
   };
 
   /* ---- ボタンの状態 ---- */
