@@ -379,16 +379,50 @@ const FQ = {
      ★photo は正方形の絵にすること。丸の中は
        background-size:cover（はみ出したぶんを切る）で入るので、
        横長のままだと左右が切れます。 */
+  /* == fq-orgs-v1 ==
+     ★実行委員の事業所。kViewer「実行委員 情報登録」で「掲載を希望する」の団体だけ。
+       名前は届いたとおりの表記（＊記載の通り表記します、のため）。
+     ★url は ホームページ／Facebook。プロフィールの中にボタンが出ます。
+       facebook.com なら「Facebookを見る →」、それ以外は「ホームページを見る →」。
+     ★とよた市民活動センターは3回登録があったので、いちばん下の1件の説明文を使っています。 */
   staff: [
-    { name:'（お名前）', role:'実行委員長',  insta:'', photo:'', bio:'' },
-    { name:'（お名前）', role:'ステージ担当', insta:'', photo:'', bio:'' },
-    { name:'（お名前）', role:'ブース担当',  insta:'', photo:'', bio:'' },
-    { name:'（お名前）', role:'フード担当',  insta:'', photo:'', bio:'' },
-    { name:'（お名前）', role:'広報担当',    insta:'', photo:'', bio:'' },
+    { name:'ふるさと株式会社', role:'実行委員',
+      url:'https://furusato.studio.site/', photo:'img/org_furusato.webp',
+      bio:'ふるさと株式会社は、愛知県豊田市を中心に高齢者福祉事業を行う企業です。'
+        + '主に美容を取り入れた通所介護事業所を軸に、訪問介護、居宅介護支援、訪問看護も運営しております。'
+        + '多くの若手社員さんが活躍中!!' },
+    { name:'とよた市民活動センター', role:'実行委員',
+      url:'https://www.toyota-shiminkatsudo.net/', photo:'',
+      bio:'とよた市民活動センターは、市民活動団体、企業、行政、大学など、多様な人や組織をつなぐ中間支援拠点です。'
+        + 'それぞれの強みやアイデアを生かし、地域課題の解決や新たな共働の取組を支援しています。' },
+    { name:'豊田市青少年センター', role:'実行委員',
+      url:'https://youth-toyota.com/', photo:'img/org_youth.webp',
+      bio:'39歳までの青少年を対象とした事業を行っています' },
+    { name:'豊田市男性保育師連盟', role:'実行委員',
+      url:'https://taiyosun.net/service03', photo:'',
+      bio:'豊田市の男性保育士が中心に2006年に設立した『パパの育児支援活動に特化』したボランティア団体です。\n'
+        + 'メイン活動の『子育て戦隊パパレンジャー』は50組以上集まり“パパ旋風を巻き起こし中です！' },
+    { name:'とよたさんそんセンター', role:'実行委員',
+      url:'https://www.oiden-sanson.com/', photo:'img/org_sanson.webp',
+      bio:'とよたさんそんセンターは、都市と山村をつなぐ中間支援機関です。'
+        + '都市と山村の交流コーディネートや、山村地域への移住を考えている人へのサポートを行っています。' },
+    { name:'藤本建設株式会社　障がい者グループホーム　花しおり', role:'実行委員',
+      url:'', photo:'',
+      bio:'障がい者グループホームです🌸　暖かく元気をチャージできるお家です😊　合言葉は📢パワーチャージ🕺💃' },
+    { name:'みどりがおかコスモス', role:'実行委員',
+      url:'', photo:'',
+      bio:'豊田市緑ヶ丘にある就労移行支援です' },
+    { name:'グローアップ豊田', role:'実行委員',
+      url:'https://growup-toyota.com', photo:'',
+      bio:'放課後等デイサービス' },
+    { name:'社会福祉法人　無門福祉会', role:'実行委員',
+      url:'http://www.facebook.com/mumonfukushi', photo:'img/org_mumon.webp',
+      bio:'人と人がよりかかり、つながりあって、人です。人と人にほどよい間があって、人間です。'
+        + '人が安心してこころをひらき、きらめくところが、無門です。' },
     /* ★丸の中はロゴの「マーク」だけ。文字まで入れると74pxでは読めない。
        ★InstagramのURLは ?utm_source=… を外した短い形。追跡用の印なので無くてよい。 */
     { name:'ココカラプラス', role:'アプリ担当',
-      insta:'https://www.instagram.com/cocokaraplus5526/',
+      url:'https://lifeplusllc.com/',   /* fq-orgs-v1: Instagram → 会社のホームページ（トップ） */
       photo:'img/logo_ccp.png',
       bio:'豊田市の機能訓練型デイサービスです。\n'
         + 'このイベントのアプリ（クエスト・タイプ診断・キャラクター図鑑）を作りました。' },
@@ -2326,6 +2360,8 @@ const FQ = {
   .pcard-ig{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;
             border-radius:999px;padding:11px 24px;font-size:14px;font-weight:900;}
   .pcard-ig[hidden]{display:none;}
+  /* fq-orgs-v1: ボタンが2つ並ぶとき、上下にすきま */
+  .pcard-ig{margin:4px 3px;}
 
   .orgs{display:flex;flex-wrap:wrap;gap:9px;}
   .org{background:#fff;border:2.5px solid var(--line);border-radius:var(--r);padding:10px 15px;
@@ -2676,6 +2712,7 @@ const FQ = {
     <div class="r" id="pcRole"></div>
     <p class="b" id="pcBio" hidden></p>
     <a class="pcard-ig" id="pcIg" href="#" target="_blank" rel="noopener" hidden>Instagramを見る →</a>
+    <a class="pcard-ig" id="pcUrl" href="#" target="_blank" rel="noopener" hidden>ホームページを見る →</a><!-- fq-orgs-v1 -->
   </div>
 </div>
 
@@ -3195,6 +3232,7 @@ const FQ = {
   (function(){
     const box = $('#pcard'); if(!box) return;
     const av=$('#pcAv'), nm=$('#pcName'), ro=$('#pcRole'), bi=$('#pcBio'), ig=$('#pcIg');
+    const ur=$('#pcUrl');   /* fq-orgs-v1 */
     function open(i){
       const p = FQ.staff[i]; if(!p) return;
       av.style.cssText = photoStyle(p.photo, i, p.pos);
@@ -3204,6 +3242,14 @@ const FQ = {
       bi.textContent = p.bio || '';
       bi.hidden = !p.bio;                      /* ひとこと紹介が空なら出さない */
       if (p.insta) { ig.href = p.insta; ig.hidden = false; } else { ig.hidden = true; }
+      /* fq-orgs-v1: ホームページ／Facebook */
+      if (ur) {
+        if (p.url) {
+          ur.href = p.url;
+          ur.textContent = /facebook\.com/i.test(p.url) ? 'Facebookを見る →' : 'ホームページを見る →';
+          ur.hidden = false;
+        } else { ur.hidden = true; }
+      }
       box.hidden = false;
       document.body.style.overflow = 'hidden'; /* うしろが動くと迷子になる */
     }
