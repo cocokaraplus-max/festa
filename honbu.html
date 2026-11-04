@@ -604,12 +604,15 @@ boot();
        ★ガチャ用は 3階・4階 × 体験／話を聞く／見る の 6 種類（base が f3_ / f4_ で始まるもの）
        ★URL はファイル名なしの形（…/?q=）。index.html が quest.html へ渡す */
     var g2c = (DATA.codes||[]).filter(function(c){ return /^f[34]_/.test(c.base); });
-    var oldc = (DATA.codes||[]).filter(function(c){ return !/^f[34]_/.test(c.base); });
+    var chk = (DATA.codes||[]).filter(function(c){ return c.base === 'check'; });   /* fq-shindan-first-v1 */
+    var oldc = (DATA.codes||[]).filter(function(c){ return !/^f[34]_/.test(c.base) && c.base !== 'check'; });
     function codeRow(c, gray){
       return '<div style="margin-bottom:8px;'+(gray?'opacity:.6;':'')+'"><b>'+esc(c.label)+'</b><br><span class="vmono">'+esc(BASE+'?q='+c.code)+'</span></div>'; }
     $('vCodes').innerHTML =
         '<div style="font-weight:900;margin:4px 0 8px;">ブースのQR（ガチャ用・6種類）</div>'
       + (g2c.map(function(c){ return codeRow(c, false); }).join('') || '<div>まだありません（fq_gacha2.sql を Run してください）</div>')
+      + (chk.length ? '<div style="font-weight:900;margin:14px 0 8px;">福祉タイプ診断のQR（読むと診断の画面が開きます。ガチャには数えません）</div>'
+          + chk.map(function(c){ return codeRow(c, false); }).join('') : '')
       + (oldc.length ? '<details style="margin-top:10px;"><summary style="cursor:pointer;font-weight:800;">前の仕組みのQR（今は使っていません）</summary><div style="margin-top:8px;">'
           + oldc.map(function(c){ return codeRow(c, true); }).join('') + '</div></details>' : '');
     $('vVouchers').innerHTML = (DATA.vouchers||[]).map(function(v){

@@ -603,6 +603,12 @@ window.__FQ_Q0 = location.search;</script>
        ★前の「クエスト（4つのミッション）」と「獲得した景品」は、スクリプトが隠す（消してはいない） -->
   <section id="g2Sec" data-tab="quest">
     <div class="sec-h hand"><span class="em">🧭</span>ガチャへの道</div>
+    <!-- fq-shindan-first-v1: 診断がまだの人だけ出る -->
+    <div id="g2Pre" class="g2-pre" style="display:none">
+      <div class="g2-pre-t">🔮 クエストに参加する前に、まず<b>福祉タイプ診断</b>をしてね！</div>
+      <div class="g2-pre-s">生年月日を入れるだけ。あなたに合う福祉の仕事のタイプがわかります。</div>
+      <button type="button" class="g2-pre-b" data-g2="shindan">診断をはじめる</button>
+    </div>
     <div id="g2Team" class="g2-team"></div>
     <div id="g2Nav" class="g2-nav"><div class="g2-nav-k">つぎの行き先</div><div class="g2-nav-v">読み込み中…</div></div>
     <div id="g2Cats" class="g2-cats"></div>
@@ -2818,6 +2824,11 @@ if ('serviceWorker' in navigator) {
   .g2-big{font-size:20px;font-weight:900;margin:4px 0;}
   .g2-note{font-size:13px;font-weight:700;color:var(--muted);line-height:1.7;margin:6px 0 0;}
   .g2-ok{background:#1E7B3A;color:#fff;border-radius:12px;padding:10px;font-weight:900;font-size:18px;margin:8px 0;}
+  /* fq-shindan-first-v1 */
+  .g2-pre{background:#EFE3F7;border:3px solid #6B3FA0;border-radius:var(--r);padding:12px 14px;margin:4px 0 12px;text-align:center;}
+  .g2-pre-t{font-size:15px;font-weight:900;line-height:1.5;color:#4A2775;}
+  .g2-pre-s{font-size:12.5px;font-weight:700;color:var(--muted);margin:4px 0 8px;line-height:1.6;}
+  .g2-pre-b{border:0;background:#6B3FA0;color:#fff;border-radius:10px;padding:10px 18px;font-weight:900;font-size:15px;font-family:inherit;}
 </style>
 <div class="modal" id="g2TicketModal">
   <div class="modal-card">
@@ -3056,6 +3067,7 @@ if ('serviceWorker' in navigator) {
     var a=b.getAttribute('data-g2'), sec=secret();
     if(a==='solo'){ ls(SOLO,'1'); paint(); return; }
     if(a==='zukan'){ if(window.FQ_TAB) window.FQ_TAB('zukan', true); return; }
+    if(a==='shindan'){ if(window.FQ_TAB) window.FQ_TAB('shindan', true); return; }   /* fq-shindan-first-v1 */
     if(a==='drawnow'){ window.drawGacha(); return; }
     if(!sec){ toast('電波の良い場所で開き直してね'); return; }
     if(a==='team' || a==='teamqr'){
@@ -3096,6 +3108,9 @@ if ('serviceWorker' in navigator) {
 
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') window.fqG2Refresh(); });
   window.addEventListener('online', function(){ window.fqG2Refresh(); });
+  /* fq-shindan-first-v1: 診断がまだの人だけ、すすめる帯を出す（診断は端末の中の S.shindan に残る） */
+  function paintPre(){ var el=$('g2Pre'); if(el) el.style.display = (window.S && S.shindan) ? 'none' : ''; }
+  paintPre(); setInterval(paintPre, 2000);
   refresh();
 })();
 </script>
