@@ -532,7 +532,7 @@ boot();
     <div id="vBody" style="display:none;">
       <h3>ガチャの設定</h3>
       <div class="lprow">
-        <label>1回に使うポイント</label><input type="number" id="vCost" class="lpin" min="1" style="width:80px;">
+        <label>1回に使うポイント<small style="font-weight:700;">（前の仕組み・今は使っていません）</small></label><input type="number" id="vCost" class="lpin" min="1" style="width:80px;">
         <label>ハズレ玉の数</label><input type="number" id="vLose" class="lpin" min="0" style="width:110px;">
         <button class="lpbtn sm" id="vSetSave">保存</button>
         <span class="vsmall" id="vRate"></span>
@@ -555,7 +555,7 @@ boot();
 
       <h3>会場のQRに入れるURL（印刷用）</h3>
       <div id="vCodes" class="vsmall"></div>
-      <p class="lpnote">★このURLをQRにして会場に置いてください。<code>?q=talk_A</code> のような古い形は、もう使えません（手で打てば取れてしまうため）。</p>
+      <p class="lpnote">★<b>ブースのQR（6種類）</b>は、体験・お話・見学が終わった人に、ブースの方が見せるものです（fq-honbu-qr-v1）。<br>★このURLをQRにして会場に置いてください。<code>?q=talk_A</code> のような古い形は、もう使えません（手で打てば取れてしまうため）。</p>
 
       <h3>引換券（新しい順・300件まで）</h3>
       <div class="vscroll"><table class="vtbl"><thead><tr><th>券番号</th><th>景品</th><th>お店</th><th>認識番号</th><th>発行</th><th>使用</th></tr></thead><tbody id="vVouchers"></tbody></table></div>
@@ -600,8 +600,18 @@ boot();
         + '<td><button class="lpbtn sm sv">保存</button> <button class="lpbtn sm del nc">コードを作り直す</button></td></tr>';
     }).join('') || '<tr><td colspan="6" class="vsmall">まだお店がありません</td></tr>';
     $('vPrizes').innerHTML = (DATA.prizes||[]).map(function(x){ return prizeRow(x); }).join('') || '<tr><td colspan="9" class="vsmall">まだ景品がありません</td></tr>';
-    $('vCodes').innerHTML = (DATA.codes||[]).map(function(c){
-      return '<div style="margin-bottom:6px;"><b>'+esc(c.label)+'</b>（'+esc(c.points)+'pt）<br><span class="vmono">'+esc(BASE+'quest.html?q='+c.code)+'</span></div>'; }).join('');
+    /* == fq-honbu-qr-v1 ==
+       ★ガチャ用は 3階・4階 × 体験／話を聞く／見る の 6 種類（base が f3_ / f4_ で始まるもの）
+       ★URL はファイル名なしの形（…/?q=）。index.html が quest.html へ渡す */
+    var g2c = (DATA.codes||[]).filter(function(c){ return /^f[34]_/.test(c.base); });
+    var oldc = (DATA.codes||[]).filter(function(c){ return !/^f[34]_/.test(c.base); });
+    function codeRow(c, gray){
+      return '<div style="margin-bottom:8px;'+(gray?'opacity:.6;':'')+'"><b>'+esc(c.label)+'</b><br><span class="vmono">'+esc(BASE+'?q='+c.code)+'</span></div>'; }
+    $('vCodes').innerHTML =
+        '<div style="font-weight:900;margin:4px 0 8px;">ブースのQR（ガチャ用・6種類）</div>'
+      + (g2c.map(function(c){ return codeRow(c, false); }).join('') || '<div>まだありません（fq_gacha2.sql を Run してください）</div>')
+      + (oldc.length ? '<details style="margin-top:10px;"><summary style="cursor:pointer;font-weight:800;">前の仕組みのQR（今は使っていません）</summary><div style="margin-top:8px;">'
+          + oldc.map(function(c){ return codeRow(c, true); }).join('') + '</div></details>' : '');
     $('vVouchers').innerHTML = (DATA.vouchers||[]).map(function(v){
       return '<tr><td class="vmono">'+esc(v.code)+'</td><td>'+esc(v.prize)+'</td><td>'+esc(v.shop)+'</td><td>'+esc(v.recog_no)+'</td><td>'+esc(t(v.issued_at))+'</td><td>'+(v.used_at?esc(t(v.used_at)):'—')+'</td></tr>';
     }).join('') || '<tr><td colspan="6" class="vsmall">まだ引換券はありません</td></tr>';
