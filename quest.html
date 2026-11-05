@@ -1681,7 +1681,7 @@ document.addEventListener('click', function(ev){
     var box=document.getElementById('shindanBody'); if(!box) return;
     var r=res();
     if(!r){
-      var got = (window.S && S.scanned && S.scanned.indexOf('check')!==-1);
+      var got = true;   /* fq-shindan-open-v1: QRなしで誰でも診断できる（前はブースのQRを読むまで鍵） */
       box.innerHTML = (got
         ? '<button class="sd-cta" data-act="sdOpen">🔮 診断をはじめる</button>'
         : '<div class="sd-locked">会場の<b>「適性診断」ブースのQR</b>を読み取ると診断できます。<br>ブースの人に声をかけてみてください。</div>')
@@ -3067,7 +3067,9 @@ if ('serviceWorker' in navigator) {
     var a=b.getAttribute('data-g2'), sec=secret();
     if(a==='solo'){ ls(SOLO,'1'); paint(); return; }
     if(a==='zukan'){ if(window.FQ_TAB) window.FQ_TAB('zukan', true); return; }
-    if(a==='shindan'){ if(window.FQ_TAB) window.FQ_TAB('shindan', true); return; }   /* fq-shindan-first-v1 */
+    if(a==='shindan'){ if(window.FQ_TAB) window.FQ_TAB('shindan', true);   /* fq-shindan-first-v1 */
+      setTimeout(function(){ var c=document.querySelector('#shindanBody .sd-cta'); if(c) c.click(); }, 300);   /* fq-shindan-open-v1: 入力までそのまま開く */
+      return; }
     if(a==='drawnow'){ window.drawGacha(); return; }
     if(!sec){ toast('電波の良い場所で開き直してね'); return; }
     if(a==='team' || a==='teamqr'){
