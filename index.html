@@ -233,7 +233,8 @@ const FQ = {
       { photo:'img/ch_pink.png',  move:'skate',  at: 23   },  */
       { photo:'img/ch_braid.png', move:'peek',   at: 33.5 },
       { photo:'img/ch_wood.png',  move:'sit',    at: 34.5 },
-      { photo:'img/ch_robot.png', move:'rocket', at: 43.5 },
+      /* fq-flock-v1: キャタピラの付いたロボットは出番なし（戻すときはこのコメントを外す）
+      { photo:'img/ch_robot.png', move:'rocket', at: 43.5 },  */
       /* == fq-cast-add-v1 ==
          ★電車の子。使っていなかった dash（走り抜ける）をそのまま使う。
            この絵は電車の先頭が左を向いていて、dash も右から左へ走るので、
@@ -242,7 +243,21 @@ const FQ = {
            左の子（上の行）と同じ m-rocket なので、煙も傾きもそのまま使える。
          ★フワフワの子。at は 0。出番の時刻は動き（a-float）の中に書いてある。 */
       { photo:'img/ch_train.png',   move:'dash',   at: 22.3 },   /* fq-usagi-v1: スケートが居なくなって前が空いたので繰り上げ。うさぎ10体ぶん(約13秒)の場所を確保し、43.5秒のロケットの手前で終わらせる */
-      { photo:'img/ch_rocket2.png', move:'rocket', at: 56.8, cls:'r2' },
+      /* == fq-flock-v1 : 鳥の子 10羽が いっせいに空へ ==
+         ★まん中の2羽から外へ 0.25秒ずつ遅れて飛ぶ → 山がたに上がっていく
+         ★x は左はしからの位置（％）。cls:'fr' は右半分（右へ広がる）
+         ★前の1羽（右うち上げ）は下のコメントの行。戻すときは10行を消してこれを戻す
+      { photo:'img/ch_rocket2.png', move:'rocket', at: 56.8, cls:'r2' },  */
+      { photo:'img/ch_rocket2.png', move:'flock', at: 56.8, x: 45.5 },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 56.8, x: 54.5, cls:'fr' },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.05, x: 36.5 },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.05, x: 63.5, cls:'fr' },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.3, x: 27.5 },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.3, x: 72.5, cls:'fr' },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.55, x: 18.5 },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.55, x: 81.5, cls:'fr' },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.8, x: 9.5 },
+      { photo:'img/ch_rocket2.png', move:'flock', at: 57.8, x: 90.5, cls:'fr' },
       { photo:'img/ch_float.png',   move:'float',  at: 0    },
       /* == fq-usagi-v1 : 列車のうしろに連なって歩く うさぎ軍団 ==
          ★★at の間隔は 0.8秒（＝約63px）。**列車とは1.2秒（約95px）あける。**
@@ -778,6 +793,36 @@ const FQ = {
       4.0%,100%{opacity:0; transform:translate(14vw,-1200px) scaleX(-1) scale(.28);}
   }
   .m-rocket img{animation:i-tilt 3s ease-in infinite;}
+  /* == fq-flock-v1 : 鳥の子 10羽 ==
+     ★位置は actors の x（left:％）で決める。translate の -50% で絵のまん中をそこに合わせる。
+     ★どのコマも translate → scale の順で2つ書いてある（数を変えると動きが濁る）。
+     ★60秒ひとまわり（ロケットと同じ）。飛ぶのは約2.6秒。
+     ★左半分は a-flock-l（左へ 6vw 広がる）、右半分（.fr）は a-flock-r。 */
+  .m-flock{--aw:clamp(34px,9vw,58px);animation:a-flock-l 60s ease-in infinite;}
+  .m-flock.fr{animation-name:a-flock-r;}
+  .m-flock img{transform-origin:50% 60%;animation:i-flap .22s ease-in-out infinite alternate;}
+  @keyframes i-flap{
+    from{transform:rotate(-7deg) scaleY(.96);}
+    to  {transform:rotate(7deg)  scaleY(1.04);}
+  }
+  @keyframes a-flock-l{
+      0%      {opacity:0; transform:translate(-50%,10px)                 scale(.92);}
+      0.3%    {opacity:1; transform:translate(-50%,10px)                 scale(.92);}
+      0.8%    {opacity:1; transform:translate(-50%,0)                    scale(1);}
+      1.7%    {opacity:1; transform:translate(calc(-50% - 1vw),-150px)   scale(.88);}
+      3.0%    {opacity:1; transform:translate(calc(-50% - 3.5vw),-640px) scale(.55);}
+      4.3%    {opacity:1; transform:translate(calc(-50% - 6vw),-1250px)  scale(.3);}
+      4.4%,100%{opacity:0; transform:translate(calc(-50% - 6vw),-1250px) scale(.3);}
+  }
+  @keyframes a-flock-r{
+      0%      {opacity:0; transform:translate(-50%,10px)                 scale(.92);}
+      0.3%    {opacity:1; transform:translate(-50%,10px)                 scale(.92);}
+      0.8%    {opacity:1; transform:translate(-50%,0)                    scale(1);}
+      1.7%    {opacity:1; transform:translate(calc(-50% + 1vw),-150px)   scale(.88);}
+      3.0%    {opacity:1; transform:translate(calc(-50% + 3.5vw),-640px) scale(.55);}
+      4.3%    {opacity:1; transform:translate(calc(-50% + 6vw),-1250px)  scale(.3);}
+      4.4%,100%{opacity:0; transform:translate(calc(-50% + 6vw),-1250px) scale(.3);}
+  }
   @keyframes a-rocket{
       /* 1回目：左下から右上へ（出番 43.5秒） */
       0%      {opacity:0; transform:translate(-40vw,10px)  scaleX(1)  scale(.95);}
@@ -2885,7 +2930,7 @@ const FQ = {
          rocket … 空へ飛んでいく子。ロゴの文字の【前】を飛ばす。
        ★ここに名前を足すと #actorsfront（z-index 3）に入る。
          前後は中の z-index ではなく、この箱で決まる（上の注意書きのとおり）。 */
-    const FRONT = ['bounce', 'skate', 'walk', 'dash', 'float', 'usagi', 'cross', 'rocket'];
+    const FRONT = ['bounce', 'skate', 'walk', 'dash', 'float', 'usagi', 'cross', 'rocket', 'flock'];   /* fq-flock-v1 */
     const sit   = A.filter(c => c.move === 'sit');
     const peek  = A.filter(c => c.move === 'peek');
     const front = A.filter(c => FRONT.indexOf(c.move) >= 0);
