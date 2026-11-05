@@ -1670,7 +1670,7 @@ document.addEventListener('click', function(ev){
           return '<button type="button" class="sd-tile' + (k === myKey ? ' me' : '') + '" data-act="sdType" data-key="' + esc(k) + '">'
             + (k === myKey ? '<span class="me-tag">あなた</span>' : '')
             + '<picture><source srcset="img/mon_' + n + '.webp" type="image/webp"><img alt="" src="img/mon_' + n + '.png" loading="lazy"></picture>'
-            + '<b>' + esc(t.name) + '</b><small>タイプ' + n + '</small></button>';
+            + '<b>' + esc(t.name) + '</b><small>タイプ ' + n + '</small></button>';   /* fq-sd-typesp-v1 */
         }).join('')
       + '</div></div>';
   }
@@ -1679,7 +1679,7 @@ document.addEventListener('click', function(ev){
     return '<div class="sd-card">'
       + '<div class="sd-hero"><picture><source srcset="img/mon_' + n + '.webp" type="image/webp"><img class="sd-img" alt="" src="img/mon_' + n + '.png"></picture></div>'
       + '<div class="sd-name">' + esc(t.name) + '</div>'
-      + '<div class="sd-role">タイプ<b>' + n + '</b>　' + esc(t.role) + '</div>'
+      + '<div class="sd-role">タイプ <b>' + n + '</b>　' + esc(t.role) + '</div>'
       + '<p class="sd-catch">「' + esc(t.cat) + '」</p>'
       + '<div class="sd-chips">' + t.chips.map(function(c){ return '<span class="sd-chip">' + esc(c) + '</span>'; }).join('') + '</div>'
       + (t.why ? '<div class="sd-blk sd-why"><h5>なぜこのモンスター？</h5><p>' + esc(t.why) + '</p></div>' : '')
@@ -1728,7 +1728,7 @@ document.addEventListener('click', function(ev){
       +   '<span class="sd-em" style="display:none">'+t.em+'</span>'
       + '</div>'
       + '<div class="sd-name">'+esc(t.name)+'</div>'
-      + '<div class="sd-role">タイプ<b>'+tno+'</b>　'+esc(t.role)+'</div>'
+      + '<div class="sd-role">タイプ <b>'+tno+'</b>　'+esc(t.role)+'</div>'
       + '<p class="sd-catch">「'+esc(t.cat)+'」</p>'
       + '<div class="sd-chips">'+t.chips.map(function(c){return '<span class="sd-chip">'+esc(c)+'</span>';}).join('')+'</div>'
       + (t.why ? '<div class="sd-blk sd-why"><h5>なぜこのモンスター？</h5><p>'+esc(t.why)+'</p></div>' : '')
