@@ -48,6 +48,12 @@
   html.soon-on .soonbox{display:block;}
   html.soon-on .ptbar{display:none;}
   html.soon-on .wrap > section:not(.soonbox){display:none !important;}
+  /* == fq-shindan-early-v1 ==
+     ★準備中でも、下のメニューで「診断」を選んでいるときだけは診断を出す（お知らせは隠す）。
+       いま選んでいるタブは、画面の切り替えのスクリプトが html の data-fqtab に書く。
+     ★クエスト・図鑑を選ぶと、これまでどおり「準備中」のお知らせが出る。 */
+  html.soon-on[data-fqtab="shindan"] .wrap > section#shindanSec{display:block !important;}
+  html.soon-on[data-fqtab="shindan"] .soonbox{display:none;}
   /* ★下の「進捗はこの端末に保存されます。」だけ消す。
        タグで囲まれていない ただの文字なので、.foot の字の大きさを 0 にして消す。
        .credit は自分で大きさを持っているので残る。
@@ -563,8 +569,10 @@ window.__FQ_Q0 = location.search;</script>
     <div class="sn-em">🚧</div>
     <h2>ただいま準備中です</h2>
     <div class="sn-en">COMING SOON</div>
-    <p>クエスト、福祉タイプ診断、キャラクター図鑑は<br>
+    <p>クエストとキャラクター図鑑は<br>
        <b>イベント当日にオープン</b>します。</p>
+    <!-- fq-shindan-early-v1: 診断だけは いまできる -->
+    <p><a class="sn-btn" href="#shindan">🔮 福祉タイプ診断は いまできます</a></p>
     <div class="sn-when">📅 2026年12月13日（日）<br>
       10:00〜17:00<br>   <!-- fq-freebig-v1: 16:00→17:00 -->
       📍 豊田市福祉センター</div>
@@ -2666,6 +2674,7 @@ if ('serviceWorker' in navigator) {
   function show(key, toTop){
     if(!OK.test(key)) key = 'quest';
     cur = key;
+    try{ document.documentElement.setAttribute('data-fqtab', key); }catch(e){}   /* fq-shindan-early-v1 */
     secs.forEach(function(o){
       o.el.style.display = (!o.off && o.tab === key) ? o.on : 'none';
     });
@@ -2704,6 +2713,8 @@ if ('serviceWorker' in navigator) {
     else { try{ start = localStorage.getItem(KEY) || 'quest'; }catch(e){} }
   }
   if(!OK.test(start)) start = 'quest';
+  /* fq-shindan-early-v1: 準備中のあいだは、URLに #◯◯ もQRも無ければ診断から見せる */
+  if(!hash() && !/[?&](q|z)=/.test(q0) && document.documentElement.classList.contains('soon-on')) start = 'shindan';
   show(start, false);
 
   /* 戻る／進む。目印が消えていたら、開いたときの画面に戻す */
