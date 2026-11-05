@@ -850,17 +850,19 @@ const FQ = {
       to  {transform:translateY(-13px) rotate(5deg);}
   }
   @keyframes a-float{
-      /* ── 1回目：左から右へ（6〜14秒） ── */
-      0%      {opacity:0; transform:translateX(-26vw) scaleX(1);}
-      9.9%    {opacity:0; transform:translateX(-26vw) scaleX(1);}
-     10.0%    {opacity:1; transform:translateX(-26vw) scaleX(1);}
-     23.2%    {opacity:1; transform:translateX(114vw) scaleX(1);}
-     23.4%    {opacity:0; transform:translateX(114vw) scaleX(1);}
-      /* ── 2回目：右から左へ（26〜34秒）。絵を反転して向きを合わせる ── */
-     43.2%    {opacity:0; transform:translateX(114vw) scaleX(-1);}
-     43.3%    {opacity:1; transform:translateX(114vw) scaleX(-1);}
-     56.6%    {opacity:1; transform:translateX(-26vw) scaleX(-1);}
-     56.8%,100%{opacity:0; transform:translateX(-26vw) scaleX(1);}
+      /* == fq-float-dir-v1 ==
+         ★この絵は しっぽが右下へ流れている＝左へ進む形。右へ進む1回目だけ裏返す */
+      /* ── 1回目：左から右へ（6〜14秒）。絵を反転して向きを合わせる ── */
+      0%      {opacity:0; transform:translateX(-26vw) scaleX(-1);}
+      9.9%    {opacity:0; transform:translateX(-26vw) scaleX(-1);}
+     10.0%    {opacity:1; transform:translateX(-26vw) scaleX(-1);}
+     23.2%    {opacity:1; transform:translateX(114vw) scaleX(-1);}
+     23.4%    {opacity:0; transform:translateX(114vw) scaleX(-1);}
+      /* ── 2回目：右から左へ（26〜34秒）。元の絵のまま ── */
+     43.2%    {opacity:0; transform:translateX(114vw) scaleX(1);}
+     43.3%    {opacity:1; transform:translateX(114vw) scaleX(1);}
+     56.6%    {opacity:1; transform:translateX(-26vw) scaleX(1);}
+     56.8%,100%{opacity:0; transform:translateX(-26vw) scaleX(-1);}
   }
   .m-dash{left:0;animation:a-dash 60s linear infinite;}
   /* ══ fq-usagi-v1 : 列車のうしろに連なって歩く うさぎ軍団 ══
@@ -2792,8 +2794,9 @@ const FQ = {
        ボタン（<button data-tab>）にすると、このページの中を探しにいってしまう。 -->
 <nav class="tabbar" id="tabbar" role="tablist" aria-label="ページの切りかえ">
   <button role="tab" data-tab="home"  aria-selected="true"><span class="ic">🏠</span>ホーム</button>
-  <button role="tab" data-tab="quest" aria-selected="false"><span class="ic">📜</span>クエスト</button>
+  <!-- fq-menu-order-v1: 並びは ホーム・診断・クエスト・図鑑・会場・協賛 -->
   <a href="quest.html#shindan"><span class="ic">🔮</span>診断</a>
+  <button role="tab" data-tab="quest" aria-selected="false"><span class="ic">📜</span>クエスト</button>
   <a href="quest.html#zukan"  ><span class="ic">📖</span>図鑑</a>
   <button role="tab" data-tab="place" aria-selected="false"><span class="ic">📍</span>会場</button><!-- fq-pin-v1: 世界地図 → 位置ピン。quest.html の .tabbar と同じにすること -->
   <button role="tab" data-tab="support" aria-selected="false"><span class="ic">🤝</span>協賛</button>
