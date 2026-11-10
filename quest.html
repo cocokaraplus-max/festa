@@ -400,6 +400,13 @@
   .zk-bar i{display:block;height:100%;width:0;border-radius:999px;
     background:linear-gradient(90deg,#7fc4b0,var(--teal));transition:width .5s ease;}
   .zk-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;}
+  /* == fq-free-gacha-v1 == */
+  .free-box{margin-top:14px;border:3px dashed #6B3FA0;border-radius:var(--r);background:#f3ecfa;padding:12px 14px;text-align:center;}
+  .free-t{font-size:17px;font-weight:900;color:#4A2775;}
+  .free-t small{font-size:12px;color:#5b4a86;}
+  .free-s{font-size:12.5px;font-weight:700;color:#5c4d3b;line-height:1.7;margin:4px 0 10px;}
+  .free-b{border:0;background:#6B3FA0;color:#fff;border-radius:12px;padding:12px 18px;font-weight:900;font-size:16px;font-family:inherit;}
+  .free-b:disabled{opacity:.5;}
   /* == fq-zukan2-v1 : あなたのモンスター（福祉タイプ診断）。69体の数には入らない == */
   .zk-mine{display:flex;align-items:center;gap:12px;background:#f3ecfa;border:3px solid #6B3FA0;
            border-radius:var(--r);padding:10px 12px;margin:0 0 12px;}
@@ -672,6 +679,12 @@ window.__FQ_Q0 = location.search;</script>
     </div>
     <button class="btn btn-gacha" id="gachaBtn" data-act="gacha" disabled>ガチャをまわす</button>
     <div class="gacha-hint" id="gachaHint">読み込み中…</div><!-- fq-nopoint-v1 -->
+    <!-- == fq-free-gacha-v1 : 8か所を全部まわった人だけ出る == -->
+    <div class="free-box" id="freeBox" style="display:none">
+      <div class="free-t">🎮 おたのしみガチャ <small>（景品なし）</small></div>
+      <div class="free-s">8か所ぜんぶまわったごほうび！<b>何度でも</b>遊べます。<br>遊ぶたびに、図鑑のなかまが1体出るよ（同じ子が出ることもあるよ）</div>
+      <button type="button" class="free-b" id="freeBtn">おたのしみガチャで遊ぶ</button>
+    </div>
   </section>
 
   <section data-tab="quest">
@@ -1803,7 +1816,7 @@ if ('serviceWorker' in navigator) {
   function clearPlay(){
     if(playCleared) return; playCleared = true;
     ['fq_g2_solo_v1', 'fq_vstate_v1', 'fq_pending_codes_v1', 'fukushi_quest_326_zukan',
-     'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+     'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal', 'fq_free_zukan_v1'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
     try{ S.scanned = []; S.gacha = 0; S.prizes = []; S.snapTalk = [0,0,0]; S.snapEvent = [0,0,0]; save(); }catch(e){}
     /* 新しい認識番号をもらえたら、開き直す（ほかの人の番号の図鑑などが残って見えないように） */
     ensureDevice().then(function(ok){ if(ok) setTimeout(function(){ location.reload(); }, 300); });
@@ -2109,6 +2122,7 @@ if ('serviceWorker' in navigator) {
       if(d.total) TOTAL = d.total;
       owned = {};
       (d.chars||[]).forEach(function(n){ owned[n]=1; });
+      freeGet().forEach(function(n){ owned[n]=1; });   /* fq-free-gacha-v1: おたのしみガチャの分（このスマホだけ）も並べる */
       saveLocal(); paint(0);
       /* fq-logpose-v1: 持っている数を称号へ渡す */
       try{ document.dispatchEvent(new CustomEvent('fq-zukan',{detail:d})); }catch(e){}
@@ -2295,6 +2309,19 @@ if ('serviceWorker' in navigator) {
         + '<button type="button" data-g2="shindan">診断する</button></div>';
   }
   paintMine(); setInterval(paintMine, 2000);
+
+  /* == fq-free-gacha-v1 : おたのしみガチャのキャラ（このスマホの中だけ。サーバーには送らない） == */
+  var FREEKEY = 'fq_free_zukan_v1', GOAL = 30;   /* GOAL … ゴールのごほうびの子。おたのしみガチャでは出さない */
+  function freeGet(){ try{ return JSON.parse(localStorage.getItem(FREEKEY) || '[]') || []; }catch(e){ return []; } }
+  document.addEventListener('fq-zukan', function(e){ var d = e.detail || {}; if (typeof d.goal_char === 'number' && d.goal_char > 0) GOAL = d.goal_char; });
+  window.fqFreePick = function(){
+    var n; do { n = 1 + Math.floor(Math.random() * TOTAL); } while (n === GOAL && TOTAL > 1);   /* ★持っている子も出る */
+    var isNew = !owned[n];
+    var a = freeGet(); if (a.indexOf(n) < 0) { a.push(n); try{ localStorage.setItem(FREEKEY, JSON.stringify(a)); }catch(e){} }
+    var cnt = 0; for (var k in owned) if (owned[k]) cnt++;
+    return { char: n, is_new: isNew, owned: cnt + (isNew ? 1 : 0), total: TOTAL };
+  };
+  freeGet().forEach(function(n){ owned[n] = 1; });
 
   /* ---- 起動 ---- */
   paint(0);
@@ -2916,7 +2943,7 @@ if ('serviceWorker' in navigator) {
       window.removeEventListener('message', onMsg);
       if(fr.parentNode) fr.parentNode.removeChild(fr);
       playFrame = null; busy = false; window.busy = false;
-      if(d.win && typeof toast === 'function') toast('🎁 受付で<b>「' + esc(d.prize_name || '景品') + '」</b>' + (d.prize_no != null ? '（' + d.prize_no + '番）' : '') + 'を受け取ってね');   /* fq-prize-big-v1 */
+      if(d.win && !d.free && typeof toast === 'function') toast('🎁 受付で<b>「' + esc(d.prize_name || '景品') + '」</b>' + (d.prize_no != null ? '（' + d.prize_no + '番）' : '') + 'を受け取ってね');   /* fq-prize-big-v1 */
       refresh();
     }
     function onMsg(ev){
@@ -2932,6 +2959,7 @@ if ('serviceWorker' in navigator) {
       window.removeEventListener('message', onMsg);
       if(fr.parentNode) fr.parentNode.removeChild(fr);
       playFrame = null;
+      if(d.free){ busy=false; window.busy=false; refresh(); return; }   /* fq-free-gacha-v1: 開けなかったときは図鑑の登場だけ出す */
       if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
       var lv = Math.max(1, Math.min(4, d.rarity|0));
       var p = { em:'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('景品番号【'+d.prize_no+'番】'):''), r:lv };
@@ -2955,6 +2983,22 @@ if ('serviceWorker' in navigator) {
       else hint.innerHTML='「体験」「話を聞く」「見る」を1つずつそろえると、ガチャ券がもらえます';
     }
   };
+
+  /* == fq-free-gacha-v1 : おたのしみガチャ（景品なし・サーバーに通信しない） == */
+  function freeOk(){ try{ return localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){ return false; } }
+  function paintFree(){ var bx = $('freeBox'); if(bx) bx.style.display = freeOk() ? '' : 'none'; }
+  paintFree(); setInterval(paintFree, 2000);
+  var fb = $('freeBtn');
+  if (fb) fb.addEventListener('click', function(){
+    if (window.busy || !freeOk() || !window.fqFreePick || !window.fqPlay) return;
+    var z = window.fqFreePick();
+    var r = Math.random(), mode = r < 0.50 ? 1 : r < 0.75 ? 2 : r < 0.90 ? 3 : 4;   /* 演出の派手さはランダム */
+    var nn = (z.char < 10 ? '0' : '') + z.char;
+    var d = { free: true, win: true, rarity: mode, prize_name: 'なかま No.' + nn, prize_no: null, zukan: z };
+    window.busy = true; busy = true;
+    if (window.fqZukanGot) window.fqZukanGot(z);   /* 演出が終わってから図鑑の登場が出る */
+    if (!window.fqPlay(d)) { busy = false; window.busy = false; }
+  });
 
   /* ---- ボタン ---- */
   document.addEventListener('click', function(ev){
