@@ -24,7 +24,9 @@
   .big{ font-size:22px; font-weight:900; text-align:center; padding:14px 8px; border-radius:12px; margin-bottom:12px; color:#fff; line-height:1.4; }
   .big.ok{ background:var(--ok); } .big.ng{ background:#7a7a7a; } .big.bad{ background:#C2410C; } .big.wait{ background:#9C8A6A; }
   .big.win{ background:var(--pink); font-size:20px; }
-  .big.win .no{ display:block; font-size:56px; line-height:1.1; margin:4px 0; }
+  /* fq-prize-big-v1: 景品の名前を大きく、番号を小さく */
+  .big.win .pnm{ display:block; font-size:40px; line-height:1.2; margin:6px 0 4px; }
+  .big.win .no{ display:block; font-size:18px; line-height:1.3; }
   .row{ display:flex; gap:8px; padding:6px 0; border-bottom:1px dashed var(--line); font-size:16px; }
   .row:last-child{ border-bottom:none; }
   .row .k{ min-width:80px; color:var(--muted); font-weight:700; font-size:13px; padding-top:3px; }
@@ -42,8 +44,8 @@
   .hide{ display:none; }
   .pend{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px dashed var(--line); }
   .pend:last-child{ border-bottom:none; }
-  .pend .pn{ font-size:26px; font-weight:900; min-width:64px; text-align:center; color:var(--pink); }
-  .pend .pt{ flex:1; font-weight:800; font-size:14px; line-height:1.5; }
+  .pend .pn{ font-size:14px; font-weight:900; min-width:44px; text-align:center; color:var(--pink); }   /* fq-prize-big-v1 */
+  .pend .pt{ flex:1; font-weight:900; font-size:19px; line-height:1.4; }   /* fq-prize-big-v1: 名前を大きく */
   .pend .pt small{ display:block; color:var(--muted); font-weight:700; font-size:12px; }
   .pend button{ border:2px solid var(--pink); background:#fff; color:var(--pink); font-weight:900; border-radius:10px; padding:8px 10px; font-family:inherit; font-size:14px; }
   .who{ text-align:center; font-size:12px; color:var(--muted); font-weight:700; margin-bottom:10px; }
@@ -150,7 +152,8 @@
       note.innerHTML = 'お客さんのスマホに<b>「ガチャをまわす」</b>が出ています。押してもらってください。<br>まわすと、ここに結果が出ます。';
     } else if (t.status === 'drawn' && t.is_win) {
       big.className = 'big win';
-      big.innerHTML = 'あたり！<span class="no">' + (t.prize_no != null ? esc(t.prize_no) + '番' : '') + '</span>' + esc(t.prize_name || '');
+      big.innerHTML = 'あたり！<span class="pnm">' + esc(t.prize_name || '') + '</span>'   /* fq-prize-big-v1 */
+        + '<span class="no">' + (t.prize_no != null ? '景品番号 ' + esc(t.prize_no) + '番' : '') + '</span>';
       if (t.handed) { note.innerHTML = '<b>景品は渡し済みです。</b>'; }
       else { note.innerHTML = 'この番号の<b>景品</b>を渡して、下のボタンを押してください。'; show('handBtn', true); }
     } else if (t.status === 'drawn') {
@@ -206,7 +209,7 @@
       var L = d.list || [];
       $('pList').innerHTML = L.length ? L.map(function(x){
         var t = x.ticket;
-        return '<div class="pend"><div class="pn">' + (t.prize_no != null ? esc(t.prize_no) : '—') + '</div>'
+        return '<div class="pend"><div class="pn">' + (t.prize_no != null ? esc(t.prize_no) + '番' : '—') + '</div>'
           + '<div class="pt">' + esc(t.prize_name) + '<small>認識番号 ' + esc(t.recog_no) + (t.nickname ? '／' + esc(t.nickname) : '') + '</small></div>'
           + '<button type="button" data-hand="' + esc(x.token) + '">渡しました</button></div>';
       }).join('') : '<p class="note">ありません。</p>';

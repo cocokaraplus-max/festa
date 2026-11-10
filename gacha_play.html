@@ -629,6 +629,14 @@
   #fqHead{ color:#ffd700; font-weight:900; font-size:18px; text-align:center; margin:4px 0 2px;
            font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif; text-shadow:0 0 8px #ff0055; }
   #nav-menu.fq-locked{ pointer-events:none; opacity:.45; }
+
+  /* == fq-prize-big-v1 : 景品の名前を大きく、番号を小さく == */
+  #fqPrize{ text-align:center; margin:10px 0 4px; }
+  #fqPrize:empty{ display:none; }
+  #fqPrize b{ display:block; font-size:30px; font-weight:900; line-height:1.25; color:#ffd700;
+              text-shadow:0 0 10px rgba(255,0,85,.55); font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif; }
+  #fqPrize small{ display:block; margin-top:4px; font-size:14px; font-weight:800; color:#fff; opacity:.9;
+                  font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif; }
 </style>
 
 <script>
@@ -648,8 +656,9 @@
     var h = {}; try{ location.hash.replace(/^#/, '').split('&').forEach(function(kv){
       var i = kv.indexOf('='); if (i > 0) h[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); }); }catch(e){}
     var m = parseInt(h.m, 10); if (!(m >= 0 && m <= 4)) m = 0;
-    var p = h.p || '景品'; if (h.n) p = '【' + h.n + '番】' + p;   /* fq-prize-no-v1: 番号を先に。本部はこの番号で景品を探す */
-    return { mode: m, prize: p };
+    /* fq-prize-big-v1: 名前が先、番号はうしろに小さく（本部はこの番号で景品を探す） */
+    var nm = h.p || '景品', p = nm; if (h.n) p = nm + '（' + h.n + '番）';
+    return { mode: m, prize: p, name: nm, no: (h.n || '') };
   })();
   var FORCE = 'fq';
   var fqStarted = false;
@@ -688,6 +697,14 @@
     $('result-title').classList.toggle('lose-title', !!lose);
     var im=$('result-img'); im.src=img; im.classList.toggle('lose-img', !!lose);
     $('result-desc').textContent = desc;
+    /* fq-prize-big-v1: 当たりのときだけ、景品の名前を大きく・番号を小さく出す */
+    var fp = document.getElementById('fqPrize');
+    if (!fp) { fp = document.createElement('div'); fp.id = 'fqPrize'; $('result-desc').parentNode.insertBefore(fp, $('result-desc').nextSibling); }
+    fp.innerHTML = '';
+    if (!lose && FQ.mode > 0) {
+      var b1 = document.createElement('b'); b1.textContent = FQ.name; fp.appendChild(b1);
+      if (FQ.no) { var s1 = document.createElement('small'); s1.textContent = '景品番号 ' + FQ.no + '番'; fp.appendChild(s1); }
+    }
     $('result-overlay').classList.toggle('lose-mode', !!lose);
     /* ★誤連打で結果を見ないまま閉じてしまわないよう、1秒だけ閉じるを止める */
     var cb=$('result-close'); cb.disabled=true; cb.style.opacity='0.5';

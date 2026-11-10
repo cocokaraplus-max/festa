@@ -2920,7 +2920,8 @@ if ('serviceWorker' in navigator) {
   .g2-ticket{background:#F5E83A!important;color:var(--ink)!important;border:3px solid var(--ink)!important;box-shadow:0 5px 0 var(--ink)!important;margin:4px 0 12px;width:100%;font-size:18px;}
   .g2-results{display:flex;flex-direction:column;gap:6px;}
   .g2-res{display:flex;gap:10px;align-items:center;background:#fbf6ea;border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13.5px;font-weight:800;}
-  .g2-res .no{font-size:22px;font-weight:900;color:#B4205F;min-width:52px;text-align:center;}
+  .g2-res .no{font-size:13px;font-weight:900;color:#B4205F;min-width:42px;text-align:center;}   /* fq-prize-big-v1: 番号は小さく */
+  .g2-res .g2-pn{display:block;font-size:19px;font-weight:900;color:var(--ink);line-height:1.35;}   /* fq-prize-big-v1: 名前を大きく */
   .g2-res small{display:block;font-weight:700;color:var(--muted);font-size:12px;}
   .g2-qr{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:10px;margin:10px auto;width:230px;max-width:100%;}
   .g2-qr svg{display:block;width:100%;height:auto;}
@@ -3053,7 +3054,7 @@ if ('serviceWorker' in navigator) {
     else tb.style.display='none';
     // 結果
     $('g2Results').innerHTML=(G.results||[]).map(function(r){
-      if(r.is_win) return '<div class="g2-res"><div class="no">'+(r.prize_no!=null?esc(r.prize_no)+'番':'🎁')+'</div><div>'+r.round+'回目：あたり！ '+esc(r.prize_name||'')
+      if(r.is_win) return '<div class="g2-res"><div class="no">'+(r.prize_no!=null?esc(r.prize_no)+'番':'🎁')+'</div><div>'+r.round+'回目：あたり！<b class="g2-pn">'+esc(r.prize_name||'')+'</b>'
         +'<small>'+(r.handed?'景品を受け取りました':'受付で、この番号の景品を受け取ってね')+'</small></div></div>';
       return '<div class="g2-res"><div class="no">—</div><div>'+r.round+'回目：はずれ<small>大抽選会の対象です</small></div></div>';
     }).join('');
@@ -3125,7 +3126,7 @@ if ('serviceWorker' in navigator) {
       window.removeEventListener('message', onMsg);
       if(fr.parentNode) fr.parentNode.removeChild(fr);
       playFrame = null; busy = false; window.busy = false;
-      if(d.win && typeof toast === 'function') toast('🎁 受付で' + (d.prize_no != null ? '【' + d.prize_no + '番】の' : '') + '景品を受け取ってね');   /* fq-prize-no-v1 */
+      if(d.win && typeof toast === 'function') toast('🎁 受付で<b>「' + esc(d.prize_name || '景品') + '」</b>' + (d.prize_no != null ? '（' + d.prize_no + '番）' : '') + 'を受け取ってね');   /* fq-prize-big-v1 */
       refresh();
     }
     function onMsg(ev){
