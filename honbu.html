@@ -1277,7 +1277,7 @@ boot();
     try { var q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize: 6, margin: 2, scalable: true}); }
     catch(e) { return '<span>QRを出せませんでした</span>'; }
   }
-  var CARDS = { booth: [], check: [], spot: [] };
+  var CARDS = { booth3: [], booth4: [], check: [], spot: [] };   /* fq-admin-ui-v2: ブースは階ごとに分ける */
   function card(c){
     return '<div class="adm-qc' + (c.off ? ' off' : '') + '"><b>' + esc(c.label) + '</b><div class="qr">' + qrSvg(c.url) + '</div>'
          + '<div class="u">' + esc(c.url) + '</div>'
@@ -1292,20 +1292,24 @@ boot();
     var body = $('admQrBody'); body.textContent = '読み込み中…';
     Promise.all([rpc('fq_admin_voucher_data', {p_pass: v}), rpc('logpose_admin_list', {p_pass: v})]).then(function(r){
       var codes = (r[0] && r[0].codes) || [], spots = (r[1] && r[1].spots) || [];
-      CARDS.booth = codes.filter(function(c){ return /^f[34]_/.test(c.base); })
-                         .map(function(c){ return { label: c.label, url: BASE + '?q=' + c.code, kind: 'booth' }; });
+      function booth(fl){ return codes.filter(function(c){ return c.base.indexOf('f' + fl + '_') === 0; })
+                                      .sort(function(a, b){ return (a.sort|0) - (b.sort|0); })
+                                      .map(function(c){ return { label: c.label, url: BASE + '?q=' + c.code, kind: 'booth' }; }); }
+      CARDS.booth3 = booth(3); CARDS.booth4 = booth(4);
       CARDS.check = codes.filter(function(c){ return c.base === 'check'; })
                          .map(function(c){ return { label: '福祉タイプ診断', url: BASE + '?q=' + c.code, kind: 'check' }; });
       CARDS.spot = spots.slice().sort(function(a, b){ return (a.ord|0) - (b.ord|0); })
                         .map(function(s){ return { label: (s.name || s.spot), url: BASE + 'quest.html?z=' + encodeURIComponent(s.spot), kind: 'spot', off: !s.enabled }; });
       body.className = '';
-      body.innerHTML = section('booth', 'ブースのQR（6種類）') + section('spot', '図鑑の8か所のQR') + section('check', '福祉タイプ診断のQR')
+      body.innerHTML = section('booth3', '3階のブースのQR（3種類）') + section('booth4', '4階のブースのQR（3種類）')
+                     + section('spot', '図鑑の8か所のQR') + section('check', '福祉タイプ診断のQR')
         || '<div class="adm-msg">QRがまだありません。</div>';
     }).catch(function(e){ body.textContent = '読み込めませんでした（' + (e.message || e) + '）'; });
   }
   /* 印刷用のカード（A4 に 2×3 枚） */
   var HOW = {
-    booth: 'ブースの方へ：体験・お話・見学が終わった方に、このQRを見せてください',
+    booth3: 'ブースの方へ：体験・お話・見学が終わった方に、このQRを見せてください',
+    booth4: 'ブースの方へ：体験・お話・見学が終わった方に、このQRを見せてください',
     spot:  'スマホのカメラで読むと、なかまが図鑑に入るよ！',
     check: 'スマホのカメラで読むと、福祉タイプ診断がはじまるよ'
   };
