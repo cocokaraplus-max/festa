@@ -49,6 +49,20 @@
   .pend .pt small{ display:block; color:var(--muted); font-weight:700; font-size:12px; }
   .pend button{ border:2px solid var(--pink); background:#fff; color:var(--pink); font-weight:900; border-radius:10px; padding:8px 10px; font-family:inherit; font-size:14px; }
   .who{ text-align:center; font-size:12px; color:var(--muted); font-weight:700; margin-bottom:10px; }
+  /* == fq-staff-lookup-v1 : 認識番号で調べる == */
+  .lk-row{ display:flex; gap:8px; align-items:center; }
+  .lk-row input{ flex:1; font-size:22px; font-weight:900; letter-spacing:.08em; }
+  .lk-row button{ border:3px solid var(--ink); background:var(--yellow); color:var(--ink); border-radius:12px;
+                  padding:12px 16px; font-size:17px; font-weight:900; font-family:inherit; white-space:nowrap; }
+  .lk-head{ font-weight:900; font-size:15px; margin:12px 0 4px; }
+  .lk-it{ border-top:1px dashed var(--line); padding:10px 0; }
+  .lk-it .r{ font-size:12.5px; font-weight:800; color:var(--muted); }
+  .lk-it .pnm{ font-size:20px; font-weight:900; line-height:1.35; }
+  .lk-it .pno{ font-size:13px; font-weight:800; color:var(--pink); }
+  .lk-it .st{ font-size:14px; font-weight:800; margin-top:4px; line-height:1.6; }
+  .lk-it .st.ok{ color:var(--ok); } .lk-it .st.wait{ color:#C2410C; }
+  .lk-it button{ margin-top:6px; border:2px solid var(--pink); background:#fff; color:var(--pink); font-weight:900;
+                 border-radius:10px; padding:8px 12px; font-family:inherit; font-size:14px; }
 </style>
 </head>
 <body>
@@ -81,6 +95,17 @@
   <div class="card hide" id="pBox">
     <div style="font-weight:900;font-size:16px;margin-bottom:6px">まだ渡していない当たり</div>
     <div id="pList"><p class="note">ありません。</p></div>
+  </div>
+
+  <!-- == fq-staff-lookup-v1 : 認識番号で調べる ==
+       お客さんが「受け取っていない」と言ってきたときに、いつ・どの受付で渡したかを確かめる -->
+  <div class="card hide" id="lBox">
+    <div style="font-weight:900;font-size:16px;margin-bottom:6px">認識番号で調べる</div>
+    <div class="lk-row">
+      <input id="lkNo" type="text" inputmode="numeric" autocomplete="off" placeholder="例：12" maxlength="8">
+      <button type="button" id="lkBtn">調べる</button>
+    </div>
+    <div id="lkOut"></div>
   </div>
 
   <div class="card hide" id="helpBox">
@@ -223,8 +248,49 @@
     hand(tok, function(t){ if (tok === token) paint(t); });
   });
 
+  /* == fq-staff-lookup-v1 : 認識番号で調べる == */
+  function hm(s){
+    if (!s) return '';
+    var d = new Date(s); if (isNaN(d)) return '';
+    return d.toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+  }
+  function lookup(){
+    var no = $('lkNo').value.trim(), out = $('lkOut');
+    if (!no) { out.innerHTML = '<p class="msg err">認識番号を入れてください。</p>'; return; }
+    out.innerHTML = '<p class="note" style="margin-top:10px">調べています…</p>';
+    rpc('fq_staff_lookup', {p_staff: getStaff(), p_recog: no}).then(function(d){
+      if (!d.ok) {
+        if (d.reason === 'staff') return staffLost();
+        out.innerHTML = '<p class="msg err">認識番号を入れてください。</p>'; return;
+      }
+      var L = d.list || [];
+      var h = '<div class="lk-head">認識番号 ' + esc(d.recog) + (d.nickname ? '（' + esc(d.nickname) + '）' : '') + '</div>';
+      if (!L.length) { out.innerHTML = h + '<p class="note">この番号のガチャの記録はありません（ガチャ券はまだ出ていません）。</p>'; return; }
+      out.innerHTML = h + L.map(function(t){
+        var r = '<div class="r">ガチャ ' + esc(t.round) + '回目</div>';
+        if (t.status === 'issued')   return '<div class="lk-it">' + r + '<div class="st">ガチャ券が出ています。<b>まだ受付で読んでいません。</b></div></div>';
+        if (t.status === 'unlocked') return '<div class="lk-it">' + r + '<div class="st">受付で読みました（' + esc(hm(t.unlocked_at)) + '　' + esc(t.unlocked_by || '') + '）。<b>まだまわしていません。</b></div></div>';
+        if (!t.is_win)               return '<div class="lk-it">' + r + '<div class="st">はずれ（' + esc(hm(t.drawn_at)) + '）。大抽選会の対象です。</div></div>';
+        var top = '<div class="pnm">' + esc(t.prize_name || '景品') + '</div>'
+                + '<div class="pno">景品番号 ' + (t.prize_no != null ? esc(t.prize_no) + '番' : '—') + '　（当たり ' + esc(hm(t.drawn_at)) + '）</div>';
+        if (t.handed_at) return '<div class="lk-it">' + r + top + '<div class="st ok">✅ 渡し済み　' + esc(hm(t.handed_at)) + '　' + esc(t.handed_by || '') + '</div></div>';
+        return '<div class="lk-it">' + r + top + '<div class="st wait">まだ渡していません。</div>'
+             + '<button type="button" data-lkhand="' + esc(t.token) + '">景品を渡しました</button></div>';
+      }).join('');
+    }).catch(function(e){ out.innerHTML = '<p class="msg err">つながりませんでした（' + esc(e.message || e) + '）</p>'; });
+  }
+  $('lkBtn').addEventListener('click', lookup);
+  $('lkNo').addEventListener('keydown', function(e){ if (e.key === 'Enter') lookup(); });
+  $('lkOut').addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-lkhand]'); if (!b) return;
+    b.disabled = true;
+    var tok = b.getAttribute('data-lkhand');
+    hand(tok, function(t){ if (tok === token) paint(t); lookup(); });
+  });
+
   function start(){
     show('loginBox', false); show('helpBox', true);
+    show('lBox', true);   /* fq-staff-lookup-v1 */
     var l = ''; try{ l = localStorage.getItem(LKEY) || ''; }catch(e){}
     $('who').textContent = 'この端末：' + (l || '受付'); show('who', true);
     if (token) openTicket();
