@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- fq-seo-v1 : 検索に出したいのは案内画面だけ -->
+<!-- fq-seo-v1 : 検索に出したいのは案内画面だけ / fq-domain-v1 : 新しい住所 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://cocokaraplus-max.github.io/fukushi-quest/</loc>
-    <lastmod>2026-11-04</lastmod>
+    <loc>https://festa.lifeplusllc.com/</loc>
+    <lastmod>2026-11-10</lastmod>
   </url>
 </urlset>

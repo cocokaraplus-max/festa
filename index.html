@@ -39,13 +39,25 @@ if ('serviceWorker' in navigator) {
      ★og:image は絶対アドレスで書く（LINE などは相対だと絵を拾わない）
      ★カードの絵を差し替えるときは img/ogp.jpg を置き換えるだけ（1200×630）
      ★LINE は一度読んだカードをしばらく覚えている。絵を変えてもすぐには変わらない -->
-<link rel="canonical" href="https://cocokaraplus-max.github.io/fukushi-quest/">
+<link rel="canonical" href="https://festa.lifeplusllc.com/">
+<!-- == fq-domain-v1 : Google 検索に出る「サイト名」 ==
+     ★Google はサイト名を ドメイン／サブドメインの いちばん上のページの WebSite から読む。
+       住所を festa.lifeplusllc.com にしたので、ここに書けば「つながるフェスタ」と出る（反映には数週間かかることがある） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "つながるフェスタ",
+  "alternateName": ["つながるフェスタ 2026", "FUKUSHI QUEST"],
+  "url": "https://festa.lifeplusllc.com/"
+}
+</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="つながるフェスタ 2026">
 <meta property="og:title" content="つながるフェスタ 2026｜豊田市福祉センター">
 <meta property="og:description" content="いつもの「福祉」のイメージが、ちょっと変わる一日。2026年12月13日(日) 10:00〜17:00 豊田市福祉センター／入場無料">
-<meta property="og:url" content="https://cocokaraplus-max.github.io/fukushi-quest/">
-<meta property="og:image" content="https://cocokaraplus-max.github.io/fukushi-quest/img/ogp.jpg">
+<meta property="og:url" content="https://festa.lifeplusllc.com/">
+<meta property="og:image" content="https://festa.lifeplusllc.com/img/ogp.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ja_JP">
@@ -73,19 +85,19 @@ if ('serviceWorker' in navigator) {
       "addressCountry": "JP"
     }
   },
-  "image": ["https://cocokaraplus-max.github.io/fukushi-quest/img/ogp.jpg"],
-  "url": "https://cocokaraplus-max.github.io/fukushi-quest/",
+  "image": ["https://festa.lifeplusllc.com/img/ogp.jpg"],
+  "url": "https://festa.lifeplusllc.com/",
   "organizer": {
     "@type": "Organization",
     "name": "つながるフェスタ実行委員会",
-    "url": "https://cocokaraplus-max.github.io/fukushi-quest/"
+    "url": "https://festa.lifeplusllc.com/"
   },
   "offers": {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "JPY",
     "availability": "https://schema.org/InStock",
-    "url": "https://cocokaraplus-max.github.io/fukushi-quest/"
+    "url": "https://festa.lifeplusllc.com/"
   }
 }
 </script>
