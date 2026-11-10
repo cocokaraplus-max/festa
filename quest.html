@@ -398,6 +398,18 @@
   .zk-bar i{display:block;height:100%;width:0;border-radius:999px;
     background:linear-gradient(90deg,#7fc4b0,var(--teal));transition:width .5s ease;}
   .zk-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;}
+  /* == fq-zukan2-v1 : あなたのモンスター（福祉タイプ診断）。69体の数には入らない == */
+  .zk-mine{display:flex;align-items:center;gap:12px;background:#f3ecfa;border:3px solid #6B3FA0;
+           border-radius:var(--r);padding:10px 12px;margin:0 0 12px;}
+  .zk-mine picture,.zk-mine img{width:64px;height:64px;object-fit:contain;flex:0 0 64px;display:block;}
+  .zk-mine-tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.45;}
+  .zk-mine-tx small{font-size:11.5px;font-weight:900;color:#5b4a86;}
+  .zk-mine-tx b{font-size:17px;font-weight:900;color:var(--ink);}
+  .zk-mine-tx span{font-size:12.5px;font-weight:800;color:#5c4d3b;}
+  .zk-mine-q{width:64px;height:64px;flex:0 0 64px;border-radius:50%;background:#e2d5f1;display:flex;
+             align-items:center;justify-content:center;font-size:30px;}
+  .zk-mine button{border:0;background:#6B3FA0;color:#fff;border-radius:10px;padding:9px 12px;
+                  font-weight:900;font-size:13.5px;font-family:inherit;white-space:nowrap;}
   .zk-cell{aspect-ratio:1;border-radius:var(--r);background:#fbf6ea;border:2px solid var(--line);
     display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
   .zk-cell img{width:86%;height:86%;object-fit:contain;
@@ -683,14 +695,18 @@ window.__FQ_Q0 = location.search;</script>
       <div class="lp-note" id="lpNote">見つけたら、そこの<b>QR</b>を読み取ろう。<br>
         行き先は<b>人によってちがいます</b>。となりの人と同じとは限りません。</div>
     </div>
-    <p class="zk-lead">会場のあちこちにいる<b>キャラクターのQR</b>を読み取ると、なかまが増えていきます。<br>
-      同じQRは<b>5分たつ</b>とまた読めます。ほかの場所のQRなら、すぐ読めます。</p>
+    <!-- fq-zukan2-v1: なかまが増える入口は3つ -->
+    <p class="zk-lead">なかまは、この3つで増えていきます。<br>
+      ①会場の8か所にある<b>キャラクターのQR</b>（同じQRは<b>5分たつ</b>とまた読めます）<br>
+      ②ブースで<b>体験・お話・見学</b>をしたあとに見せてもらうQR<br>
+      ③1F受付の<b>ガチャ</b>をまわしたとき</p>
     <div class="zk-head">
       <div class="zk-count"><b id="zkOwned">0</b>/<span id="zkTotal">69</span></div>
       <div class="zk-bar"><i id="zkBar"></i></div>
     </div>
     <!-- == fq-logpose-v1 : 称号（この端末の中で計算する） == -->
     <div class="lp-title" id="lpTitle" style="display:none"><span class="lp-tem">🏅</span><b id="lpTitleTx"></b></div>
+    <div id="zkMine"></div><!-- fq-zukan2-v1: あなたのモンスター（診断） -->
     <div class="zk-grid" id="zkGrid"></div>
     <div id="zkMsg"></div>
     <!-- == fq-zukan-retry-v1 : 「あとで受け取ります」の ==
@@ -1657,6 +1673,12 @@ document.addEventListener('click', function(ev){
   }
   function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function res(){ return (window.S && S.shindan && T[S.shindan.key]) ? S.shindan : null; }
+  /* fq-zukan2-v1: 図鑑の「あなたのモンスター」の枠に渡す（端末の中だけ。サーバーには送らない） */
+  window.fqMyMon = function(){
+    var r = res(); if(!r) return null;
+    var t = T[r.key];
+    return { no: '①②③④⑤⑥⑦'.indexOf(t.no) + 1, name: t.name, role: t.role };
+  };
 
   /* fq-shindan-all-v1: 7タイプをぜんぶ見る */
   function typeNo(t){ return '①②③④⑤⑥⑦'.indexOf(t.no) + 1; }
@@ -1914,6 +1936,7 @@ if ('serviceWorker' in navigator) {
       if(!d.ok && d.reason==='auth'){ forgetDevice(); ensureDevice().then(function(ok){ if(ok) flushCodes(); }); return; }
       pset(pget().filter(function(c){ return c!==code; }));
       if(d.ok){ V.balance=d.balance|0; saveV(); render(); refreshRanking(); }
+      if(d.ok && d.zukan && window.fqZukanGot) window.fqZukanGot(d.zukan);   /* fq-zukan2-v1: ブースのQRで図鑑に1体 */
       else if(d.reason==='bad_code'){
         var bb=String(code).split('.')[0];
         if((V.bases||[]).indexOf(bb)===-1){ S.scanned=S.scanned.filter(function(x){ return x!==bb; }); save(); render(); }
@@ -2129,6 +2152,8 @@ if ('serviceWorker' in navigator) {
   }
   function pad(n){ return (n<10?'0':'')+n; }
   function src(n){ return 'img/zukan/z_'+pad(n)+'.png'; }
+  /* fq-zukan2-v1: 場所のQRは、端末の合言葉といっしょに送る（zukan_scan2） */
+  function zsec(){ try{ return localStorage.getItem('fq_secret_v1') || ''; }catch(e){ return ''; } }
 
   /* ---- 升目を作る ---- */
   var grid = document.getElementById('zkGrid');
@@ -2231,12 +2256,12 @@ if ('serviceWorker' in navigator) {
 
   var flushing = false;
   function pflush(){
-    if(flushing || !sb || !window.DID) return;
+    if(flushing || !sb || !window.DID || !zsec()) return;   /* fq-zukan2-v1: 合言葉がまだなら待つ */
     pclean();
     var q = pget(); if(!q.length) return;
     flushing = true;
     var item = q[0];
-    sb.rpc('zukan_scan', {p_recog:String(window.DID), p_spot:String(item.spot)}).then(function(r){
+    sb.rpc('zukan_scan2', {p_recog:String(window.DID), p_secret:zsec(), p_spot:String(item.spot)}).then(function(r){   /* fq-zukan2-v1 */
       flushing = false;
       /* つながらない・サーバーが答えない → 待ち行列に残して、次の機会に */
       if(!r || r.error || !r.data) return;
@@ -2245,6 +2270,7 @@ if ('serviceWorker' in navigator) {
       try{ document.dispatchEvent(new CustomEvent('fq-zukan',{detail:d})); }catch(e){}
       /* ★ここまで来たら「サーバーに届いた」。ok でも cooldown でも待ち行列から外す。
            cooldown ＝ さっき読んだばかり ＝ **もう受け取れている**。 */
+      if(!d.ok && d.reason==='auth') return;   /* fq-zukan2-v1: 端末の合言葉を作り直している途中。待ち行列に残す */
       pdel(item.spot);
       if(d.ok){
         owned[d.char]=1; saveLocal();
@@ -2256,14 +2282,21 @@ if ('serviceWorker' in navigator) {
     }).catch(function(){ flushing = false; });
   }
 
-  var busyZk=false;
+  var busyZk=false, zWait=0;
   function doScan(spot){
     if(busyZk) return;
     if(!sb){ msg('図鑑をつかうには通信が必要です。電波の良い場所でもう一度ひらいてください。', true); return; }
-    if(!window.DID){ setTimeout(function(){ doScan(spot); }, 800); return; }
+    /* fq-zukan2-v1: 端末の合言葉がまだ届いていないときは少し待つ。8秒待っても無ければ、あとで自動で受け取る */
+    if(!window.DID || !zsec()){
+      zWait = (zWait||0) + 800;
+      if(zWait > 8000){ zWait = 0; padd(spot);
+        msg('いまは受け取れませんでした。<br><b>あとで自動で受け取ります</b>。このまま先へ進んで大丈夫です。', true); return; }
+      setTimeout(function(){ doScan(spot); }, 800); return;
+    }
+    zWait = 0;
     busyZk=true;
     msg('よみとり中…');
-    sb.rpc('zukan_scan', {p_recog: String(window.DID), p_spot: String(spot)}).then(function(r){
+    sb.rpc('zukan_scan2', {p_recog: String(window.DID), p_secret: zsec(), p_spot: String(spot)}).then(function(r){   /* fq-zukan2-v1 */
       busyZk=false;
       /* ★fq-zukan-retry-v1: サーバーが答えを返せなかった（通信・サーバー側の不調）。
            場所を覚えておいて、あとで送り直す。 */
@@ -2286,6 +2319,11 @@ if ('serviceWorker' in navigator) {
       } else if(d.reason==='cooldown'){
         paint(0);
         countdown(d.wait);
+      } else if(d.reason==='bad_spot'){   /* fq-zukan2-v1: 会場の8か所のQRではない */
+        msg('このQRは、図鑑のQRではありませんでした。<br>会場の<b>キャラクターのQR</b>を読み取ってね。', true);
+      } else if(d.reason==='auth'){       /* fq-zukan2-v1: 端末の合言葉を作り直している途中 → あとで送る */
+        padd(spot);
+        msg('いまは受け取れませんでした。<br><b>あとで自動で受け取ります</b>。このまま先へ進んで大丈夫です。', true);
       } else {
         msg('このQRは読み取れませんでした。', true);
       }
@@ -2324,6 +2362,43 @@ if ('serviceWorker' in navigator) {
       var mo=document.getElementById('zukanModal'); if(mo) mo.classList.remove('show');
     }
   });
+
+  /* == fq-zukan2-v1 : ほかの入口（ブースのQR・ガチャ）から来た子を出す ==
+     ★ガチャの演出中や、ほかの画面が開いているあいだは待つ。閉じてから1体ずつ出す */
+  var zq = [];
+  function zqRun(){
+    if(!zq.length) return;
+    if(window.busy || document.querySelector('.modal.show, .modal-fx.show')){ setTimeout(zqRun, 700); return; }
+    var z = zq.shift();
+    owned[z.char] = 1; saveLocal();
+    var n = paint(z.char);
+    show(z.char, z.is_new !== false, z.owned || n);
+    if(zq.length) setTimeout(zqRun, 700);
+  }
+  window.fqZukanGot = function(z){
+    if(!z || !z.char) return;
+    if(z.total) TOTAL = z.total;
+    zq.push(z); setTimeout(zqRun, 900);
+  };
+
+  /* == fq-zukan2-v1 : あなたのモンスター（福祉タイプ診断）。69体の数には入れない == */
+  function paintMine(){
+    var el = document.getElementById('zkMine'); if(!el) return;
+    var m = window.fqMyMon ? window.fqMyMon() : null;
+    var k = m ? ('m' + m.no) : 'none';
+    if(el.getAttribute('data-k') === k) return;
+    el.setAttribute('data-k', k);
+    function e(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    el.innerHTML = m
+      ? '<div class="zk-mine"><picture><source srcset="img/mon_' + m.no + '.webp" type="image/webp">'
+        + '<img src="img/mon_' + m.no + '.png" alt=""></picture>'
+        + '<div class="zk-mine-tx"><small>🔮 あなたのモンスター</small><b>' + e(m.name) + '</b>'
+        + '<span>タイプ ' + m.no + '　' + e(m.role) + '</span></div></div>'
+      : '<div class="zk-mine"><span class="zk-mine-q">🔮</span>'
+        + '<div class="zk-mine-tx"><small>🔮 あなたのモンスター</small><span>福祉タイプ診断をすると、<br>ここに入るよ</span></div>'
+        + '<button type="button" data-g2="shindan">診断する</button></div>';
+  }
+  paintMine(); setInterval(paintMine, 2000);
 
   /* ---- 起動 ---- */
   paint(0);
@@ -2393,7 +2468,7 @@ if ('serviceWorker' in navigator) {
 
   /* 称号。持っている数で決まる。上から順に見て、届いている一番上を出す。 */
   var TITLES = [
-    {n:72, t:'326 コンプリート'},
+    {n:69, t:'326 コンプリート'},   /* fq-zukan2-v1: 72 → 69（図鑑を69体にしたときの直し忘れ） */
     {n:50, t:'326マスター'},
     {n:36, t:'図鑑 はんぶん マスター'},
     {n:20, t:'326ハンター'},
@@ -3019,6 +3094,7 @@ if ('serviceWorker' in navigator) {
       var d=res && res.data;
       if(!d){ throw (res && res.error) || new Error('no data'); }
       if(!d.ok){ busy=false; window.busy=false; toast(d.reason==='not_unlocked'?'受付でガチャ券を見せてね':'もう一度ためしてね'); refresh(); return; }
+      if(d.zukan && window.fqZukanGot) window.fqZukanGot(d.zukan);   /* fq-zukan2-v1: 演出が終わってから図鑑に1体 */
       /* == fq-gacha-play-v1 : お客さんが遊びを選ぶ演出（gacha_play.html）。開けないときは今までの演出 == */
       if(window.fqPlay && window.fqPlay(d)) return;
       if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
