@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ガチャ あたり速報</title>
+<!-- == fq-atari-v1 : 本部のモニターに出す「ガチャ あたり速報」 ==
+     ・ガチャで当たりが出るたびに「認識番号 0012 さん　カフェ券」を大きく出す（3秒ごとにサーバーに聞く）
+     ・出すのは 認識番号・景品の名前 だけ。なまえ（ニックネーム）は出さない
+     ・ガチャそのものには関わらない。この画面が止まっても、ガチャも受付も今までどおり動く
+     ・はじめての端末は、受付と同じ暗証番号を 1 回だけ入れる（受付の画面と同じ鍵 fq_staff_v1 を使う）
+     ・音はブラウザの決まりで「1回押すまで」出せない。開いたら右下の「音を出す」を押す
+     ★サーバーの関数は fq_staff_wins.sql -->
+<style>
+  :root{ --bg:#1b1430; --bg2:#2a1f4a; --gold:#ffd84a; --cream:#fff7e0; --pink:#ff5ea8; --muted:#b9acd6; --line:rgba(255,255,255,.14); }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; overflow:hidden; background:radial-gradient(ellipse at 30% 20%, var(--bg2) 0%, var(--bg) 70%); color:var(--cream);
+    font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic','Noto Sans JP',sans-serif; }
+  #fx{ position:fixed; inset:0; pointer-events:none; z-index:5; }
+  .top{ position:fixed; left:0; right:0; top:0; height:12vh; display:flex; align-items:center; justify-content:space-between;
+        padding:0 3vw; border-bottom:2px solid var(--line); z-index:2; }
+  .ttl{ font-size:5.2vh; font-weight:900; letter-spacing:.08em; color:var(--gold); text-shadow:0 0 .3em rgba(255,216,74,.45); }
+  .ttl small{ font-size:2.4vh; color:var(--cream); margin-left:1.2vw; letter-spacing:.04em; font-weight:800; }
+  .cnt{ font-size:2.6vh; font-weight:800; color:var(--muted); }
+  .cnt b{ font-size:5vh; color:var(--cream); margin:0 .3vw; }
+  .main{ position:fixed; top:12vh; bottom:7vh; left:0; right:0; display:grid; grid-template-columns:2fr 1fr; gap:2vw; padding:3vh 3vw; z-index:1; }
+  .hero{ border-radius:3vh; background:rgba(255,255,255,.06); border:3px solid var(--line); display:flex; flex-direction:column;
+         align-items:center; justify-content:center; text-align:center; padding:3vh 2vw; position:relative; overflow:hidden; }
+  .hero .lab{ font-size:3.4vh; font-weight:900; color:var(--gold); letter-spacing:.2em; }
+  .hero .who{ font-size:4vh; font-weight:800; color:var(--muted); margin-top:2vh; }
+  .hero .who b{ font-size:13vh; color:var(--cream); letter-spacing:.08em; font-variant-numeric:tabular-nums; margin:0 .6vw; line-height:1.05; }
+  .hero .pz{ font-size:9vh; font-weight:900; line-height:1.2; margin-top:1vh; color:var(--gold); text-shadow:0 0 .25em rgba(255,216,74,.5); word-break:break-word; }
+  .hero .tm{ font-size:2.6vh; color:var(--muted); font-weight:700; margin-top:2vh; }
+  .hero.r2{ border-color:var(--pink); box-shadow:0 0 6vh rgba(255,94,168,.35) inset; }
+  .hero.r3{ border-color:#ff7a3c; box-shadow:0 0 6vh rgba(255,122,60,.45) inset; }
+  /* 虹（いちばん派手な景品）：ふちだけ虹色に流す。中は暗いままにして文字を読みやすく */
+  .hero.r4{ border:6px solid transparent;
+    background:linear-gradient(#2a1f4a,#2a1f4a) padding-box,
+               linear-gradient(90deg,#ff5e5e,#ffd84a,#5eff8a,#5ec8ff,#b45eff,#ff5e5e) border-box;
+    background-size:100% 100%, 300% 100%; animation:rbb 3s linear infinite; }
+  @keyframes rbb{ to{ background-position:0 0, 300% 0; } }
+  .hero.r4 .pz{ background:linear-gradient(90deg,#ff7a7a,#ffe27a,#7affa1,#7ad6ff,#c27aff); -webkit-background-clip:text; background-clip:text; color:transparent;
+    background-size:200% 100%; animation:rb 4s linear infinite; text-shadow:none; }
+  @keyframes rb{ to{ background-position:300% 0; } }
+  .hero.pop{ animation:pop .9s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes pop{ 0%{ transform:scale(.6); opacity:0; } 60%{ transform:scale(1.04); opacity:1; } 100%{ transform:scale(1); } }
+  .idle .ic{ width:22vh; height:22vh; object-fit:contain; animation:fl 3s ease-in-out infinite; }
+  @keyframes fl{ 50%{ transform:translateY(-1.5vh); } }
+  .idle .msg1{ font-size:5vh; font-weight:900; color:var(--cream); margin-top:2vh; }
+  .idle .msg2{ font-size:3vh; font-weight:800; color:var(--muted); margin-top:1vh; }
+  .side{ border-radius:3vh; background:rgba(0,0,0,.2); border:2px solid var(--line); padding:2.4vh 1.6vw; display:flex; flex-direction:column; min-height:0; }
+  .side h2{ margin:0 0 1.4vh; font-size:3vh; color:var(--gold); letter-spacing:.1em; }
+  .list{ flex:1; overflow:hidden; display:flex; flex-direction:column; gap:1.1vh; }
+  .it{ display:flex; align-items:center; gap:1vw; background:rgba(255,255,255,.06); border-radius:1.6vh; padding:1.2vh 1vw; }
+  .it .n{ font-size:3.4vh; font-weight:900; font-variant-numeric:tabular-nums; min-width:5.5em; color:var(--cream); }
+  .it .n small{ font-size:1.8vh; color:var(--muted); margin-left:.3em; }
+  .it .p{ flex:1; font-size:2.8vh; font-weight:800; color:var(--gold); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .it .t{ font-size:1.9vh; color:var(--muted); font-weight:700; }
+  .it.new{ animation:slide .6s ease-out; }
+  @keyframes slide{ from{ transform:translateX(30%); opacity:0; } }
+  .empty{ color:var(--muted); font-size:2.4vh; font-weight:700; }
+  .bottom{ position:fixed; left:0; right:0; bottom:0; height:7vh; display:flex; align-items:center; justify-content:space-between; padding:0 3vw;
+           border-top:2px solid var(--line); z-index:2; font-size:2.6vh; font-weight:800; color:var(--cream); }
+  .bottom .tip b{ color:var(--gold); }
+  .btns{ display:flex; gap:.8vw; align-items:center; }
+  .btns button{ border:2px solid var(--line); background:rgba(255,255,255,.08); color:var(--cream); border-radius:1vh; padding:.8vh 1vw;
+                font-size:1.9vh; font-weight:800; font-family:inherit; cursor:pointer; }
+  .btns button.on{ border-color:var(--gold); color:var(--gold); }
+  .st{ font-size:1.8vh; color:var(--muted); font-weight:700; }
+  .st.ng{ color:#ff9a9a; }
+  /* はじめての端末：暗証番号 */
+  .login{ position:fixed; inset:0; z-index:10; display:none; align-items:center; justify-content:center; background:rgba(10,6,20,.92); }
+  .login.show{ display:flex; }
+  .lbox{ width:min(460px,92vw); background:#fff; color:#36271E; border-radius:16px; padding:22px; font-size:15px; }
+  .lbox h3{ margin:0 0 6px; font-size:19px; }
+  .lbox p{ margin:0 0 10px; line-height:1.7; color:#6E6052; font-weight:600; font-size:13.5px; }
+  .lbox label{ display:block; font-weight:800; font-size:13px; color:#6E6052; margin:10px 0 4px; }
+  .lbox input{ width:100%; font-size:19px; padding:11px; border:2px solid #CFC4AE; border-radius:10px; font-family:inherit; }
+  .lbox button{ width:100%; margin-top:14px; border:3px solid #36271E; background:#F5E83A; color:#36271E; border-radius:12px; padding:13px;
+                font-size:17px; font-weight:900; font-family:inherit; cursor:pointer; }
+  .lbox .err{ color:#C2410C; font-weight:800; margin-top:8px; min-height:1.2em; font-size:14px; }
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<div class="top">
+  <div class="ttl">🎉 ガチャ あたり速報<small>1F 受付でガチャをまわそう！</small></div>
+  <div class="cnt">これまでの当たり<b id="total">0</b>本</div>
+</div>
+
+<div class="main">
+  <div class="hero idle" id="hero">
+    <img class="ic" src="img/app/gacha.png" alt="">
+    <div class="msg1">当たりが出ると、ここに出ます！</div>
+    <div class="msg2">会場をまわってガチャ券を集めよう</div>
+  </div>
+  <div class="side">
+    <h2>さっきの当たり</h2>
+    <div class="list" id="list"><div class="empty">まだありません</div></div>
+  </div>
+</div>
+
+<div class="bottom">
+  <div class="tip">当たった人は <b>1F 受付</b> で景品を受け取ってね</div>
+  <div class="btns">
+    <span class="st" id="st"></span>
+    <button type="button" id="sndBtn">🔇 音を出す</button>
+    <button type="button" id="fsBtn">⛶ 全画面</button>
+  </div>
+</div>
+
+<div class="login" id="login">
+  <div class="lbox">
+    <h3>この端末をモニターにする</h3>
+    <p>受付と同じ<b>暗証番号</b>を入れてください。<b>この端末で1回だけ</b>です。</p>
+    <label for="lbl">この端末の呼び名</label>
+    <input id="lbl" type="text" maxlength="20" autocomplete="off" value="モニター">
+    <label for="pass">受付の暗証番号</label>
+    <input id="pass" type="password" autocomplete="off">
+    <button type="button" id="loginBtn">モニターにする</button>
+    <div class="err" id="loginMsg"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  'use strict';
+  var cfg = window.FQ_CONFIG || {};
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  if (!(cfg.SUPABASE_URL && window.supabase)) { $('st').textContent = '設定が読み込めませんでした'; $('st').className = 'st ng'; return; }
+  var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  function rpc(fn, args){ return sb.rpc(fn, args).then(function(r){ if (r.error) throw r.error; return r.data || {}; }); }
+
+  /* 受付の画面と同じ鍵を使う（同じブラウザで受付にしてあれば、暗証番号は要らない） */
+  var KEY = 'fq_staff_v1', LKEY = 'fq_staff_label_v1';
+  function getStaff(){ try{ return localStorage.getItem(KEY) || ''; }catch(e){ return ''; } }
+  function setStaff(v, l){ try{ if (v) { localStorage.setItem(KEY, v); localStorage.setItem(LKEY, l||''); } else { localStorage.removeItem(KEY); } }catch(e){} }
+
+  $('loginBtn').addEventListener('click', function(){
+    var b = this; b.disabled = true; $('loginMsg').textContent = '';
+    var lbl = $('lbl').value.trim() || 'モニター';
+    rpc('fq_staff_login', {p_pass: $('pass').value, p_label: lbl}).then(function(d){
+      b.disabled = false;
+      if (d.ok) { setStaff(d.staff, lbl); $('pass').value = ''; $('login').classList.remove('show'); start(); return; }
+      $('loginMsg').textContent = d.reason === 'locked' ? 'まちがいが続いたので、10分ほど止まっています。' : '暗証番号がちがいます。';
+    }).catch(function(e){ b.disabled = false; $('loginMsg').textContent = 'つながりませんでした（' + (e.message||e) + '）'; });
+  });
+  $('pass').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('loginBtn').click(); });
+
+  /* ---- 時刻 ---- */
+  function hm(s){ var d = new Date(s); if (isNaN(d)) return ''; return d.toLocaleTimeString('ja-JP', {timeZone:'Asia/Tokyo', hour:'2-digit', minute:'2-digit'}); }
+
+  /* ---- 紙ふぶき ---- */
+  var cv = $('fx'), cx = cv.getContext('2d'), parts = [], raf = 0;
+  function fit(){ cv.width = innerWidth; cv.height = innerHeight; }
+  addEventListener('resize', fit); fit();
+  function confetti(n, rainbow){
+    var cols = rainbow ? ['#ff5e5e','#ffd84a','#5eff8a','#5ec8ff','#b45eff'] : ['#ffd84a','#fff7e0','#ff5ea8','#ffb347'];
+    for (var i = 0; i < n; i++) parts.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*.3, vx: (Math.random()-.5)*3,
+      vy: 2 + Math.random()*4, r: 4 + Math.random()*7, a: Math.random()*6, va: (Math.random()-.5)*.3, c: cols[i % cols.length] });
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function tick(){
+    cx.clearRect(0, 0, cv.width, cv.height);
+    parts = parts.filter(function(p){ return p.y < cv.height + 30; });
+    parts.forEach(function(p){ p.x += p.vx; p.y += p.vy; p.a += p.va; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.a);
+      cx.fillStyle = p.c; cx.fillRect(-p.r/2, -p.r/4, p.r, p.r/2); cx.restore(); });
+    raf = parts.length ? requestAnimationFrame(tick) : 0;
+  }
+
+  /* ---- 音（押すまで出ない） ---- */
+  var ac = null, sound = false;
+  $('sndBtn').addEventListener('click', function(){
+    sound = !sound;
+    if (sound && !ac) { try{ ac = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){} }
+    this.textContent = sound ? '🔊 音あり' : '🔇 音を出す'; this.classList.toggle('on', sound);
+    if (sound) chime(1);
+  });
+  function chime(r){
+    if (!sound || !ac) return;
+    var notes = r >= 4 ? [523,659,784,1047,1319] : r >= 3 ? [523,659,784,1047] : [659,784,1047];
+    notes.forEach(function(f, i){
+      var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + i*0.12;
+      o.type = 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.55);
+    });
+  }
+  $('fsBtn').addEventListener('click', function(){
+    var d = document.documentElement;
+    if (document.fullscreenElement) document.exitFullscreen(); else if (d.requestFullscreen) d.requestFullscreen();
+  });
+
+  /* ---- 表示 ---- */
+  var recent = [], queue = [], showing = false, last = null;
+  function paintList(newKey){
+    $('list').innerHTML = recent.length ? recent.slice(0, 8).map(function(w){
+      var k = w.recog_no + '|' + w.drawn_at;
+      return '<div class="it' + (k === newKey ? ' new' : '') + '"><div class="n">' + esc(w.recog_no) + '<small>さん</small></div>'
+        + '<div class="p">' + esc(w.prize_name || '景品') + '</div><div class="t">' + esc(hm(w.drawn_at)) + '</div></div>';
+    }).join('') : '<div class="empty">まだありません</div>';
+  }
+  function paintHero(w, anim){
+    var h = $('hero'), r = Math.max(1, Math.min(4, w.rarity|0));
+    h.className = 'hero r' + r;
+    h.innerHTML = '<div class="lab">あたり！</div>'
+      + '<div class="who">認識番号<b>' + esc(w.recog_no) + '</b>さん</div>'
+      + '<div class="pz">' + esc(w.prize_name || '景品') + '</div>'
+      + '<div class="tm">' + esc(hm(w.drawn_at)) + '</div>';
+    if (anim) { void h.offsetWidth; h.classList.add('pop'); confetti(r >= 4 ? 260 : r >= 3 ? 180 : 110, r >= 4); chime(r); }
+  }
+  /* 同時にいくつか来ても、1つずつ 6 秒は見せる */
+  function next(){
+    if (!queue.length) { showing = false; return; }
+    showing = true;
+    var w = queue.shift();
+    recent.unshift(w); recent = recent.slice(0, 12);
+    paintList(w.recog_no + '|' + w.drawn_at);
+    paintHero(w, true);
+    setTimeout(next, 6000);
+  }
+
+  var timer = null, first = true;
+  function poll(){
+    clearTimeout(timer);
+    rpc('fq_staff_wins', {p_staff: getStaff(), p_after: last}).then(function(d){
+      if (!d.ok) {
+        if (d.reason === 'staff') { setStaff(''); $('login').classList.add('show'); $('loginMsg').textContent = 'もう一度、暗証番号を入れてください。'; return; }
+        throw new Error(d.reason || 'ng');
+      }
+      $('st').textContent = ''; $('st').className = 'st';
+      $('total').textContent = d.total | 0;
+      var L = d.list || [];
+      if (L.length) last = L[L.length - 1].drawn_at;
+      if (first) {
+        /* 開いたときは、これまでの当たりを一覧に並べるだけ（演出はしない） */
+        first = false;
+        recent = L.slice().reverse(); paintList('');
+        if (recent.length) paintHero(recent[0], false);
+      } else if (L.length) {
+        L.forEach(function(w){ queue.push(w); });
+        if (!showing) next();
+      }
+      timer = setTimeout(poll, 3000);
+    }).catch(function(){
+      $('st').textContent = 'つながりません…（自動でつなぎ直します）'; $('st').className = 'st ng';
+      timer = setTimeout(poll, 6000);
+    });
+  }
+  function start(){ first = true; last = null; poll(); }
+  if (getStaff()) start(); else $('login').classList.add('show');
+})();
+</script>
+</body>
+</html>
