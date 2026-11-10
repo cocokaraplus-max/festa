@@ -20,7 +20,7 @@
 (function(){
   try{
     var p = new URLSearchParams(location.search);
-    if (p.get('q') || p.get('dev') || p.get('admin') || p.get('team')) {   /* fq-gacha2-v1: チームのQR */
+    if (p.get('q') || p.get('dev') || p.get('admin') || p.get('team') || p.get('v')) {   /* fq-gacha2-v1: チームのQR ／ fq-smile-qr-v1: 笑顔コンテストのQR */
       location.replace('quest.html' + location.search + location.hash);
     }
   }catch(e){}

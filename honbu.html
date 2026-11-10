@@ -1073,23 +1073,22 @@ boot();
     <div class="lpmsg" id="smMsg2"></div>
     <div id="smBody" style="display:none;">
       <p class="lpnote" id="smStat"></p>
-      <p class="lpnote">投票は<b>1人1票</b>（登録したなまえと番号で数えています）。<b>同じ票数のときは同じ順位</b>で出ます。1位が複数のときは現場で決めてください。参加者の画面には票数は一切出ません。</p>
+      <p class="lpnote">（fq-smile-qr-v1）会場に貼る写真に<b>1番, 2番, …</b>と番号を振り、番号ごとの<b>QR</b>を横に貼ります。お客さんがスマホのカメラで読むと、その番号に1票入ります。<b>1人1票</b>（別の番号を読むと入れ直し）。参加者の画面には票数は一切出ません。表彰はアナログで。</p>
+      <div class="sform">
+        <label for="smCount" style="font-weight:900;">応募の数</label>
+        <input type="number" id="smCount" min="1" max="300" placeholder="例：24" style="width:96px;">
+        <button class="lpbtn sm" id="smSetup">番号をそろえる</button>
+        <button class="lpbtn sm" id="smPrint">番号のQRカードを印刷</button>
+      </div>
       <div id="smList"></div>
-      <div class="lprow" style="margin-top:12px;"><!-- fq-grand-smile-v1 -->
+      <div class="lprow" style="margin-top:12px;display:none;"><!-- fq-grand-smile-v1 / fq-smile-qr-v1: 表彰はアナログなので隠す -->
         <button class="lpbtn" id="smScreenOpen">大抽選会モニターを開く</button>
         <button class="gbtn" id="smAnnounce">1位を発表する</button>
         <button class="lpbtn sm del" id="smScreenClear">大抽選会モニターを消す</button>
         <span class="vsmall" id="smScreenSt"></span>
       </div>
-      <p class="lpnote">「1位を発表する」を押すと、<b>大抽選会モニター</b>でドラムロールが鳴り、写真が切りかわりながら約7秒じらしてから1位を出します。1位が同票のときは、ならべて「同じ票数です」と出ます。<b>先に受付を締め切って、もう一度「読み込む」を押してから</b>発表してください。</p>
-      <h3 style="margin:18px 0 6px;font-size:15px;">写真をふやす・直す</h3>
-      <div class="sform">
-        <input type="number" id="smNo" placeholder="番号" style="width:84px;">
-        <input type="text" id="smTitle" placeholder="一言（本名は入れない）" style="width:230px;">
-        <input type="text" id="smImg" placeholder="img/smile/01.jpg" style="width:230px;">
-        <button class="lpbtn sm" id="smAdd">追加する</button>
-      </div>
-      <p class="lpnote">写真は <b>img/smile/</b> に置いて、ファイル名を入れてください（外部のURLでも動きます）。行の「直す」で番号・一言・ファイル名を書きかえ、「消す」でその写真と入っていた票を消します。</p>
+      <p class="lpnote" style="display:none;">「1位を発表する」を押すと、<b>大抽選会モニター</b>でドラムロールが鳴り、写真が切りかわりながら約7秒じらしてから1位を出します。1位が同票のときは、ならべて「同じ票数です」と出ます。<b>先に受付を締め切って、もう一度「読み込む」を押してから</b>発表してください。</p>
+      <!-- fq-smile-qr-v1: 写真の登録はやめた（番号だけ） -->
     </div>
   </div>
 </div>
@@ -1121,19 +1120,50 @@ boot();
       $('smStat').innerHTML = '受付：<b>' + (OPEN ? '受付中' : '締切') + '</b>　投票した人：<b>' + (d.voters|0)
                             + '人</b>　合計：<b>' + (d.total_votes|0) + '票</b>';
       ROWS = d.rows || [];   /* fq-grand-smile-v1 */
-      $('smList').innerHTML = (d.rows||[]).map(function(r){
-        return '<div class="srow' + (r.active ? '' : ' off') + '">'
-             + '<span class="rk">' + (r.rank|0) + '位' + (r.tie ? '<span class="tie">同票</span>' : '') + '</span>'
-             + '<img class="th" alt="" src="' + esc(r.img) + '">'
-             + '<span class="no">' + esc(r.no) + '</span>'
-             + '<span class="ti">' + esc(r.title || '') + (r.active ? '' : '（非公開）') + '</span>'
-             + '<span class="vt">' + (r.votes|0) + '票</span>'
-             + '<button class="lpbtn sm" data-ed="' + esc(r.id) + '" data-no="' + esc(r.no) + '" data-ti="' + esc(r.title||'') + '" data-im="' + esc(r.img||'') + '">直す</button>'
-             + '<button class="lpbtn sm" data-del="' + esc(r.id) + '">消す</button></div>';
-      }).join('') || '<p class="lpnote">まだ写真がありません。下から足してください。</p>';
+      if (d.count && !$('smCount').value) $('smCount').value = d.count;   /* fq-smile-qr-v1 */
+      var byVotes = (d.rows||[]).slice().sort(function(x, y){ return (y.votes|0) - (x.votes|0) || x.no - y.no; });
+      $('smList').innerHTML = byVotes.map(function(r){
+        return '<div class="srow">'
+             + '<span class="no" style="min-width:70px;font-size:22px;">' + esc(r.no) + '番</span>'
+             + '<span class="vt" style="min-width:90px;">' + (r.votes|0) + '票</span>'
+             + '<span class="rk" style="min-width:0;font-size:14px;">' + ((r.votes|0) > 0 ? ((r.rank|0) + '位' + (r.tie ? '（同票）' : '')) : '') + '</span>'
+             + '</div>';
+      }).join('') || '<p class="lpnote">まだ番号がありません。「応募の数」を入れて「番号をそろえる」を押してください。</p>';
     }).catch(function(e){ say('読み込めませんでした（' + (e.message || e) + '）。fq_smile.sql は流しましたか？', 'ng'); });
   }
   $('smLoad').addEventListener('click', load);
+
+  /* == fq-smile-qr-v1 : 応募の数 → 番号をそろえる ／ 番号のQRカードを印刷 == */
+  $('smSetup').addEventListener('click', function(){
+    var n = parseInt($('smCount').value, 10);
+    if (!(n >= 1 && n <= 300)) { say('応募の数を 1〜300 で入れてください。', 'ng'); return; }
+    if (!confirm(n + '番までの番号をそろえます。よろしいですか？\n（' + n + '番より大きい番号があれば、投票の対象から外します）')) return;
+    rpc('fq_admin_smile_setup', {p_pass: pass.value, p_count: n}).then(function(d){
+      if (!d.ok) { say(d.message || 'できませんでした。', 'ng'); return; }
+      say(n + '番までそろえました。「番号のQRカードを印刷」でQRを出せます。'); load();
+    }).catch(function(e){ say('できませんでした（' + (e.message || e) + '）。fq_smile_qr.sql は流しましたか？', 'ng'); });
+  });
+  $('smPrint').addEventListener('click', function(){
+    var rows = ROWS.filter(function(r){ return r.active && r.code; }).sort(function(a, b){ return a.no - b.no; });
+    if (!rows.length) { say('先に「番号をそろえる」を押してください。', 'ng'); return; }
+    if (typeof qrcode !== 'function') { say('QRの部品が読めませんでした。開き直してください。', 'ng'); return; }
+    var BASE = location.origin + location.pathname.replace(/[^\/]*$/, '');
+    var cards = rows.map(function(r){
+      var q = qrcode(0, 'M'); q.addData(BASE + '?v=' + encodeURIComponent(r.code)); q.make();
+      return '<div class="c"><div class="t">笑顔コンテスト</div><div class="n">' + esc(r.no) + '<small>番</small></div>'
+           + '<div class="q">' + q.createSvgTag({cellSize: 5, margin: 2, scalable: true}) + '</div>'
+           + '<div class="h">この写真に1票！<br>スマホのカメラで読んでね</div></div>';
+    }).join('');
+    var w = window.open('', '_blank'); if (!w) { say('印刷の画面を開けませんでした（ポップアップを許可してください）。', 'ng'); return; }
+    w.document.write('<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>笑顔コンテスト 番号のQR</title><style>'
+      + '@page{size:A4;margin:10mm}body{margin:0;font-family:"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;color:#2b2118}'
+      + '.g{display:grid;grid-template-columns:repeat(2,1fr);gap:8mm}'
+      + '.c{border:2px solid #2b2118;border-radius:6mm;padding:6mm;text-align:center;break-inside:avoid;height:80mm;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:space-between}'
+      + '.t{font-size:13pt;font-weight:900;letter-spacing:.1em}.n{font-size:44pt;font-weight:900;line-height:1;color:#d2462f}.n small{font-size:18pt;margin-left:2pt}'
+      + '.q svg{width:38mm;height:38mm;display:block}.h{font-size:10pt;font-weight:900;line-height:1.4}'
+      + '</style></head><body><div class="g">' + cards + '</div><script>setTimeout(function(){print()},400)<\/script></body></html>');
+    w.document.close();
+  });
 
   $('smToggle').addEventListener('click', function(){
     var next = !OPEN;
@@ -1145,7 +1175,7 @@ boot();
     }).catch(function(e){ say(String(e.message || e), 'ng'); });
   });
 
-  $('smAdd').addEventListener('click', function(){
+  if ($('smAdd')) $('smAdd').addEventListener('click', function(){   /* fq-smile-qr-v1: ボタンは消した */
     var no = parseInt($('smNo').value, 10);
     if (!no) { say('番号を入れてください。', 'ng'); return; }
     rpc('fq_admin_smile_save', {p_pass: pass.value, p_id: null, p_no: no,
@@ -1251,7 +1281,9 @@ boot();
   $('admEye').addEventListener('click', function(){ var sh = pass.type === 'password'; pass.type = sh ? 'text' : 'password'; this.textContent = sh ? '🙈' : '👁'; });
   /* それぞれの欄の合言葉の入力は隠して、ここで入れたものを配る */
   var IN = ['lpPass', 'vPass', 'sdPass', 'gPass', 'smPass'];
-  IN.forEach(function(id){ var el = $(id); if (el) { var row = el.closest('.lprow'); if (row) row.style.display = 'none'; } });
+  IN.forEach(function(id){ var el = $(id); if (!el) return; el.style.display = 'none';   /* fq-smile-qr-v1: 行ごと隠すと、同じ行のボタンまで消えていた */
+    var lb = document.querySelector('label[for="' + id + '"]'); if (lb) lb.style.display = 'none'; });
+  if ($('lpEye')) $('lpEye').style.display = 'none';
   function open_(){
     var v = pass.value;
     if (!v.trim()) { say('管理画面の合言葉を入れてください。', 'ng'); return; }

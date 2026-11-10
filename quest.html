@@ -841,9 +841,14 @@ window.__FQ_Q0 = location.search;</script>
   <!-- fq-smile-v1 笑顔コンテスト。写真が1枚も無いときは出ない -->
   <section id="smileSec" data-tab="quest" style="display:none">
     <div class="sec-h hand"><span class="em">😊</span>笑顔コンテスト</div>
-    <p class="sec-sub" id="smSub">いちばん笑顔だと思う1枚を選んでください。<b>おひとり1票</b>です。</p>
+    <!-- fq-smile-qr-v1: 写真はアプリに入れない。会場の写真の横のQRを読んで投票する -->
+    <p class="sec-sub" id="smSub">会場にならんだ笑顔の写真から、いちばんの1枚の<b>QR</b>を<b>スマホのカメラ</b>で読むと投票できます。<b>おひとり1票</b>です。</p>
     <div id="smClosed" class="sm-closed" style="display:none">いまは投票を受け付けていません。</div>
-    <div id="smGrid" class="sm-grid"></div>
+    <div id="smMine" style="display:none;margin:8px 0 4px;text-align:center;background:#fff;border:3px solid var(--mustard);border-radius:var(--r);padding:12px 10px;">
+      <div style="font-size:13px;font-weight:900;color:var(--muted)">あなたの1票</div>
+      <div style="font-size:40px;font-weight:900;color:var(--red);line-height:1.2"><span id="smMineNo">—</span>番</div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted)">締め切りまでなら、別の番号のQRを読むと入れ直せます</div>
+    </div>
     <div class="sm-msg" id="smMsg"></div>
   </section>
 
@@ -2846,10 +2851,10 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-/* ===== fq-smile-v1 笑顔コンテスト（参加者）=====
-   ・1人1票。だれが何票かは、この画面には一切おりてきません（サーバーが返さない）
-   ・押しまちがえても、締切までなら入れ直せます
-   ・写真が0枚、または fq_smile.sql をまだ流していないときは、この節ごと出ません */
+/* ===== fq-smile-v1 笑顔コンテスト（参加者）／ fq-smile-qr-v1 : 番号のQRを読んで投票 =====
+   ・写真はアプリに入れない。会場の写真の横に、番号ごとのQR（?v=記号）を貼る
+   ・1人1票。だれが何票かは、この画面には一切おりてこない
+   ・番号がまだ1つも無い（本部が応募の数を入れていない）ときは、この節ごと出ない */
 (function(){
   'use strict';
   var cfg = window.FQ_CONFIG || {};
@@ -2857,57 +2862,52 @@ if ('serviceWorker' in navigator) {
   var sec = document.getElementById('smileSec'); if (!sec) return;
   var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
   function $(id){ return document.getElementById(id); }
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function secret(){ try{ return localStorage.getItem('fq_secret_v1') || ''; }catch(e){ return ''; } }
+  function onQuest(){ return (document.documentElement.getAttribute('data-fqtab') || 'quest') === 'quest'; }
+  function say(t){ var m = $('smMsg'); if (m) m.textContent = t || ''; }
 
-  var MINE = null, OPEN = false, BUSY = false;
-
-  function draw(photos){
-    $('smGrid').innerHTML = photos.map(function(p){
-      var on = OPEN ? '' : ' off';
-      return '<div class="sm-card' + (String(p.id) === String(MINE) ? ' mine' : '') + on + '" data-id="' + esc(p.id) + '">'
-           + '<span class="no">' + esc(p.no) + '</span><span class="me">あなたの1票</span>'
-           + '<img alt="" loading="lazy" src="' + esc(p.img) + '">'
-           + (p.title ? '<div class="ti">' + esc(p.title) + '</div>' : '')
-           + '</div>';
-    }).join('');
+  function paint(d){
+    if (!d || !(d.count > 0)) { sec.removeAttribute('data-ok'); sec.style.display = 'none'; return; }
+    sec.setAttribute('data-ok', '1');                     /* fq-smile-fix-v1: メニューに「出してよい」と知らせる */
+    sec.style.display = onQuest() ? '' : 'none';
+    $('smClosed').style.display = d.open ? 'none' : '';
+    $('smSub').innerHTML = d.open
+      ? '会場にならんだ笑顔の写真から、いちばんの1枚の<b>QR</b>を<b>スマホのカメラ</b>で読むと投票できます。<b>おひとり1票</b>です。'
+      : '結果は会場で発表します。';
+    $('smMine').style.display = d.mine_no ? '' : 'none';
+    $('smMineNo').textContent = d.mine_no || '—';
   }
-
   function load(){
     var sc = secret(); if (!sc || !window.DID) return;
     return sb.rpc('fq_smile_list', {p_recog:String(window.DID), p_secret:sc}).then(function(r){
-      if (r.error || !r.data || !r.data.ok) return;          /* SQL 未実行などは だまって出さない */
-      var d = r.data, ps = d.photos || [];
-      if (!ps.length) { sec.style.display = 'none'; return; }
-      OPEN = !!d.open; MINE = d.mine;
-      sec.setAttribute('data-ok', '1');   /* fq-smile-fix-v1: メニューに「出してよい」と知らせる */
-      sec.style.display = ((document.documentElement.getAttribute('data-fqtab') || 'quest') === 'quest') ? '' : 'none';
-      $('smClosed').style.display = OPEN ? 'none' : '';
-      $('smSub').innerHTML = OPEN
-        ? 'いちばん笑顔だと思う1枚を選んでください。<b>おひとり1票</b>です。'
-        : '結果は大抽選会で発表します。';
-      draw(ps);
-      $('smMsg').textContent = (MINE && OPEN) ? 'えらびました。締め切りまでなら、押し直して変えられます。' : '';
+      if (r.error || !r.data || !r.data.ok) return;     /* SQL 未実行などは だまって出さない */
+      paint(r.data);
     }).catch(function(){});
   }
 
-  $('smGrid').addEventListener('click', function(e){
-    var c = e.target.closest('.sm-card'); if (!c || !OPEN || BUSY) return;
-    var id = parseInt(c.getAttribute('data-id'), 10); if (!id) return;
-    BUSY = true; $('smMsg').textContent = '送っています…';
-    sb.rpc('fq_smile_vote', {p_recog:String(window.DID), p_secret:secret(), p_id:id}).then(function(r){
-      BUSY = false;
-      var d = (r && r.data) || {};
-      if (r.error || !d.ok) { $('smMsg').textContent = d.message || 'うまく送れませんでした。電波の良いところでもう一度おためしください。'; return; }
-      MINE = d.mine;
-      [].slice.call($('smGrid').querySelectorAll('.sm-card')).forEach(function(x){
-        x.classList.toggle('mine', String(x.getAttribute('data-id')) === String(MINE));
-      });
-      $('smMsg').textContent = 'ありがとうございます。締め切りまでなら、押し直して変えられます。';
-    }).catch(function(){ BUSY = false; $('smMsg').textContent = 'うまく送れませんでした。'; });
-  });
+  /* ---- 番号のQR（?v=記号）から来た ---- */
+  var code = ''; try{ code = new URLSearchParams(location.search).get('v') || ''; }catch(e){}
+  if (code) {
+    try{ if (history.replaceState) history.replaceState(null, '', location.pathname); }catch(e){}
+    (function vote(n){
+      if (!secret() || !window.DID) { if (n < 25) setTimeout(function(){ vote(n + 1); }, 800); else toast('電波の良いところで、もう一度QRを読んでね'); return; }
+      sb.rpc('fq_smile_vote_code', {p_recog:String(window.DID), p_secret:secret(), p_code:String(code)}).then(function(r){
+        var d = (r && r.data) || {};
+        if (r.error) { toast('うまく送れませんでした。もう一度QRを読んでね'); return; }
+        if (d.ok) {
+          var t = (d.prev_no && d.prev_no !== d.no) ? ('😊 ' + d.prev_no + '番から <b>' + d.no + '番</b> に入れ直しました') : ('😊 <b>' + d.no + '番</b> に投票しました！');
+          toast(t); say('ありがとうございます！');
+        } else if (d.reason === 'closed') toast('いまは笑顔コンテストの投票を受け付けていません');
+        else if (d.reason === 'not_found') toast('このQRは使えませんでした');
+        else toast('うまく送れませんでした。もう一度QRを読んでね');
+        load();
+        if (window.FQ_TAB) window.FQ_TAB('quest');
+        setTimeout(function(){ if (sec.style.display !== 'none' && sec.scrollIntoView) sec.scrollIntoView({behavior:'smooth', block:'center'}); }, 400);
+      }).catch(function(){ toast('うまく送れませんでした。もう一度QRを読んでね'); });
+    })(0);
+  }
 
-  /* fq-smile-fix-v1: 認識番号が届くまで 2秒ごとに読みに行く（前は1回だけで、次は60秒後だった） */
+  /* fq-smile-fix-v1: 認識番号が届くまで 2秒ごとに読みに行く */
   (function first(n){ if (secret() && window.DID) { load(); return; } if (n < 30) setTimeout(function(){ first(n + 1); }, 2000); })(0);
   document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') load(); });
   setInterval(load, 60000);          /* 受付が開いた／締まったのを拾う */
