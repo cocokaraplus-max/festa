@@ -804,12 +804,12 @@ window.__FQ_Q0 = location.search;</script>
       <div class="lp-ans" id="lpAnsWrap"><button class="linkbtn" data-act="lpAns">こたえを見る</button></div>
       <div class="lp-name" id="lpName" style="display:none"></div>
       <div class="lp-note" id="lpNote">見つけたら、そこの<b>QR</b>を読み取ろう。<br>
-        行き先は<b>人によってちがいます</b>。となりの人と同じとは限りません。</div>
+        行き先は<b>人によってちがいます</b>。<b>チームの仲間</b>とは同じです。</div>
     </div>
     <!-- fq-zukan2-v1: なかまが増える入口は3つ -->
     <!-- fq-zukan86-v1: なかまの増やし方を3つの札に -->
     <div class="zk-ways">
-      <div class="zk-way"><i>🧭</i><b>会場の8か所</b><span>キャラクターのQR<br>（5分たつとまた読める）</span></div>
+      <div class="zk-way"><i>🧭</i><b>会場の8か所</b><span>キャラクターのQR<br>（1か所1回）</span></div>
       <div class="zk-way"><i>🏪</i><b>ブース</b><span>体験・お話・見学の<br>あとに見せてもらうQR</span></div>
       <div class="zk-way"><i>🎰</i><b>ガチャ</b><span>1F受付で<br>まわしたとき</span></div>
     </div>
@@ -2137,7 +2137,7 @@ if ('serviceWorker' in navigator) {
 <script>
 /* == fq-zukan-v1 : キャラクター図鑑 ==
    会場のQR（?z=場所の名前）を読むと、キャラが1体ずつ増える。
-   ★5分の判定はサーバー（zukan_scan）でやる。端末の履歴を消しても回避できない。
+   ★「1か所1回」の判定はサーバー（zukan_scan）でやる。端末の履歴を消しても回避できない。（fq-spot-once-v1：前は5分たつと また読めた）
    ★ポイントとは別勘定。participants にも draws にも触らない。
    先に fq_zukan.sql を Supabase で Run しておくこと。 */
 (function(){
@@ -2328,6 +2328,9 @@ if ('serviceWorker' in navigator) {
         msg('');
         var el=document.getElementById('zukanSec');
         if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'center'});
+      } else if(d.reason==='already'){   /* fq-spot-once-v1: 1か所1回 */
+        paint(0);
+        msg('ここのQRは <b>もう読んだよ</b>。<br>つぎの場所をさがそう！', true);
       } else if(d.reason==='cooldown'){
         paint(0);
         countdown(d.wait);
@@ -2647,7 +2650,7 @@ if ('serviceWorker' in navigator) {
     var nx = st.next || {};
     $('lpHint').textContent = nx.hint || (nx.name || 'つぎの場所をさがそう');
     $('lpNote').innerHTML = '見つけたら、そこの<b>QR</b>を読み取ろう。<br>'
-      + '行き先は<b>人によってちがいます</b>。となりの人と同じとは限りません。';
+      + '行き先は<b>人によってちがいます</b>。<b>チームの仲間</b>とは同じです。';
 
     /* 行き先が変わったら「こたえ」は隠しなおす */
     if(curSpot !== (nx.spot||'')){ curSpot = (nx.spot||''); shownAnswer = false; }
