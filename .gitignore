@@ -19,3 +19,6 @@ patch_*.py
 
 # Claude が渡したファイルの置き場（リポジトリには載せない）
 Claude outputs/
+
+# 手で作った控え（.bak）
+*.bak
