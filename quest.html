@@ -400,6 +400,38 @@
   .zk-bar i{display:block;height:100%;width:0;border-radius:999px;
     background:linear-gradient(90deg,#7fc4b0,var(--teal));transition:width .5s ease;}
   .zk-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;}
+  /* == fq-zukan86-v1 : ごほうびの大きな枠・増やし方の札== */
+  .zk-hero{position:relative;margin:0 0 14px;border:3px solid #6B3FA0;border-radius:18px;overflow:hidden;
+    background:radial-gradient(circle at 50% 42%,#fff 0,#f3ecfa 58%,#e6daf5 100%);text-align:center;padding:12px 12px 14px;}
+  .zk-hero-tag{display:inline-block;background:#6B3FA0;color:#fff;font-size:12.5px;font-weight:900;
+    border-radius:999px;padding:4px 12px;letter-spacing:.04em;}
+  .zk-hero-stage{position:relative;width:200px;height:200px;margin:6px auto 0;}
+  .zk-hero-stage img{width:100%;height:100%;object-fit:contain;display:block;position:relative;z-index:1;}
+  .zk-hero.sil .zk-hero-stage img{filter:brightness(0) opacity(.78);}
+  .zk-hero-q{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);z-index:2;
+    font-size:96px;font-weight:900;color:#fff;line-height:1;text-shadow:0 0 0 #6B3FA0,0 4px 0 #6B3FA0,0 0 18px rgba(107,63,160,.8);
+    animation:zkq 1.6s ease-in-out infinite;}
+  @keyframes zkq{0%{transform:translate(-50%,-46%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.08);}100%{transform:translate(-50%,-46%) scale(1);}}
+  .zk-hero.open .zk-hero-stage::before{content:"";position:absolute;inset:-30px;z-index:0;border-radius:50%;
+    background:repeating-conic-gradient(rgba(231,164,58,.28) 0 12deg,transparent 12deg 24deg);animation:zkray 14s linear infinite;}
+  @keyframes zkray{to{transform:rotate(360deg);}}
+  .zk-hero.pop .zk-hero-stage img{animation:zkpop .9s cubic-bezier(.2,1.6,.4,1) both;}
+  @keyframes zkpop{0%{transform:scale(.3);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .zk-hero-dots{display:flex;justify-content:center;gap:6px;margin:8px 0 2px;}
+  .zk-hero-dots i{width:16px;height:16px;border-radius:50%;background:#e2d5f1;border:2px solid #b9a3d8;}
+  .zk-hero-dots i.on{background:var(--mustard);border-color:#c98a1f;}
+  .zk-hero-tx{font-size:15px;font-weight:900;color:#4A2775;line-height:1.6;margin-top:6px;}
+  .zk-hero-tx b{color:var(--red);font-size:19px;}
+  .zk-hero-nm{font-size:26px;font-weight:900;color:var(--red);margin-top:4px;}
+  .zk-hero-ty{font-size:13.5px;font-weight:800;color:#5c4d3b;}
+  .zk-hero button{margin-top:10px;border:0;background:#6B3FA0;color:#fff;border-radius:12px;padding:11px 18px;
+    font-weight:900;font-size:15px;font-family:inherit;}
+  .zk-ways{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 12px;}
+  .zk-way{background:#fbf6ea;border:2px solid var(--line);border-radius:var(--r);padding:7px 4px 8px;text-align:center;line-height:1.35;}
+  .zk-way i{display:block;font-style:normal;font-size:20px;}
+  .zk-way b{display:block;font-size:12.5px;font-weight:900;color:var(--ink);margin-top:2px;}
+  .zk-way span{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;}
+  .lp-modal .zk-img.sil{filter:brightness(0) opacity(.78);}
   /* == fq-free-gacha-v1 == */
   .free-box{margin-top:14px;border:3px dashed #6B3FA0;border-radius:var(--r);background:#f3ecfa;padding:12px 14px;text-align:center;}
   .free-t{font-size:17px;font-weight:900;color:#4A2775;}
@@ -698,6 +730,7 @@ window.__FQ_Q0 = location.search;</script>
   <!-- == fq-zukan-v1 == -->
   <section id="zukanSec" data-tab="zukan">
     <div class="sec-h hand"><span class="em">📖</span>キャラクター図鑑</div>
+    <div id="zkMine"></div><!-- fq-zukan86-v1: 8か所ゴールのごほうび（あなたのモンスター） -->
     <!-- == fq-logpose-v1 : つぎの行き先。fq_logpose.sql を Run すると出る == -->
     <div class="lp-box" id="lpBox" style="display:none">
       <div class="lp-h"><span class="lp-em">🧭</span><span id="lpHead">つぎの ぼうけん</span></div>
@@ -712,17 +745,18 @@ window.__FQ_Q0 = location.search;</script>
         行き先は<b>人によってちがいます</b>。となりの人と同じとは限りません。</div>
     </div>
     <!-- fq-zukan2-v1: なかまが増える入口は3つ -->
-    <p class="zk-lead">なかまは、この3つで増えていきます。<br>
-      ①会場の8か所にある<b>キャラクターのQR</b>（同じQRは<b>5分たつ</b>とまた読めます）<br>
-      ②ブースで<b>体験・お話・見学</b>をしたあとに見せてもらうQR<br>
-      ③1F受付の<b>ガチャ</b>をまわしたとき</p>
+    <!-- fq-zukan86-v1: なかまの増やし方を3つの札に -->
+    <div class="zk-ways">
+      <div class="zk-way"><i>🧭</i><b>会場の8か所</b><span>キャラクターのQR<br>（5分たつとまた読める）</span></div>
+      <div class="zk-way"><i>🏪</i><b>ブース</b><span>体験・お話・見学の<br>あとに見せてもらうQR</span></div>
+      <div class="zk-way"><i>🎰</i><b>ガチャ</b><span>1F受付で<br>まわしたとき</span></div>
+    </div>
     <div class="zk-head">
-      <div class="zk-count"><b id="zkOwned">0</b>/<span id="zkTotal">69</span></div>
+      <div class="zk-count"><b id="zkOwned">0</b>/<span id="zkTotal">86</span></div>
       <div class="zk-bar"><i id="zkBar"></i></div>
     </div>
     <!-- == fq-logpose-v1 : 称号（この端末の中で計算する） == -->
     <div class="lp-title" id="lpTitle" style="display:none"><span class="lp-tem">🏅</span><b id="lpTitleTx"></b></div>
-    <div id="zkMine"></div><!-- fq-zukan2-v1: あなたのモンスター（診断） -->
     <div class="zk-grid" id="zkGrid"></div>
     <div id="zkMsg"></div>
     <!-- == fq-zukan-retry-v1 : 「あとで受け取ります」の ==
@@ -802,8 +836,8 @@ window.__FQ_Q0 = location.search;</script>
     <div class="lp-gem">🧭</div>
     <div class="zk-em">ぜんぶ まわった！</div>
     <img class="zk-img" id="lpImg" alt="">
-    <h3 class="hand">ログポース コンプリート！</h3>
-    <div class="lp-award">ここでしか会えない なかまと<br>称号「<span id="lpAwardTx">ログポースの ぼうけんしゃ</span>」</div>
+    <h3 class="hand">ガチャ権利 ゲット！</h3>
+    <div class="lp-award" id="lpAward">あなたのモンスターが 現れた！<br>称号「<span id="lpAwardTx">夢を掴む冒険者</span>」</div>
     <button class="btn" data-act="lpClose">やった！</button>
   </div>
 </div>
@@ -1816,7 +1850,7 @@ if ('serviceWorker' in navigator) {
   function clearPlay(){
     if(playCleared) return; playCleared = true;
     ['fq_g2_solo_v1', 'fq_vstate_v1', 'fq_pending_codes_v1', 'fukushi_quest_326_zukan',
-     'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal', 'fq_free_zukan_v1'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+     'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal', 'fq_free_zukan_v1', 'fq_free_zukan86_v1'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
     try{ S.scanned = []; S.gacha = 0; S.prizes = []; S.snapTalk = [0,0,0]; S.snapEvent = [0,0,0]; save(); }catch(e){}
     /* 新しい認識番号をもらえたら、開き直す（ほかの人の番号の図鑑などが残って見えないように） */
     ensureDevice().then(function(ok){ if(ok) setTimeout(function(){ location.reload(); }, 300); });
@@ -2045,7 +2079,7 @@ if ('serviceWorker' in navigator) {
      ★体数を変えるときは、ここと Supabase の zukan_config.char_count の
        両方を直すこと。ここは通信できないときの控えで、
        つながればサーバーの値で上書きされる。 */
-  var TOTAL = 69;                       /* img/zukan/z_01.png 〜 z_69.png */
+  var TOTAL = 86;                       /* img/zukan/z_01.png 〜 z_86.png（fq-zukan86-v1） */
   var KEY   = 'fukushi_quest_326_zukan';/* 通信できない時の控え（表示用だけ） */
 
   var cfg = window.FQ_CONFIG || {};
@@ -2291,27 +2325,48 @@ if ('serviceWorker' in navigator) {
     zq.push(z); setTimeout(zqRun, 900);
   };
 
-  /* == fq-zukan2-v1 : あなたのモンスター（福祉タイプ診断）。69体の数には入れない == */
+  /* == fq-zukan86-v1 : 8か所ゴールのごほうび ＝ あなたのモンスター（福祉タイプ診断）。86体の数には入れない ==
+     ゴール前 … モンスターの影＋大きな「？」。8か所のうち何か所まわったかを ● で出す
+     ゴール後 … 色がついて現れる（診断がまだなら、影のまま「診断すると現れる」） */
+  var heroWas = '';
   function paintMine(){
     var el = document.getElementById('zkMine'); if(!el) return;
     var m = window.fqMyMon ? window.fqMyMon() : null;
-    var k = m ? ('m' + m.no) : 'none';
+    var goal = false; try{ goal = localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){}
+    var lb = document.getElementById('lpBox'), vEl = document.getElementById('lpVisited'), tEl = document.getElementById('lpTotal');
+    var lpOn = !!(lb && lb.style.display !== 'none');
+    var v = lpOn && vEl ? (parseInt(vEl.textContent, 10) || 0) : 0, t = lpOn && tEl ? (parseInt(tEl.textContent, 10) || 0) : 0;
+    var open = goal && !!m;
+    var k = (m ? m.no : 0) + '|' + (goal ? 1 : 0) + '|' + v + '/' + t;
     if(el.getAttribute('data-k') === k) return;
     el.setAttribute('data-k', k);
     function e(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    el.innerHTML = m
-      ? '<div class="zk-mine"><picture><source srcset="img/mon_' + m.no + '.webp" type="image/webp">'
-        + '<img src="img/mon_' + m.no + '.png" alt=""></picture>'
-        + '<div class="zk-mine-tx"><small>🔮 あなたのモンスター</small><b>' + e(m.name) + '</b>'
-        + '<span>タイプ ' + m.no + '　' + e(m.role) + '</span></div></div>'
-      : '<div class="zk-mine"><span class="zk-mine-q">🔮</span>'
-        + '<div class="zk-mine-tx"><small>🔮 あなたのモンスター</small><span>福祉タイプ診断をすると、<br>ここに入るよ</span></div>'
-        + '<button type="button" data-g2="shindan">診断する</button></div>';
+    var no = m ? m.no : 1;   /* 診断がまだのときは、影だけ見せる */
+    var img = '<div class="zk-hero-stage"><picture><source srcset="img/mon_' + no + '.webp" type="image/webp">'
+            + '<img src="img/mon_' + no + '.png" alt=""></picture>' + (open ? '' : '<span class="zk-hero-q">？</span>') + '</div>';
+    var dots = '';
+    if(!goal && t > 0){ dots = '<div class="zk-hero-dots">'; for(var i=0;i<t;i++) dots += '<i' + (i < v ? ' class="on"' : '') + '></i>'; dots += '</div>'; }
+    var body;
+    if(open){
+      body = '<div class="zk-hero-nm hand">' + e(m.name) + '</div><div class="zk-hero-ty">タイプ ' + m.no + '　' + e(m.role) + '</div>';
+    } else if(goal){
+      body = '<div class="zk-hero-tx">8か所 ぜんぶ まわった！<br>あとは<b>診断</b>するだけ。あなたのモンスターが現れるよ</div>'
+           + '<button type="button" data-g2="shindan">診断する</button>';
+    } else {
+      var rest = t > 0 ? Math.max(0, t - v) : 8;
+      body = '<div class="zk-hero-tx">あと<b>' + rest + 'か所</b>まわると…<br>' + (m ? 'あなたのモンスターが 現れる！' : 'あなたのモンスターが 現れる！') + '</div>'
+           + (m ? '' : '<button type="button" data-g2="shindan">先に診断して、モンスターを決める</button>');
+    }
+    el.innerHTML = '<div class="zk-hero ' + (open ? 'open' : 'sil') + (open && heroWas === 'sil' ? ' pop' : '') + '">'
+      + '<div class="zk-hero-tag">' + (open ? '🏆 あなたのモンスター' : '🏆 8か所 ぜんぶ まわった ごほうび') + '</div>'
+      + img + dots + body + '</div>';
+    heroWas = open ? 'open' : 'sil';
   }
   paintMine(); setInterval(paintMine, 2000);
 
   /* == fq-free-gacha-v1 : おたのしみガチャのキャラ（このスマホの中だけ。サーバーには送らない） == */
-  var FREEKEY = 'fq_free_zukan_v1', GOAL = 30;   /* GOAL … ゴールのごほうびの子。おたのしみガチャでは出さない */
+  var FREEKEY = 'fq_free_zukan86_v1', GOAL = 0;   /* fq-zukan86-v1: ごほうびは診断のモンスターになったので、除外する子はなし。控えは86体の番号で取り直す */
+  try{ localStorage.removeItem('fq_free_zukan_v1'); }catch(e){}
   function freeGet(){ try{ return JSON.parse(localStorage.getItem(FREEKEY) || '[]') || []; }catch(e){ return []; } }
   document.addEventListener('fq-zukan', function(e){ var d = e.detail || {}; if (typeof d.goal_char === 'number' && d.goal_char > 0) GOAL = d.goal_char; });
   window.fqFreePick = function(){
@@ -2387,13 +2442,13 @@ if ('serviceWorker' in navigator) {
 (function(){
   'use strict';
   var KEY_GOAL = 'fukushi_quest_326_lp_goal';   /* ゴールした印（表示用だけ） */
-  var GOAL_TITLE = 'ログポースの ぼうけんしゃ';
+  var GOAL_TITLE = '夢を掴む冒険者';   /* fq-zukan86-v1: ログポース → 夢を掴む冒険者 */
 
   /* 称号。持っている数で決まる。上から順に見て、届いている一番上を出す。 */
   var TITLES = [
-    {n:69, t:'326 コンプリート'},   /* fq-zukan2-v1: 72 → 69（図鑑を69体にしたときの直し忘れ） */
+    {n:86, t:'326 コンプリート'},   /* fq-zukan86-v1: 69 → 86 */
     {n:50, t:'326マスター'},
-    {n:36, t:'図鑑 はんぶん マスター'},
+    {n:43, t:'図鑑 はんぶん マスター'},
     {n:20, t:'326ハンター'},
     {n:10, t:'なかま あつめ 名人'},
     {n:5,  t:'なかま あつめ 見習い'},
@@ -2487,9 +2542,15 @@ if ('serviceWorker' in navigator) {
     goaled = true;
     try{ localStorage.setItem(KEY_GOAL,'1'); }catch(e){}
     var mo=$('lpModal'); if(!mo) return;
-    var im=$('lpImg');
-    if(im && goalChar > 0) im.src = 'img/zukan/z_'+pad(goalChar)+'.png';
-    else if(im) im.removeAttribute('src');
+    var im=$('lpImg');   /* fq-zukan86-v1: ごほうびは あなたのモンスター（診断のキャラ） */
+    var mm = window.fqMyMon ? window.fqMyMon() : null;
+    if(im){ im.src = 'img/mon_' + (mm ? mm.no : 1) + '.png'; im.classList.toggle('sil', !mm); }
+    var aw = $('lpAward');
+    if(aw) aw.innerHTML = mm
+      ? 'あなたのモンスター<br>「' + String(mm.name).replace(/</g,'&lt;') + '」が 現れた！<br>称号「' + GOAL_TITLE + '」'
+        + '<br><small>クエストの「おたのしみガチャ」で 何度でも遊べるよ（景品なし）</small>'
+      : '福祉タイプ診断をすると<br>あなたのモンスターが 現れるよ！<br>称号「' + GOAL_TITLE + '」'
+        + '<br><small>クエストの「おたのしみガチャ」で 何度でも遊べるよ（景品なし）</small>';
     mo.classList.add('show');
     if(typeof confetti==='function') confetti(3);
     paintTitle(lastOwned);          /* ★称号に「ぼうけんしゃ」を足す */
