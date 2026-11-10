@@ -668,8 +668,8 @@ window.__FQ_Q0 = location.search;</script>
       <img class="gacha-keeper" src="img/app/gacha.png" alt="">
       <div class="capsule" id="capsule"></div>
     </div>
-    <button class="btn btn-gacha" id="gachaBtn" data-act="gacha">ガチャをまわす</button>
-    <div class="gacha-hint" id="gachaHint"></div>
+    <button class="btn btn-gacha" id="gachaBtn" data-act="gacha" disabled>ガチャをまわす</button>
+    <div class="gacha-hint" id="gachaHint">読み込み中…</div><!-- fq-nopoint-v1 -->
   </section>
 
   <section data-tab="quest">
@@ -1992,17 +1992,8 @@ if ('serviceWorker' in navigator) {
     var bal = V.balance, cost = V.cost||1;
     var pt=document.getElementById('pt'); if(pt) pt.textContent = (bal==null ? '…' : bal);
     var st=document.getElementById('steps'); if(st) st.style.display='none';
-    var btn=document.getElementById('gachaBtn'), hint=document.getElementById('gachaHint');
-    if(btn){
-      var can = !!SECRET && bal!=null && bal>=cost && !busy;
-      btn.disabled = !can;
-      btn.textContent = 'ガチャをまわす（1回 '+cost+'pt）';
-    }
-    if(hint){
-      if(!SECRET || bal==null) hint.innerHTML='ポイントを確かめています…<br>電波の良い場所で開いてね';
-      else if(bal>=cost) hint.innerHTML='のこり <b>'+bal+'pt</b>：あと <b>'+Math.floor(bal/cost)+'回</b> まわせます';
-      else hint.innerHTML='あと <b>'+(cost-bal)+'ポイント</b> でまわせます。会場のQRを読み取ろう';
-    }
+    /* fq-nopoint-v1: ガチャのボタンと説明は、今のガチャ（fq-gacha2-v1）の側だけが書く。
+       前のポイント制の「1回 1pt」「ポイントを確かめています」は出さない */
     var gEl=document.getElementById('fqGrand');   /* fq-grand-v1 */
     if(gEl){
       gEl.style.display = SECRET ? 'block' : 'none';
