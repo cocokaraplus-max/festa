@@ -1073,7 +1073,7 @@ boot();
     <div class="lpmsg" id="smMsg2"></div>
     <div id="smBody" style="display:none;">
       <p class="lpnote" id="smStat"></p>
-      <p class="lpnote">（fq-smile-qr-v1）会場に貼る写真に<b>1番, 2番, …</b>と番号を振り、番号ごとの<b>QR</b>を横に貼ります。お客さんがスマホのカメラで読むと、その番号に1票入ります。<b>1人1票</b>（別の番号を読むと入れ直し）。参加者の画面には票数は一切出ません。表彰はアナログで。</p>
+      <p class="lpnote"><!-- fq-smile-qr-v1 -->会場に貼る写真に<b>1番, 2番, …</b>と番号を振り、番号ごとの<b>QR</b>を横に貼ります。お客さんがスマホのカメラで読むと、その番号に1票入ります。<b>1人1票</b>（別の番号を読むと入れ直し）。参加者の画面には票数は一切出ません。表彰はアナログで。</p>
       <div class="sform">
         <label for="smCount" style="font-weight:900;">応募の数</label>
         <input type="number" id="smCount" min="1" max="300" placeholder="例：24" style="width:96px;">
@@ -1309,7 +1309,7 @@ boot();
     try { var q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize: 6, margin: 2, scalable: true}); }
     catch(e) { return '<span>QRを出せませんでした</span>'; }
   }
-  var CARDS = { booth3: [], booth4: [], check: [], spot: [] };   /* fq-admin-ui-v2: ブースは階ごとに分ける */
+  var CARDS = { start: [], booth3: [], booth4: [], check: [], spot: [] };   /* fq-g2-start-v1: スタートのQR */   /* fq-admin-ui-v2: ブースは階ごとに分ける */
   function card(c){
     return '<div class="adm-qc' + (c.off ? ' off' : '') + '"><b>' + esc(c.label) + '</b><div class="qr">' + qrSvg(c.url) + '</div>'
          + '<div class="u">' + esc(c.url) + '</div>'
@@ -1328,12 +1328,14 @@ boot();
                                       .sort(function(a, b){ return (a.sort|0) - (b.sort|0); })
                                       .map(function(c){ return { label: c.label, url: BASE + '?q=' + c.code, kind: 'booth' }; }); }
       CARDS.booth3 = booth(3); CARDS.booth4 = booth(4);
+      CARDS.start = codes.filter(function(c){ return c.base === 'start'; })   /* fq-g2-start-v1 */
+                         .map(function(c){ return { label: 'ガチャへの道 スタート', url: BASE + '?q=' + c.code, kind: 'start' }; });
       CARDS.check = codes.filter(function(c){ return c.base === 'check'; })
                          .map(function(c){ return { label: '福祉タイプ診断', url: BASE + '?q=' + c.code, kind: 'check' }; });
       CARDS.spot = spots.slice().sort(function(a, b){ return (a.ord|0) - (b.ord|0); })
                         .map(function(s){ return { label: (s.name || s.spot), url: BASE + 'quest.html?z=' + encodeURIComponent(s.spot), kind: 'spot', off: !s.enabled }; });
       body.className = '';
-      body.innerHTML = section('booth3', '3階のブースのQR（3種類）') + section('booth4', '4階のブースのQR（3種類）')
+      body.innerHTML = section('start', 'ガチャへの道スタートのQR（会場の入口に貼る）') + section('booth3', '3階のブースのQR（3種類）') + section('booth4', '4階のブースのQR（3種類）')
                      + section('spot', '図鑑の8か所のQR') + section('check', '福祉タイプ診断のQR')
         || '<div class="adm-msg">QRがまだありません。</div>';
     }).catch(function(e){ body.textContent = '読み込めませんでした（' + (e.message || e) + '）'; });
@@ -1343,6 +1345,7 @@ boot();
     booth3: 'ブースの方へ：体験・お話・見学が終わった方に、このQRを見せてください',
     booth4: 'ブースの方へ：体験・お話・見学が終わった方に、このQRを見せてください',
     spot:  'スマホのカメラで読むと、なかまが図鑑に入るよ！',
+    start: 'スマホのカメラで読むと、ガチャへの道がスタート！',   /* fq-g2-start-v1 */
     check: 'スマホのカメラで読むと、福祉タイプ診断がはじまるよ'
   };
   $('admQrBody').addEventListener('click', function(e){

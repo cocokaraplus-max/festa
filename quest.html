@@ -957,7 +957,7 @@ var QUESTS=[
   {key:'check',img:'img/app/m_check.png',title:'適性診断を受ける',desc:'診断ブースのQRを読み取る',test:function(c){return c==='check';}},
   {key:'event',img:'img/app/m_event.png',title:'ホールのイベントに参加',desc:'ホール画面に出るQRを読み取る',test:function(c){return c.indexOf('event')===0;}}
 ];
-var VALID=['jigyosho','talk_A','talk_B','talk_C','check','event_1','event_2','f3_exp','f3_talk','f3_see','f4_exp','f4_talk','f4_see']; /* fq-gacha2-v1: 6種類のQR */
+var VALID=['jigyosho','talk_A','talk_B','talk_C','check','event_1','event_2','f3_exp','f3_talk','f3_see','f4_exp','f4_talk','f4_see','start']; /* fq-gacha2-v1: 6種類のQR ／ fq-g2-start-v1: スタートのQR */
 // r = レア度(1:通常 2:チャンス 3:激アツ/地域協賛賞 4:特賞・大当たり)
 var PRIZES=[
   {kind:'イベント賞',name:'お菓子の詰め合わせ',em:'🍬',r:1},
@@ -1009,7 +1009,7 @@ function scan(code){
   if(S.scanned.indexOf(base)!==-1){toast('このQRはもう読み取り済みだよ');render();return;}
   var wasAll=allDone();
   S.scanned.push(base); save();
-  var label={f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「見る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「見る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
+  var label={start:'ガチャへの道 スタート！',f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「見る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「見る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
   toast(base==='check' ? '🔮 福祉タイプ診断のQRを読んだよ' : ('✅ '+label));   /* fq-daycheck-v1: ポイントの表示はもう出さない */
   if(window.fqG2Refresh) setTimeout(window.fqG2Refresh, 1200);
   render();
@@ -3045,6 +3045,16 @@ if ('serviceWorker' in navigator) {
     // 行き先
     var nav=G.nav||{}, nv=$('g2Nav'), cls='g2-nav', v='', s='';
     var me_done = drawn>=2;
+    /* fq-g2-start-v1: 会場でスタートのQRを読むまでは、行き先を出さない
+       （ブースのQRを先に読んだ・ガチャ券がある・ガチャをまわした人は、もうスタートしたことにする） */
+    var started = (window.S && S.scanned && S.scanned.indexOf('start') >= 0)
+                || drawn > 0 || earned > 0 || !!G.ticket
+                || (m.n && ((m.n.exp|0) + (m.n.talk|0) + (m.n.see|0)) > 0);
+    if(!started){
+      nv.className='g2-nav';
+      nv.innerHTML='<div class="g2-nav-k">スタート</div><div class="g2-nav-v">会場の入口で<br>スタートのQRを読もう！</div>'
+        +'<div class="g2-nav-s">ガチャへの道は、会場に来てからはじまります。<br>入口の<b>「スタート」のQR</b>を<b>スマホのカメラ</b>で読んでね。</div>';
+    } else
     if(nav.kind==='booth'){
       cls+=' '+nav.cat;
       v='<span class="fl">'+nav.floor+'階</span>'+esc(nav.label);
@@ -3059,8 +3069,10 @@ if ('serviceWorker' in navigator) {
       v='📖 図鑑の8か所めぐりへ！';
       s='ガチャは1人2回まで。会場のキャラのQRを集めよう。<br><button type="button" class="linkbtn" data-g2="zukan">図鑑をひらく</button>';
     }
+    if(started){   /* fq-g2-start-v1 */
     nv.className=cls;
     nv.innerHTML='<div class="g2-nav-k">'+(nav.kind==='zukan'?'つぎは':'つぎの行き先')+'</div><div class="g2-nav-v">'+v+'</div><div class="g2-nav-s">'+s+'</div>';
+    }
     // そろったカテゴリ（いまの回）
     var ct=$('g2Cats');
     if(drawn>=2){ ct.innerHTML=''; }
