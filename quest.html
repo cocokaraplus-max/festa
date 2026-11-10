@@ -432,6 +432,7 @@
   .zk-way b{display:block;font-size:12.5px;font-weight:900;color:var(--ink);margin-top:2px;}
   .zk-way span{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;}
   .lp-modal .zk-img.sil{filter:brightness(0) opacity(.78);}
+  .lp-modal .zk-img.sil{filter:brightness(0) blur(12px) opacity(.6);}   /* fq-daycheck-v1 */
   /* == fq-mon-v1 : ギラギラ（ホログラム）の台紙・モンスターの動き・福祉モンスターの段 == */
   /* プリズムのホログラム（シールのギラギラ）：市松のマス＋細い放射の線＋虹色が流れる＋光の帯 */
   .holo,.zk-cell.got.holo{position:relative;isolation:isolate;overflow:hidden;--t:24px;
@@ -712,8 +713,8 @@ window.__FQ_Q0 = location.search;</script>
     <!-- ★fq-square2-v1: 「ステージ」「みどころ」は1つのタブ（イベント）にまとまったので、
          ここの言いまわしも合わせました。 -->
     <p class="sn-note">イベントの中身、会場への行き方はもう見られます。<br>
-      このページをホーム画面に追加しておくと、<br>
-      当日そのままクエストをはじめられます。</p>
+      当日は、ブースのQRをスマホのカメラで読むと<br>
+      そのままクエストがはじまります。</p>
   </section>
 
   <section class="pinfo">
@@ -1004,7 +1005,7 @@ function scan(code){
   var wasAll=allDone();
   S.scanned.push(base); save();
   var label={f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「見る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「見る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
-  toast('✅ '+label+(/^f[34]_/.test(base)?'':'  +1pt'));   /* fq-gacha2-v1: 新しいQRはポイント表示なし */
+  toast(base==='check' ? '🔮 福祉タイプ診断のQRを読んだよ' : ('✅ '+label));   /* fq-daycheck-v1: ポイントの表示はもう出さない */
   if(window.fqG2Refresh) setTimeout(window.fqG2Refresh, 1200);
   render();
   if(!wasAll && allDone()){ setTimeout(showRevive, 700); }
@@ -1959,7 +1960,7 @@ if ('serviceWorker' in navigator) {
       else if(d.reason==='bad_code'){
         var bb=String(code).split('.')[0];
         if((V.bases||[]).indexOf(bb)===-1){ S.scanned=S.scanned.filter(function(x){ return x!==bb; }); save(); render(); }
-        toast('このQRは使えませんでした（ポイントは入りません）');
+        toast('このQRは使えませんでした');   /* fq-daycheck-v1 */
       }
       if(pget().length) setTimeout(flushCodes, 400);
     }).catch(function(){ flushing=false; });
@@ -2675,6 +2676,8 @@ if ('serviceWorker' in navigator) {
     }).catch(function(){});
   }
 
+  window.fqLpRefresh = refresh;   /* fq-daycheck-v1: チームが変わったら取り直す */
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') refresh(); });
   /* ---- ゴールしたとき ---- */
   function celebrate(){
     goaled = true;
@@ -3000,6 +3003,7 @@ if ('serviceWorker' in navigator) {
   var busyState=false, fastUntil=0, timer=null;
   function refresh(){
     clearTimeout(timer);
+    if(document.visibilityState === 'hidden'){ timer=setTimeout(refresh, 20000); return; }   /* fq-daycheck-v1: 見ていないときは聞かない（戻ったら すぐ聞く） */
     var sec=secret();
     if(!sec){ timer=setTimeout(refresh, 1500); return; }
     if(busyState){ timer=setTimeout(refresh, 1000); return; }
@@ -3218,11 +3222,11 @@ if ('serviceWorker' in navigator) {
         $('g2TeamQr').innerHTML=qrSvg(base()+'?team='+encodeURIComponent(d.code));
         $('g2TeamCnt').textContent='いまのチーム：'+d.count+'人';
         $('g2TeamModal').classList.add('show');
-        window.fqG2Refresh();
+        window.fqG2Refresh(); if(window.fqLpRefresh) window.fqLpRefresh();   /* fq-daycheck-v1 */
       }).catch(function(){ toast('つながりませんでした'); });
     } else if(a==='leave'){
       if(!confirm('チームをぬけて、ひとりでまわりますか？')) return;
-      sb.rpc('fq_team_leave', {p_recog:String(DID), p_secret:sec}).then(function(){ ls(SOLO,'1'); window.fqG2Refresh(); });
+      sb.rpc('fq_team_leave', {p_recog:String(DID), p_secret:sec}).then(function(){ ls(SOLO,'1'); window.fqG2Refresh(); if(window.fqLpRefresh) window.fqLpRefresh(); });
     }
   });
   $('g2TicketBtn').addEventListener('click', function(){
@@ -3240,7 +3244,7 @@ if ('serviceWorker' in navigator) {
       if(!confirm('友だちのチームに入りますか？（全員に同じ行き先が出ます）')) return;
       sb.rpc('fq_team_join', {p_recog:String(DID), p_secret:sec, p_code:code}).then(function(res){
         var d=res && res.data;
-        if(d && d.ok){ ls(SOLO,null); toast('👫 チームに入りました（'+d.count+'人）'); window.fqG2Refresh(); }
+        if(d && d.ok){ ls(SOLO,null); toast('👫 チームに入りました（'+d.count+'人）'); window.fqG2Refresh(); if(window.fqLpRefresh) window.fqLpRefresh(); }
         else toast(d && d.reason==='full' ? 'このチームは10人でいっぱいです' : 'チームが見つかりませんでした');
       }).catch(function(){ toast('つながりませんでした。もう一度QRを読んでね'); });
     }
@@ -3253,6 +3257,22 @@ if ('serviceWorker' in navigator) {
   function paintPre(){ var el=$('g2Pre'); if(el) el.style.display = (window.S && S.shindan) ? 'none' : ''; }
   paintPre(); setInterval(paintPre, 2000);
   refresh();
+})();
+</script>
+<!-- == fq-daycheck-v1 : iPhone のホーム画面から開いたときは、Safari で開いてもらう ==
+     ★ホーム画面のアプリと Safari は、記録（認識番号・ガチャ券・図鑑）が別々。
+       カメラでQRを読むと Safari で開くので、ホーム画面のアプリで遊ぶと記録がつながらない。 -->
+<script>
+(function(){
+  try{
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var sa = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+    if(!ios || !sa) return;
+    var d = document.createElement('div');
+    d.style.cssText = 'position:sticky;top:0;z-index:300;background:#e6291c;color:#fff;font-weight:900;font-size:13.5px;line-height:1.6;padding:10px 12px;text-align:center;';
+    d.innerHTML = '⚠️ ホーム画面から開いたアプリでは、QRの記録がつながりません。<br>ブースのQRを<b>カメラで読んで開く Safari</b> の画面で遊んでね。';
+    document.body.insertBefore(d, document.body.firstChild);
+  }catch(e){}
 })();
 </script>
 </body>
