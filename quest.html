@@ -2785,7 +2785,8 @@ if ('serviceWorker' in navigator) {
     cur = key;
     try{ document.documentElement.setAttribute('data-fqtab', key); }catch(e){}   /* fq-shindan-early-v1 */
     secs.forEach(function(o){
-      o.el.style.display = (!o.off && o.tab === key) ? o.on : 'none';
+      var off = o.off && !o.el.hasAttribute('data-ok');   /* fq-smile-fix-v1: 後から出してよくなった節（笑顔コンテスト） */
+      o.el.style.display = (!off && o.tab === key) ? o.on : 'none';
     });
     btns.forEach(function(b){
       b.setAttribute('aria-selected', b.getAttribute('data-tab') === key ? 'true' : 'false');
@@ -2879,7 +2880,8 @@ if ('serviceWorker' in navigator) {
       var d = r.data, ps = d.photos || [];
       if (!ps.length) { sec.style.display = 'none'; return; }
       OPEN = !!d.open; MINE = d.mine;
-      sec.style.display = '';
+      sec.setAttribute('data-ok', '1');   /* fq-smile-fix-v1: メニューに「出してよい」と知らせる */
+      sec.style.display = ((document.documentElement.getAttribute('data-fqtab') || 'quest') === 'quest') ? '' : 'none';
       $('smClosed').style.display = OPEN ? 'none' : '';
       $('smSub').innerHTML = OPEN
         ? 'いちばん笑顔だと思う1枚を選んでください。<b>おひとり1票</b>です。'
@@ -2905,7 +2907,9 @@ if ('serviceWorker' in navigator) {
     }).catch(function(){ BUSY = false; $('smMsg').textContent = 'うまく送れませんでした。'; });
   });
 
-  setTimeout(load, 1200);
+  /* fq-smile-fix-v1: 認識番号が届くまで 2秒ごとに読みに行く（前は1回だけで、次は60秒後だった） */
+  (function first(n){ if (secret() && window.DID) { load(); return; } if (n < 30) setTimeout(function(){ first(n + 1); }, 2000); })(0);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') load(); });
   setInterval(load, 60000);          /* 受付が開いた／締まったのを拾う */
 })();
 </script>
