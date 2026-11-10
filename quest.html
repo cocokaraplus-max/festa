@@ -311,6 +311,8 @@
   .pinfo-id{font-size:11.5px;font-weight:800;color:var(--muted);display:flex;flex-direction:column;gap:3px;align-items:flex-end;}
   .pinfo-id b{font-size:20px;color:var(--ink);letter-spacing:.04em;}
   .pinfo-note{font-size:10.5px;color:var(--muted);margin:8px 0 0;line-height:1.5;}
+  /* fq-oldsec-v1: 前の仕組みの節は、どのタブでも出さない */
+  .fq-gone{display:none !important;}
 </style>
 <style>/* == fq-shindan-v1 / fq-shindan-mon-v1 : 福祉タイプ診断。演出の正本のスタイル定義には足さず、別ブロックにしてある == */
   #shindanSec .sd-lead{color:var(--muted);font-size:12.5px;line-height:1.7;font-weight:500;margin:0 0 12px;}
@@ -2959,8 +2961,9 @@ if ('serviceWorker' in navigator) {
 
   /* ---- 前の表示を隠す（消してはいない） ---- */
   (function(){
-    var q=$('quests'); if(q && q.closest('section')) q.closest('section').style.display='none';
-    var p=$('prizes'); if(p && p.closest('section')) p.closest('section').style.display='none';
+    /* fq-oldsec-v1: style だけだと、メニューを切り替えたときに出し直されるので「いつも隠す」印も付ける */
+    var q=$('quests'); if(q && q.closest('section')){ q.closest('section').style.display='none'; q.closest('section').classList.add('fq-gone'); }
+    var p=$('prizes'); if(p && p.closest('section')){ p.closest('section').style.display='none'; p.closest('section').classList.add('fq-gone'); }
     var st=$('steps'); if(st) st.style.display='none';
     var pt=$('pt'); if(pt && pt.closest('.ptchip')) pt.closest('.ptchip').style.display='none';
     var pm=document.querySelector('#prizeModal p'); if(pm) pm.textContent='受付のスタッフから、この番号の景品を受け取ってね。';
