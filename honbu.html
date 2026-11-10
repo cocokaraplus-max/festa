@@ -135,7 +135,7 @@ if (!/[?&]admin=1/.test(location.search)) { location.replace(location.pathname +
     </div>
     <div class="lpmsg" id="lpMsg"></div>
     <p class="lpnote">
-      <b>記号</b>はQRの中身（<code>?z=</code> のうしろ）。印刷したQRと同じにすること。ここは変えられません。<br>
+      <b>記号</b>はQRの中身（<code>?z=</code> のうしろ）。印刷したQRと同じにすること。ここは変えられません。<b>うしろの5文字</b>は、家から打ちこめないように自動で付きます（fq-open-now-v1）。<br>
       <b>ヒント</b>が参加者の画面に大きく出ます。<b>名前</b>は「こたえを見る」を押したときだけ出ます。<br>
       <b>使う</b>のチェックを外すと、その場所は行き先に出なくなります（QRが破れた時など）。<br>
       保存するとすぐ反映されます。行き先の順番は<b>人ごとに自動で変わる</b>ので、番号は表示の並べ替え用です。
@@ -504,6 +504,7 @@ boot();
       if (r.error) throw r.error;
       var d = r.data || {};
       if (!d.ok) { say(d.message || '足せませんでした。', 'ng'); return; }
+      spot = d.spot || spot;   /* fq-open-now-v1: サーバーが うしろに5文字を付けた記号（推測できない形）を使う */
       list.appendChild(row({ spot: spot, ord: list.children.length + 1,
                              name: '', hint: '', enabled: true }));
       el.value = '';
