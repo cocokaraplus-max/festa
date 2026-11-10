@@ -759,7 +759,7 @@ window.__FQ_Q0 = location.search;</script>
     </div>
   </section>
 
-  <section>
+  <section style="display:none"><!-- fq-prize-no-v1: 前の仕組み（ポイント制・お店で使う引換券）の説明。お客さんの画面には出さない -->
     <div class="sec-h hand"><span class="em">💡</span>仕組みと使い方</div>
     <details>
       <summary>QRはどう作るの？（会場設置のしかた）</summary>
@@ -2970,7 +2970,7 @@ if ('serviceWorker' in navigator) {
     var p=$('prizes'); if(p && p.closest('section')) p.closest('section').style.display='none';
     var st=$('steps'); if(st) st.style.display='none';
     var pt=$('pt'); if(pt && pt.closest('.ptchip')) pt.closest('.ptchip').style.display='none';
-    var pm=document.querySelector('#prizeModal p'); if(pm) pm.textContent='受付のスタッフから、この番号の引換券を受け取ってね。';
+    var pm=document.querySelector('#prizeModal p'); if(pm) pm.textContent='受付のスタッフから、この番号の景品を受け取ってね。';
   })();
 
   function base(){ return location.origin + location.pathname.replace(/[^\/]*$/, ''); }
@@ -3054,7 +3054,7 @@ if ('serviceWorker' in navigator) {
     // 結果
     $('g2Results').innerHTML=(G.results||[]).map(function(r){
       if(r.is_win) return '<div class="g2-res"><div class="no">'+(r.prize_no!=null?esc(r.prize_no)+'番':'🎁')+'</div><div>'+r.round+'回目：あたり！ '+esc(r.prize_name||'')
-        +'<small>'+(r.handed?'引換券を受け取りました':'受付で、この番号の引換券を受け取ってね')+'</small></div></div>';
+        +'<small>'+(r.handed?'景品を受け取りました':'受付で、この番号の景品を受け取ってね')+'</small></div></div>';
       return '<div class="g2-res"><div class="no">—</div><div>'+r.round+'回目：はずれ<small>大抽選会の対象です</small></div></div>';
     }).join('');
     paintTicketModal();
@@ -3100,7 +3100,7 @@ if ('serviceWorker' in navigator) {
       if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
       var lv=Math.max(1, Math.min(4, d.rarity|0)), revive=false;
       if(lv===4){ var rr=Math.random(); revive = rr<0.4?false:(rr<0.7?1:2); }
-      var p={ em:({1:'🎁',2:'🎀',3:'🎫',4:'🌈'})[lv]||'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('引換券 '+d.prize_no+'番'):''), r:lv };
+      var p={ em:({1:'🎁',2:'🎀',3:'🎫',4:'🌈'})[lv]||'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('景品番号【'+d.prize_no+'番】'):''), r:lv };
       runFx(lv, function(){ busy=false; window.busy=false; showPrize(p, lv); confetti(lv); refresh(); }, revive);
     }).catch(function(e){
       console.warn('fq_g2_draw失敗', e); busy=false; window.busy=false; refresh();
@@ -3125,7 +3125,7 @@ if ('serviceWorker' in navigator) {
       window.removeEventListener('message', onMsg);
       if(fr.parentNode) fr.parentNode.removeChild(fr);
       playFrame = null; busy = false; window.busy = false;
-      if(d.win && typeof toast === 'function') toast('🎁 受付で' + (d.prize_no != null ? ' ' + d.prize_no + '番の' : '') + '引換券を受け取ってね');
+      if(d.win && typeof toast === 'function') toast('🎁 受付で' + (d.prize_no != null ? '【' + d.prize_no + '番】の' : '') + '景品を受け取ってね');   /* fq-prize-no-v1 */
       refresh();
     }
     function onMsg(ev){
@@ -3143,7 +3143,7 @@ if ('serviceWorker' in navigator) {
       playFrame = null;
       if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
       var lv = Math.max(1, Math.min(4, d.rarity|0));
-      var p = { em:'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('引換券 '+d.prize_no+'番'):''), r:lv };
+      var p = { em:'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('景品番号【'+d.prize_no+'番】'):''), r:lv };
       runFx(lv, function(){ busy=false; window.busy=false; showPrize(p, lv); confetti(lv); refresh(); }, false);
     }, 8000);
     return true;

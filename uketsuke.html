@@ -71,7 +71,7 @@
     <div class="big wait" id="tBig">確かめています…</div>
     <div id="tRows"></div>
     <p class="note" id="tNote"></p>
-    <button class="btn hand hide" id="handBtn">引換券を渡しました</button>
+    <button class="btn hand hide" id="handBtn">景品を渡しました</button><!-- fq-prize-no-v1 -->
     <div class="msg" id="tMsg"></div>
   </div>
 
@@ -85,7 +85,7 @@
     <p class="note">
       ・お客さんの<b>ガチャ券のQR</b>を、この端末の<b>ふつうのカメラ</b>で読んでください。この画面が開きます。<br>
       ・「OK」と出たら、お客さんのスマホに「ガチャをまわす」が出ます。押してもらってください。<br>
-      ・当たりなら、ここに<b>番号と景品</b>が出ます。その番号の引換券を渡して「引換券を渡しました」を押してください。<br>
+      ・当たりなら、ここに<b>番号と景品</b>が出ます。その番号の景品を渡して「景品を渡しました」を押してください。<br>
       ・<b>いつも同じブラウザ</b>で開いてください（ほかのブラウザでは、もう一度暗証番号が要ります）。
     </p>
     <button class="btn sub" id="logoutBtn">この端末の受付をやめる</button>
@@ -151,8 +151,8 @@
     } else if (t.status === 'drawn' && t.is_win) {
       big.className = 'big win';
       big.innerHTML = 'あたり！<span class="no">' + (t.prize_no != null ? esc(t.prize_no) + '番' : '') + '</span>' + esc(t.prize_name || '');
-      if (t.handed) { note.innerHTML = '<b>引換券は渡し済みです。</b>'; }
-      else { note.innerHTML = 'この番号の<b>紙の引換券</b>を渡して、下のボタンを押してください。'; show('handBtn', true); }
+      if (t.handed) { note.innerHTML = '<b>景品は渡し済みです。</b>'; }
+      else { note.innerHTML = 'この番号の<b>景品</b>を渡して、下のボタンを押してください。'; show('handBtn', true); }
     } else if (t.status === 'drawn') {
       big.className = 'big ng'; big.innerHTML = 'はずれ';
       note.innerHTML = '大抽選会の対象です。「最後の大抽選会もお楽しみに！」とお伝えください。';

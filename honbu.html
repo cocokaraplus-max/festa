@@ -522,7 +522,7 @@ boot();
 </style>
 <div class="wrap" id="vWrap" style="display:none;">
   <div class="card lpcard vcard" style="grid-column:1 / -1;">
-    <h2>🎟 景品・協力店・引換券</h2>
+    <h2>🎟 景品とガチャの設定</h2>
     <div class="lprow">
       <label for="vPass">合言葉</label>
       <input type="password" id="vPass" class="lpin" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:180px;">
@@ -532,13 +532,14 @@ boot();
     <div id="vBody" style="display:none;">
       <h3>ガチャの設定</h3>
       <div class="lprow">
-        <label>1回に使うポイント<small style="font-weight:700;">（前の仕組み・今は使っていません）</small></label><input type="number" id="vCost" class="lpin" min="1" style="width:80px;">
+        <span style="display:none"><label>1回に使うポイント</label><input type="number" id="vCost" class="lpin" min="1" style="width:80px;"></span>
         <label>ハズレ玉の数</label><input type="number" id="vLose" class="lpin" min="0" style="width:110px;">
         <button class="lpbtn sm" id="vSetSave">保存</button>
         <span class="vsmall" id="vRate"></span>
       </div>
       <p class="lpnote">当たる確率 ＝ 景品の残りの数 ÷（景品の残りの数 ＋ ハズレ玉の数）。ハズレ玉を増やすほど当たりにくくなります。</p>
 
+<div style="display:none"><!-- fq-prize-no-v1: 協力店・お店の暗証番号（デジタルの引換券）はもう使わない -->
       <h3>協力店</h3>
       <div class="vscroll"><table class="vtbl"><thead><tr><th>お店の名前</th><th>メモ</th><th>はじめのコード</th><th>暗証番号</th><th>発行／使用</th><th></th></tr></thead><tbody id="vShops"></tbody></table></div>
       <div class="lprow" style="margin-top:10px;">
@@ -548,17 +549,21 @@ boot();
       <p class="lpnote">お店には「はじめのコード」と、次のページのURLを渡してください。お店がそこで暗証番号を決めます：<br><span class="vmono" id="vSetupUrl"></span><br>
         お店が暗証番号を忘れたら「コードを作り直す」を押して、新しいコードを渡してください（前の暗証番号は使えなくなります）。</p>
 
+</div>
       <h3>景品</h3>
-      <div class="vscroll"><table class="vtbl"><thead><tr><th>景品の名前</th><th>演出</th><th>用意する数</th><th>残り</th><th>使えるお店</th><th>内容（券に出る）</th><th>有効期限</th><th>番号</th><th></th></tr></thead><tbody id="vPrizes"></tbody></table></div>
+      <div class="vscroll"><table class="vtbl"><thead><tr><th>番号</th><th>景品の名前</th><th>演出</th><th>用意する数</th><th>残り</th><th></th></tr></thead><tbody id="vPrizes"></tbody></table></div>
+      <div class="lpmsg ng" id="vPrizeWarn" style="display:none"></div><!-- fq-prize-no-v1 -->
       <div class="lprow" style="margin-top:10px;"><button class="lpbtn sm" id="vAddPrize">景品を足す</button></div>
-      <p class="lpnote"><b>★番号（fq-gacha2-v1）</b>：受付の画面とお客さんの画面に「12番」のように出ます。紙の引換券にも同じ番号を書いておいてください。<br><b>演出（fq-gacha-play-v1）</b>：当たったときの演出を景品ごとに選べます（通常あたり／虹色・反転停止（爆竹）／フリーズ・覚醒／ネガ反転・ひび割れ）。下にいくほど派手です。釣りでは「ネガ反転・ひび割れ」が超大物になります。「用意する数」を変えると、残りも同じだけ増減します。会場で渡す景品は、お店を「本部」にしておくと、本部の受付で同じように使用済みにできます。</p>
+      <p class="lpnote"><b>★番号（fq-prize-no-v1）</b>：景品1つ1つに付ける番号です。<b>紙の景品に貼る番号と同じ</b>にしてください。当たると、お客さんの画面と受付の画面に<b>必ず「【12番】カフェ券」の形で番号が出ます</b>。本部はこの番号で景品を探します。番号は1以上で、ほかの景品と重ならないようにしてください（重なっていると保存できません）。<br><b>演出</b>：当たったときの演出を景品ごとに選べます（通常あたり／虹色・反転停止（爆竹）／フリーズ・覚醒／ネガ反転・ひび割れ）。下にいくほど派手です。釣りでは「ネガ反転・ひび割れ」が超大物になります。「用意する数」を変えると、残りも同じだけ増減します。</p>
 
       <h3>会場のQRに入れるURL（印刷用）</h3>
       <div id="vCodes" class="vsmall"></div>
       <p class="lpnote">★<b>ブースのQR（6種類）</b>は、体験・お話・見学が終わった人に、ブースの方が見せるものです（fq-honbu-qr-v1）。<br>★このURLをQRにして会場に置いてください。<code>?q=talk_A</code> のような古い形は、もう使えません（手で打てば取れてしまうため）。</p>
 
+<div style="display:none"><!-- fq-prize-no-v1: デジタルの引換券の一覧はもう使わない -->
       <h3>引換券（新しい順・300件まで）</h3>
       <div class="vscroll"><table class="vtbl"><thead><tr><th>券番号</th><th>景品</th><th>お店</th><th>認識番号</th><th>発行</th><th>使用</th></tr></thead><tbody id="vVouchers"></tbody></table></div>
+</div>
     </div>
   </div>
 </div>
@@ -599,7 +604,17 @@ boot();
         + '<td>'+(s.issued|0)+'／'+(s.used|0)+'</td>'
         + '<td><button class="lpbtn sm sv">保存</button> <button class="lpbtn sm del nc">コードを作り直す</button></td></tr>';
     }).join('') || '<tr><td colspan="6" class="vsmall">まだお店がありません</td></tr>';
-    $('vPrizes').innerHTML = (DATA.prizes||[]).map(function(x){ return prizeRow(x); }).join('') || '<tr><td colspan="9" class="vsmall">まだ景品がありません</td></tr>';
+    /* fq-prize-no-v1: 番号の順に並べる */
+    var PZ = (DATA.prizes||[]).slice().sort(function(a,b){ return (a.sort|0) - (b.sort|0); });
+    $('vPrizes').innerHTML = PZ.map(function(x){ return prizeRow(x); }).join('') || '<tr><td colspan="6" class="vsmall">まだ景品がありません</td></tr>';
+    /* fq-prize-no-v1: 番号が入っていない・重なっている景品を赤い字で知らせる */
+    var seen = {}, noNo = [], dup = {};
+    PZ.forEach(function(x){ var n = x.sort|0; if(n < 1){ noNo.push(x.name || '（名前なし）'); return; } if(seen[n]) dup[n] = 1; seen[n] = 1; });
+    var warn = [];
+    if (noNo.length) warn.push('番号が入っていない景品があります：' + noNo.join('、'));
+    if (Object.keys(dup).length) warn.push('番号が重なっています：' + Object.keys(dup).map(function(n){ return n + '番'; }).join('、'));
+    var pw = $('vPrizeWarn');
+    if (pw) { pw.textContent = warn.join('　／　'); pw.style.display = warn.length ? '' : 'none'; }
     /* == fq-honbu-qr-v1 ==
        ★ガチャ用は 3階・4階 × 体験／話を聞く／見る の 6 種類（base が f3_ / f4_ で始まるもの）
        ★URL はファイル名なしの形（…/?q=）。index.html が quest.html へ渡す */
@@ -619,14 +634,23 @@ boot();
       return '<tr><td class="vmono">'+esc(v.code)+'</td><td>'+esc(v.prize)+'</td><td>'+esc(v.shop)+'</td><td>'+esc(v.recog_no)+'</td><td>'+esc(t(v.issued_at))+'</td><td>'+(v.used_at?esc(t(v.used_at)):'—')+'</td></tr>';
     }).join('') || '<tr><td colspan="6" class="vsmall">まだ引換券はありません</td></tr>';
   }
+  /* fq-prize-no-v1: 新しい景品の番号（いま画面にある番号のいちばん大きいもの ＋1） */
+  function nextNo(){
+    var m = 0;
+    [].forEach.call(document.querySelectorAll('#vPrizes .so'), function(i){ m = Math.max(m, parseInt(i.value,10)||0); });
+    (DATA.prizes||[]).forEach(function(x){ m = Math.max(m, x.sort|0); });
+    return m + 1;
+  }
   function prizeRow(x){
-    x = x || {id:'', name:'', rarity:1, initial_stock:0, stock:0, shop_id:'', description:'', expires_on:'', sort:(DATA.prizes||[]).length+1};
+    x = x || {id:'', name:'', rarity:1, initial_stock:0, stock:0, shop_id:'', description:'', expires_on:'', sort:nextNo()};   /* fq-prize-no-v1 */
     /* fq-gacha-play-v1: 演出は4つ（gacha_play.html の段階と同じ番号） */
     var rs = [1,2,3,4].map(function(r){ var cur=Math.min(4, Math.max(1, x.rarity|0)); return '<option value="'+r+'"'+(cur===r?' selected':'')+'>'+['','通常あたり','虹色・反転停止（爆竹）','フリーズ・覚醒','ネガ反転・ひび割れ'][r]+'</option>'; }).join('');
-    return '<tr data-prize="'+esc(x.id)+'"><td><input class="nm" value="'+esc(x.name)+'"></td><td><select class="rr">'+rs+'</select></td>'
+    /* fq-prize-no-v1: 番号をいちばん左に。お店・内容・期限はもう使わないので隠す（保存のときに読むので消さない） */
+    return '<tr data-prize="'+esc(x.id)+'"><td><input class="n so" type="number" min="1" value="'+esc(x.sort)+'" style="font-weight:900;font-size:16px;"></td>'
+      + '<td><input class="nm" value="'+esc(x.name)+'"></td><td><select class="rr">'+rs+'</select></td>'
       + '<td><input class="n ini" type="number" min="0" value="'+esc(x.initial_stock)+'"></td><td>'+esc(x.stock)+'</td>'
-      + '<td><select class="sh">'+shopOptions(x.shop_id)+'</select></td><td><input class="ds" value="'+esc(x.description)+'"></td>'
-      + '<td><input class="d ex" type="date" value="'+esc(x.expires_on||'')+'"></td><td><input class="n so" type="number" value="'+esc(x.sort)+'"></td>'
+      + '<td style="display:none"><select class="sh">'+shopOptions(x.shop_id)+'</select><input class="ds" value="'+esc(x.description)+'">'
+      + '<input class="d ex" type="date" value="'+esc(x.expires_on||'')+'"></td>'
       + '<td><button class="lpbtn sm sv">保存</button> <button class="lpbtn sm del rm">削除</button></td></tr>';
   }
   function load(){
@@ -670,6 +694,12 @@ boot();
     } else if (tr.hasAttribute('data-prize')) {
       var pid = tr.getAttribute('data-prize');
       if (b.classList.contains('sv')) {
+        /* fq-prize-no-v1: 番号は 1 以上・ほかの景品と重ならないこと（本部はこの番号で景品を探す） */
+        var pno = parseInt(tr.querySelector('.so').value, 10);
+        if (!tr.querySelector('.nm').value.trim()) { say('景品の名前を入れてください。', 'ng'); return; }
+        if (!(pno >= 1)) { say('番号を入れてください（1以上）。紙の景品に貼る番号と同じにします。', 'ng'); return; }
+        var clash = (DATA.prizes||[]).filter(function(x){ return x.id !== pid && (x.sort|0) === pno; })[0];
+        if (clash) { say(pno + '番は「' + (clash.name || '') + '」で使っています。ちがう番号にしてください。', 'ng'); return; }
         rpc('fq_admin_prize_save', {p_pass: pass.value, p_id: pid, p_name: tr.querySelector('.nm').value,
           p_rarity: parseInt(tr.querySelector('.rr').value,10)||1, p_initial: parseInt(tr.querySelector('.ini').value,10)||0,
           p_shop_id: tr.querySelector('.sh').value, p_description: tr.querySelector('.ds').value,
