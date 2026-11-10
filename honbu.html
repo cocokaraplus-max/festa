@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow"><!-- fq-seo-v1: 検索に出さない -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>本部モニター（景品）｜福祉クエスト</title>
+<title>管理画面｜福祉クエスト</title><!-- fq-passnames-v1 -->
+<script>/* fq-names-v2: 本部モニター（景品）はやめて「管理画面」1つにする。
+   ?admin=1 を付けずに開いても、管理画面（?admin=1）に切りかえる。景品の在庫とランキングも管理画面のいちばん上に出ている */
+if (!/[?&]admin=1/.test(location.search)) { location.replace(location.pathname + (location.search ? location.search + '&' : '?') + 'admin=1' + location.hash); }</script>
 <style>
   :root{ --bg:#211c14; --panel:#2c2519; --line:#3d3527; --cream:#f2ecdd; --gold:#e0b64a; --sub:#c9bfa6; }
   *{ box-sizing:border-box; }
@@ -97,7 +100,7 @@
 </head>
 <body>
 <header>
-  <h1 id="fqPageName">本部モニター（景品）</h1>
+  <h1 id="fqPageName">管理画面</h1>
   <script>/* fq-names-v1: ?admin=1 で開いたときは「管理画面」 */
   if (/[?&]admin=1/.test(location.search)) { document.title = '管理画面｜福祉クエスト'; document.getElementById('fqPageName').textContent = '管理画面'; }</script>
   <div class="st" id="st">接続中…</div>
@@ -117,7 +120,7 @@
   <div class="card lpcard">
     <h2>🧭 ログポース ヒント編集</h2>
     <div class="lprow">
-      <label for="lpPass">合言葉</label>
+      <label for="lpPass">管理画面の合言葉</label>
       <input type="password" id="lpPass" class="lpin" autocomplete="off" autocapitalize="off"
              spellcheck="false" style="width:180px;">
       <button type="button" id="lpEye" class="cbtn" title="合言葉を見る"
@@ -155,7 +158,7 @@
   <div class="abox">
     <h3>大会リセット</h3>
     <div class="astats" id="resetWhat"></div>
-    <label for="resetPass">合言葉</label>
+    <label for="resetPass">管理画面の合言葉</label>
     <!-- fq-pass-eye-v1: 打ち間違いに気づけるよう、見るボタンを付ける -->
     <div style="display:flex;gap:8px;align-items:center;">
       <input type="password" id="resetPass" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1;">
@@ -417,7 +420,7 @@ boot();
   }
 
   function load(){
-    if (!pass.value.trim()) { say('合言葉を入れてください。', 'ng'); return; }
+    if (!pass.value.trim()) { say('管理画面の合言葉を入れてください。', 'ng'); return; }
     say('読み込み中…');
     sb.rpc('logpose_admin_list', { p_pass: pass.value }).then(function(r){
       if (r.error) throw r.error;
@@ -526,7 +529,7 @@ boot();
   <div class="card lpcard vcard" style="grid-column:1 / -1;">
     <h2>🎟 景品とガチャの設定</h2>
     <div class="lprow">
-      <label for="vPass">合言葉</label>
+      <label for="vPass">管理画面の合言葉</label>
       <input type="password" id="vPass" class="lpin" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:180px;">
       <button class="lpbtn" id="vLoad">読み込む</button>
     </div>
@@ -656,7 +659,7 @@ boot();
       + '<td><button class="lpbtn sm sv">保存</button> <button class="lpbtn sm del rm">削除</button></td></tr>';
   }
   function load(){
-    if (!pass.value.trim()) { say('合言葉を入れてください。', 'ng'); return; }
+    if (!pass.value.trim()) { say('管理画面の合言葉を入れてください。', 'ng'); return; }
     say('読み込み中…');
     rpc('fq_admin_voucher_data', {p_pass: pass.value}).then(function(d){
       if (!d.ok) { say(d.message || '読み込めませんでした。', 'ng'); return; }
@@ -717,6 +720,74 @@ boot();
   });
 })();
 </script>
+<!-- == fq-staff-dev-v1 : 受付の端末（?admin=1 のときだけ出る） ==
+     受付の暗証番号で登録したスマホ・パソコン（受付（管理画面）・受付（景品モニター））の一覧。
+     スマホをなくしたとき・当日の係が変わったときに、ここから解除する。 -->
+<div class="wrap" id="sdWrap" style="display:none;">
+  <div class="card lpcard" style="grid-column:1 / -1;">
+    <h2>📱 受付の端末</h2>
+    <div class="lprow">
+      <label for="sdPass">管理画面の合言葉</label>
+      <input type="password" id="sdPass" class="lpin" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:180px;">
+      <button class="lpbtn" id="sdLoad">読み込む</button>
+    </div>
+    <div class="lpmsg" id="sdMsg"></div>
+    <div id="sdBody" style="display:none;">
+      <div class="vscroll"><table class="vtbl"><thead><tr><th>呼び名</th><th>登録した日時</th><th></th></tr></thead><tbody id="sdList"></tbody></table></div>
+      <div class="lprow" style="margin-top:10px;"><button class="lpbtn sm del" id="sdAll">全部解除する</button></div>
+      <p class="lpnote">★「受付の暗証番号」で登録したスマホ・パソコンの一覧です（受付（管理画面）・受付（景品モニター））。<br>
+        ★<b>解除</b>すると、その端末はもう一度「受付の暗証番号」を入れるまで使えなくなります。<br>
+        ★スマホをなくしたときは、その端末を解除して、「受付の暗証番号」も変えてください（変え方はAIに聞いてください）。<br>
+        ★呼び名が同じ端末が並ぶときは、登録した日時で見分けてください。</p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  if (new URLSearchParams(location.search).get('admin') !== '1') return;
+  var cfg = window.FQ_CONFIG || {};
+  var wrap = document.getElementById('sdWrap'); if (!wrap) return;
+  wrap.style.display = '';
+  function $(id){ return document.getElementById(id); }
+  function say(t, cls){ var m = $('sdMsg'); m.className = 'lpmsg' + (cls ? ' ' + cls : ''); m.textContent = t; }
+  if (!(cfg.SUPABASE_URL && window.supabase)) { say('config.js が未設定なので使えません。', 'ng'); $('sdLoad').disabled = true; return; }
+  var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  function rpc(fn, args){ return sb.rpc(fn, args).then(function(r){ if (r.error) throw r.error; return r.data || {}; }); }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function t(s){ var d = new Date(s); return isNaN(d) ? '' : d.toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}); }
+  var pass = $('sdPass');
+  function load(){
+    if (!pass.value.trim()) { say('管理画面の合言葉を入れてください。', 'ng'); return; }
+    say('読み込み中…');
+    rpc('fq_admin_staff_list', {p_pass: pass.value}).then(function(d){
+      if (!d.ok) { say(d.message || '読み込めませんでした。', 'ng'); return; }
+      var L = d.list || [];
+      $('sdList').innerHTML = L.length ? L.map(function(x){
+        return '<tr><td><b>' + esc(x.label || '（呼び名なし）') + '</b></td><td>' + esc(t(x.created_at)) + '</td>'
+             + '<td><button class="lpbtn sm del" data-sd="' + esc(x.id) + '" data-sdl="' + esc(x.label) + '">解除</button></td></tr>';
+      }).join('') : '<tr><td colspan="3" class="vsmall">登録されている端末はありません</td></tr>';
+      $('sdAll').disabled = !L.length;
+      $('sdBody').style.display = ''; say('読み込みました（' + L.length + '台）。', 'ok');
+    }).catch(function(e){ say('読み込めませんでした（' + (e.message || e) + '）。fq_staff_devices.sql は流しましたか？', 'ng'); });
+  }
+  function remove(id, what){
+    if (!confirm(what + 'を解除しますか？\n解除した端末は、もう一度「受付の暗証番号」を入れるまで使えなくなります。')) return;
+    rpc('fq_admin_staff_remove', {p_pass: pass.value, p_id: id}).then(function(d){
+      if (!d.ok) { say(d.message || '解除できませんでした。', 'ng'); return; }
+      load(); setTimeout(function(){ say((d.removed|0) + '台を解除しました。', 'ok'); }, 400);
+    }).catch(function(e){ say('解除できませんでした（' + (e.message || e) + '）。', 'ng'); });
+  }
+  $('sdLoad').addEventListener('click', load);
+  pass.addEventListener('keydown', function(e){ if (e.key === 'Enter') load(); });
+  $('sdList').addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('[data-sd]'); if (!b) return;
+    remove(b.getAttribute('data-sd'), '「' + (b.getAttribute('data-sdl') || '呼び名なし') + '」');
+  });
+  $('sdAll').addEventListener('click', function(){ remove('ALL', '受付の端末を全部'); });
+})();
+</script>
+
 <!-- fq-grand-v1: 大抽選会（?admin=1 のときだけ出る）。対象はガチャを1回でもまわした人 -->
 <style>
   .gcard{ border-color:#7a5a2a; }
@@ -741,7 +812,7 @@ boot();
   <div class="card lpcard gcard" style="grid-column:1 / -1;">
     <h2>🎉 大抽選会</h2>
     <div class="lprow">
-      <label for="gPass">合言葉</label>
+      <label for="gPass">管理画面の合言葉</label>
       <input type="password" id="gPass" class="lpin" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:180px;">
       <button class="lpbtn" id="gLoad">読み込む</button>
       <button class="lpbtn sm" id="gPractice" title="サーバーには何も書きません">練習で抽選する（記録しない）</button><!-- fq-grand-v5 -->
@@ -783,7 +854,7 @@ boot();
   function rpc(name, args){ return sb.rpc(name, args).then(function(r){ if (r.error) throw r.error; return r.data || {}; }); }
 
   function load(){
-    if (!pass.value.trim()) { say('合言葉を入れてください。', 'ng'); return Promise.resolve(); }
+    if (!pass.value.trim()) { say('管理画面の合言葉を入れてください。', 'ng'); return Promise.resolve(); }
     return rpc('fq_admin_grand_list', {p_pass: pass.value}).then(function(d){
       if (!d.ok) { say(d.message || '読み込めませんでした。', 'ng'); return; }
       $('gBody').style.display = ''; say('');
@@ -937,7 +1008,7 @@ boot();
   <div class="card lpcard scard" style="grid-column:1 / -1;">
     <h2>😊 笑顔コンテスト</h2>
     <div class="lprow">
-      <label for="smPass">合言葉</label>
+      <label for="smPass">管理画面の合言葉</label>
       <input type="password" id="smPass" class="lpin" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:180px;">
       <button class="lpbtn" id="smLoad">読み込む</button>
       <button class="lpbtn sm" id="smToggle" disabled>受付を開ける</button>
@@ -984,7 +1055,7 @@ boot();
   function rpc(name, args){ return sb.rpc(name, args).then(function(r){ if (r.error) throw r.error; return r.data || {}; }); }
 
   function load(){
-    if (!pass.value.trim()) { say('合言葉を入れてください。', 'ng'); return Promise.resolve(); }
+    if (!pass.value.trim()) { say('管理画面の合言葉を入れてください。', 'ng'); return Promise.resolve(); }
     return rpc('fq_admin_smile_list', {p_pass: pass.value}).then(function(d){
       if (!d.ok) { say(d.message || '読み込めませんでした。', 'ng'); return; }
       say(''); $('smBody').style.display = ''; OPEN = !!d.open;

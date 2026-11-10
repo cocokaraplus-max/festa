@@ -108,6 +108,7 @@
     <span class="st" id="st"></span>
     <button type="button" id="sndBtn">🔇 音を出す</button>
     <button type="button" id="fsBtn">⛶ 全画面</button>
+    <button type="button" id="outBtn">この端末をやめる</button><!-- fq-staff-dev-v1 -->
   </div>
 </div>
 
@@ -191,6 +192,13 @@
       o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.55);
     });
   }
+  /* fq-staff-dev-v1: この端末をやめる（サーバーの登録も消す） */
+  $('outBtn').addEventListener('click', function(){
+    if (!confirm('この端末をモニターからはずしますか？（受付の画面も使えなくなります。もう一度使うときは暗証番号が要ります）')) return;
+    var st = getStaff();
+    function out(){ setStaff(''); location.reload(); }
+    rpc('fq_staff_logout', {p_staff: st}).then(out, out);
+  });
   $('fsBtn').addEventListener('click', function(){
     var d = document.documentElement;
     if (document.fullscreenElement) document.exitFullscreen(); else if (d.requestFullscreen) d.requestFullscreen();

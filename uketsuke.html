@@ -157,7 +157,10 @@
   });
   $('logoutBtn').addEventListener('click', function(){
     if (!confirm('この端末の受付をやめますか？（もう一度使うときは暗証番号が要ります）')) return;
-    setStaff(''); location.href = location.pathname;
+    /* fq-staff-dev-v1: サーバーの登録も消す（つながらなくても、この端末からは消す） */
+    var st = getStaff();
+    function out(){ setStaff(''); location.href = location.pathname; }
+    rpc('fq_staff_logout', {p_staff: st}).then(out, out);
   });
 
   // ---- ガチャ券 ----
