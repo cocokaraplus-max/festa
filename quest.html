@@ -432,6 +432,68 @@
   .zk-way b{display:block;font-size:12.5px;font-weight:900;color:var(--ink);margin-top:2px;}
   .zk-way span{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;}
   .lp-modal .zk-img.sil{filter:brightness(0) opacity(.78);}
+  /* == fq-mon-v1 : ギラギラ（ホログラム）の台紙・モンスターの動き・福祉モンスターの段 == */
+  /* プリズムのホログラム（シールのギラギラ）：市松のマス＋細い放射の線＋虹色が流れる＋光の帯 */
+  .holo,.zk-cell.got.holo{position:relative;isolation:isolate;overflow:hidden;--t:24px;
+    background:
+      repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.6) 0 4deg,rgba(255,255,255,0) 4deg 10deg) 0 0/var(--t) var(--t),
+      conic-gradient(from 45deg at 50% 50%,#ffffff 0 90deg,#b4b8c4 90deg 180deg,#5e6272 180deg 270deg,#dcdfe6 270deg 360deg) 0 0/var(--t) var(--t),
+      #dfe1e8;}
+  .zk-cell.got.holo{--t:14px;border-color:#c9a227;}
+  .holo::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:conic-gradient(from 135deg at 50% 50%,#f6f7fa 0 90deg,#9da1ae 90deg 180deg,#545867 180deg 270deg,#cfd2db 270deg 360deg) 0 0/var(--t) var(--t);
+    -webkit-mask:conic-gradient(#000 0 25%,transparent 0 50%,#000 0 75%,transparent 0) 0 0/calc(var(--t)*2) calc(var(--t)*2);
+            mask:conic-gradient(#000 0 25%,transparent 0 50%,#000 0 75%,transparent 0) 0 0/calc(var(--t)*2) calc(var(--t)*2);}
+  .holo::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.9) 45%,rgba(255,255,255,.15) 52%,transparent 62%) -200% 0/300% 100% no-repeat,
+      linear-gradient(125deg,#ff3d9a,#f2f2f2,#a8ff1f,#f2f2f2,#ff3d9a,#c9ff5a,#ff3d9a) 0 0/160% 160%;
+    mix-blend-mode:overlay;opacity:.62;animation:fqholo 5s linear infinite,fqsheen 3s ease-in-out infinite;}
+  .holo > *{position:relative;z-index:2;}
+  .glint{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.95) 0 1.5px,transparent 3px) 0 0/37px 41px,radial-gradient(circle at 70% 60%,rgba(255,255,255,.9) 0 1px,transparent 2.5px) 0 0/53px 47px;animation:glint 1.8s steps(2) infinite;mix-blend-mode:screen;}
+  .glint::before{content:"";position:absolute;inset:-50%;background:linear-gradient(135deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.55) 42%,rgba(120,125,145,.35) 50%,rgba(255,255,255,.6) 58%,rgba(255,255,255,0) 70%);mix-blend-mode:overlay;animation:silv 4s ease-in-out infinite alternate;}
+  @keyframes silv{0%{transform:translate(-25%,-25%)}100%{transform:translate(25%,25%)}}
+  @keyframes glint{0%{opacity:.25}50%{opacity:1}100%{opacity:.25}}
+  @keyframes fqholo{0%{background-position:-200% 0,0% 0%;}100%{background-position:-200% 0,100% 100%;}}
+  @keyframes fqsheen{0%{background-position:-200% 0,0 0;}55%,100%{background-position:300% 0,0 0;}}
+  .zk-cell.got.holo img{filter:drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff);}
+  /* ごほうびの枠が現れたら：白いふちのシール */
+  .zk-hero.open{border:7px solid #fff;outline:2px solid #d8cfe8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.18);padding:10px 8px 12px;}
+  .zk-hero.open .zk-hero-stage::before{display:none;}
+  .zk-hero.open .zk-hero-stage{margin-top:0;}
+  .zk-hero.open{container-type:inline-size;}
+  .holo > .zk-stk-nm{z-index:3;}   /* 名前はキャラの上に */
+  .zk-hero.open .zk-hero-stage{width:190px;height:190px;}
+  .zk-stk-nm{display:flex;justify-content:center;margin:8px 0 2px;font-weight:900;font-size:9cqw;line-height:1.1;letter-spacing:-.02em;}
+  .zk-stk-nm span{display:inline-block;color:#ee2b24;-webkit-text-stroke:.2em #1d1d1d;paint-order:stroke fill;text-shadow:0 .09em 0 #1d1d1d;}
+  .zk-hero.open .zk-hero-ty{display:inline-block;background:#fff;border:2px solid #1d1d1d;border-radius:999px;padding:2px 12px;
+    font-size:13px;font-weight:900;color:#1d1d1d;}
+  .zk-hero.open .zk-hero-tag{background:#1d1d1d;}
+  .zk-hero.open .zk-hero-stage img{filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 0 1px #1d1d1d) drop-shadow(0 5px 5px rgba(0,0,0,.25));}
+  .zk-hero.sil .zk-hero-stage img{filter:brightness(0) blur(14px) opacity(.6);transform:scale(.92);}
+  .zk-mv{display:block;width:100%;height:100%;transform-origin:50% 100%;}
+  .zk-mv picture{display:block;width:100%;height:100%;}
+  .mv1{animation:mv1 1.6s cubic-bezier(.3,.7,.4,1) infinite;}
+  @keyframes mv1{0%{transform:translateY(0) scale(1,1);}30%{transform:translateY(-26px) scale(.96,1.05);}45%{transform:translateY(0) scale(1.12,.86);}55%{transform:scale(.97,1.04) rotate(-2deg);}65%{transform:scale(1.03,.98) rotate(2deg);}75%,100%{transform:translateY(0) scale(1,1);}}
+  .mv2{animation:mv2 3.2s ease-in-out infinite;transform-origin:50% 50%;}
+  @keyframes mv2{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-16px) rotate(4deg);}}
+  .mv3{animation:mv3 1.2s ease-in-out infinite;}
+  @keyframes mv3{0%,100%{transform:translate(-10px,0) rotate(-6deg);}25%,75%{transform:translate(0,-22px) rotate(0);}50%{transform:translate(10px,0) rotate(6deg);}}
+  .mv4{animation:mv4 1.4s steps(1) infinite;}
+  @keyframes mv4{0%{transform:rotate(-4deg);}25%{transform:rotate(-4deg) translateY(-4px);}50%{transform:rotate(4deg);}75%{transform:rotate(4deg) translateY(-4px);}}
+  .mv5{animation:mv5 1.5s ease-in-out infinite;}
+  @keyframes mv5{0%,60%{transform:translateX(0) rotate(-5deg);}5%,15%,25%,35%,45%,55%{transform:translate(2px,-8px) rotate(-7deg);}10%,20%,30%,40%,50%{transform:translate(-2px,0) rotate(-5deg);}75%{transform:translateX(22px) rotate(-10deg) scaleX(1.06);}88%{transform:translateX(-6px) rotate(-3deg);}100%{transform:translateX(0) rotate(-5deg);}}
+  .mv6{animation:mv6 2.6s ease-in-out infinite;}
+  @keyframes mv6{0%,100%{transform:translateY(0) scale(1,1);}20%{transform:translateY(2px) scale(1.08,.9);}45%{transform:translateY(-26px) scale(.94,1.08);}70%{transform:translateY(-14px) scale(1,1);}}
+  .mv7{animation:mv7 .8s ease-in-out infinite;}
+  @keyframes mv7{0%,100%{transform:translateY(0) rotate(4deg);}25%,75%{transform:translateY(-14px) rotate(0);}50%{transform:translateY(0) rotate(-4deg);}}
+  .zk-mon-h{margin:16px 0 7px;font-size:14px;font-weight:900;color:#4A2775;text-align:center;}
+  .zk-mon-h small{font-size:12px;color:var(--muted);font-weight:800;margin-left:4px;}
+  .zk-grid.zk-mon-grid{grid-template-columns:repeat(7,1fr);gap:5px;}
+  .zk-mon-grid .zk-cell.got{border-color:#c9a227;}
+  .zk-mon-note{font-size:11px;color:var(--muted);font-weight:700;text-align:center;margin-top:5px;}
+  .zk-comp{margin:14px 0 0;padding:12px;border-radius:14px;text-align:center;font-size:18px;font-weight:900;color:#4A2775;
+    border:3px solid #c9a227;}
+  .zk-comp span{background:rgba(255,255,255,.9);border-radius:10px;padding:4px 12px;}
   /* == fq-free-gacha-v1 == */
   .free-box{margin-top:14px;border:3px dashed #6B3FA0;border-radius:var(--r);background:#f3ecfa;padding:12px 14px;text-align:center;}
   .free-t{font-size:17px;font-weight:900;color:#4A2775;}
@@ -714,7 +776,7 @@ window.__FQ_Q0 = location.search;</script>
     <!-- == fq-free-gacha-v1 : 8か所を全部まわった人だけ出る == -->
     <div class="free-box" id="freeBox" style="display:none">
       <div class="free-t">🎮 おたのしみガチャ <small>（景品なし）</small></div>
-      <div class="free-s">8か所ぜんぶまわったごほうび！<b>何度でも</b>遊べます。<br>遊ぶたびに、図鑑のなかまが1体出るよ（同じ子が出ることもあるよ）</div>
+      <div class="free-s">8か所ぜんぶまわったごほうび！<b>何度でも</b>遊べます。<br>遊ぶたびに、図鑑のなかまか<b>福祉モンスター</b>が1体出るよ。<br>同じ子も出るけど、まわし続ければ<b>いつか必ずコンプリート</b>できるよ</div>
       <button type="button" class="free-b" id="freeBtn">おたのしみガチャで遊ぶ</button>
     </div>
   </section>
@@ -758,6 +820,11 @@ window.__FQ_Q0 = location.search;</script>
     <!-- == fq-logpose-v1 : 称号（この端末の中で計算する） == -->
     <div class="lp-title" id="lpTitle" style="display:none"><span class="lp-tem">🏅</span><b id="lpTitleTx"></b></div>
     <div class="zk-grid" id="zkGrid"></div>
+    <!-- fq-mon-v1: 福祉モンスター7体（自分の子は8か所ゴールで、ほかの6体は おたのしみガチャで） -->
+    <div class="zk-mon-h">🔮 福祉モンスター <small><b id="zkMonN">0</b>/7</small></div>
+    <div class="zk-grid zk-mon-grid" id="zkMonGrid"></div>
+    <div class="zk-mon-note">自分のモンスターは8か所ゴールで、ほかの子は おたのしみガチャで出るよ</div>
+    <div class="zk-comp holo" id="zkComp" style="display:none"><span>🎉 図鑑コンプリート！ 🎉</span></div>
     <div id="zkMsg"></div>
     <!-- == fq-zukan-retry-v1 : 「あとで受け取ります」の ==
          中身はJSが入れます。CSSは足していません（.zk-note を使いまわす）。 -->
@@ -1850,7 +1917,7 @@ if ('serviceWorker' in navigator) {
   function clearPlay(){
     if(playCleared) return; playCleared = true;
     ['fq_g2_solo_v1', 'fq_vstate_v1', 'fq_pending_codes_v1', 'fukushi_quest_326_zukan',
-     'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal', 'fq_free_zukan_v1', 'fq_free_zukan86_v1'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+     'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal', 'fq_free_zukan_v1', 'fq_free_zukan86_v1', 'fq_free_mon_v1', 'fq_free_dry_v1'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
     try{ S.scanned = []; S.gacha = 0; S.prizes = []; S.snapTalk = [0,0,0]; S.snapEvent = [0,0,0]; save(); }catch(e){}
     /* 新しい認識番号をもらえたら、開き直す（ほかの人の番号の図鑑などが残って見えないように） */
     ensureDevice().then(function(ok){ if(ok) setTimeout(function(){ location.reload(); }, 300); });
@@ -2114,6 +2181,7 @@ if ('serviceWorker' in navigator) {
       var has=!!owned[i+1];
       if(has) n++;
       c.classList.toggle('got', has);
+      c.classList.toggle('holo', has && (i+1) >= 84 && (i+1) <= 86);   /* fq-mon-v1: 326さん（No.84）と294くん・294ちゃん（No.85・86）はギラギラ */
       c.classList.toggle('justgot', (i+1)===justGot);
     });
     var o=document.getElementById('zkOwned'), t=document.getElementById('zkTotal'),
@@ -2314,13 +2382,27 @@ if ('serviceWorker' in navigator) {
     if(!zq.length) return;
     if(window.busy || document.querySelector('.modal.show, .modal-fx.show')){ setTimeout(zqRun, 700); return; }
     var z = zq.shift();
+    if(z.mon){   /* fq-mon-v1: 福祉モンスター（おたのしみガチャ） */
+      var mo = document.getElementById('zukanModal');
+      if(mo){
+        document.getElementById('zkImg').src = 'img/mon_' + z.mon + '.png';
+        document.getElementById('zkEm').textContent  = z.is_new !== false ? '福祉モンスターが 現れた！' : 'もう会ったことがあるね';
+        document.getElementById('zkTtl').textContent = z.name || 'ゲット！';
+        document.getElementById('zkNo').textContent  = 'タイプ ' + z.mon;
+        document.getElementById('zkProg').textContent = '福祉モンスター ' + paintMon() + ' / 7 体';
+        mo.classList.add('show');
+        if(z.is_new !== false && typeof confetti==='function') confetti(3);
+      }
+      if(zq.length) setTimeout(zqRun, 700);
+      return;
+    }
     owned[z.char] = 1; saveLocal();
     var n = paint(z.char);
     show(z.char, z.is_new !== false, z.owned || n);
     if(zq.length) setTimeout(zqRun, 700);
   }
   window.fqZukanGot = function(z){
-    if(!z || !z.char) return;
+    if(!z || (!z.char && !z.mon)) return;   /* fq-mon-v1: 福祉モンスターも受ける */
     if(z.total) TOTAL = z.total;
     zq.push(z); setTimeout(zqRun, 900);
   };
@@ -2341,28 +2423,64 @@ if ('serviceWorker' in navigator) {
     if(el.getAttribute('data-k') === k) return;
     el.setAttribute('data-k', k);
     function e(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    var no = m ? m.no : 1;   /* 診断がまだのときは、影だけ見せる */
-    var img = '<div class="zk-hero-stage"><picture><source srcset="img/mon_' + no + '.webp" type="image/webp">'
-            + '<img src="img/mon_' + no + '.png" alt=""></picture>' + (open ? '' : '<span class="zk-hero-q">？</span>') + '</div>';
+    /* fq-mon-v1: 現れる前は、だれのモンスターか分からないように いつも同じ絵を強くぼかす */
+    var no = open ? m.no : 1;
+    var img = '<div class="zk-hero-stage"><span class="zk-mv' + (open ? ' mv' + no : '') + '"><picture><source srcset="img/mon_' + no + '.webp" type="image/webp">'
+            + '<img src="img/mon_' + no + '.png" alt=""></picture></span>' + (open ? '' : '<span class="zk-hero-q">？</span>') + '</div>';
     var dots = '';
     if(!goal && t > 0){ dots = '<div class="zk-hero-dots">'; for(var i=0;i<t;i++) dots += '<i' + (i < v ? ' class="on"' : '') + '></i>'; dots += '</div>'; }
     var body;
     if(open){
       body = '<div class="zk-hero-nm hand">' + e(m.name) + '</div><div class="zk-hero-ty">タイプ ' + m.no + '　' + e(m.role) + '</div>';
     } else if(goal){
-      body = '<div class="zk-hero-tx">8か所 ぜんぶ まわった！<br>あとは<b>診断</b>するだけ。あなたのモンスターが現れるよ</div>'
+      body = '<div class="zk-hero-tx">8か所 ぜんぶ まわった！<br>あとは<b>診断</b>するだけ。ご褒美キャラクターが出現するよ。</div>'
            + '<button type="button" data-g2="shindan">診断する</button>';
     } else {
       var rest = t > 0 ? Math.max(0, t - v) : 8;
-      body = '<div class="zk-hero-tx">あと<b>' + rest + 'か所</b>まわると…<br>' + (m ? 'あなたのモンスターが 現れる！' : 'あなたのモンスターが 現れる！') + '</div>'
-           + (m ? '' : '<button type="button" data-g2="shindan">先に診断して、モンスターを決める</button>');
+      body = '<div class="zk-hero-tx">あと<b>' + rest + 'か所</b>まわると…<br>ご褒美キャラクターが出現するよ。</div>'
+           + (m ? '' : '<button type="button" data-g2="shindan">福祉タイプ診断をしておく</button>');
     }
-    el.innerHTML = '<div class="zk-hero ' + (open ? 'open' : 'sil') + (open && heroWas === 'sil' ? ' pop' : '') + '">'
+    if(open){   /* fq-mon-v1: シールのように、赤い名前（黒いふち・弓なり）を上に */
+      var cs = Array.from(m.name), L = cs.length;
+      body = '<div class="zk-hero-ty">タイプ ' + m.no + '　' + e(m.role) + '</div>';
+      img = '<div class="zk-stk-nm">' + cs.map(function(ch, k){ var d = k - (L - 1) / 2;
+              return '<span style="transform:translateY(' + (d * d * 0.55).toFixed(1) + 'px) rotate(' + (d * 2.2).toFixed(1) + 'deg)">' + e(ch) + '</span>'; }).join('')
+          + '</div>' + img;
+    }
+    el.innerHTML = '<div class="zk-hero ' + (open ? 'open holo' : 'sil') + (open && heroWas === 'sil' ? ' pop' : '') + '">'
       + '<div class="zk-hero-tag">' + (open ? '🏆 あなたのモンスター' : '🏆 8か所 ぜんぶ まわった ごほうび') + '</div>'
       + img + dots + body + '</div>';
     heroWas = open ? 'open' : 'sil';
   }
-  paintMine(); setInterval(paintMine, 2000);
+  /* == fq-mon-v1 : 福祉モンスター7体の段 ／ コンプリート == */
+  var MONS = ['ガツガツモンスター','ヨシヨシモンスター','ウキウキモンスター','コツコツモンスター','イケイケモンスター','フワフワモンスター','ハピハピモンスター'];
+  var MONKEY = 'fq_free_mon_v1', DRYKEY = 'fq_free_dry_v1';
+  function monFree(){ try{ return JSON.parse(localStorage.getItem(MONKEY) || '[]') || []; }catch(e){ return []; } }
+  function monOwned(){
+    var o = {}; monFree().forEach(function(n){ o[n] = 1; });
+    var m = window.fqMyMon ? window.fqMyMon() : null, goal = false;
+    try{ goal = localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){}
+    if(m && goal) o[m.no] = 1;
+    return o;
+  }
+  var monCells = [];
+  (function(){
+    var g = document.getElementById('zkMonGrid'); if(!g) return;
+    for(var i = 1; i <= 7; i++){
+      var c = document.createElement('div'); c.className = 'zk-cell';
+      var im = document.createElement('img'); im.loading = 'lazy'; im.alt = ''; im.src = 'img/mon_' + i + '.png';
+      c.appendChild(im); g.appendChild(c); monCells.push(c);
+    }
+  })();
+  function paintMon(){
+    var o = monOwned(), n = 0;
+    monCells.forEach(function(c, i){ var has = !!o[i + 1]; if(has) n++; c.classList.toggle('got', has); c.classList.toggle('holo', has); });
+    var el = document.getElementById('zkMonN'); if(el) el.textContent = n;
+    var cnt = 0; for(var k in owned) if(owned[k] && +k <= TOTAL) cnt++;
+    var cp = document.getElementById('zkComp'); if(cp) cp.style.display = (cnt >= TOTAL && n >= 7) ? '' : 'none';
+    return n;
+  }
+  paintMine(); paintMon(); setInterval(function(){ paintMine(); paintMon(); }, 2000);
 
   /* == fq-free-gacha-v1 : おたのしみガチャのキャラ（このスマホの中だけ。サーバーには送らない） == */
   var FREEKEY = 'fq_free_zukan86_v1', GOAL = 0;   /* fq-zukan86-v1: ごほうびは診断のモンスターになったので、除外する子はなし。控えは86体の番号で取り直す */
@@ -2370,8 +2488,25 @@ if ('serviceWorker' in navigator) {
   function freeGet(){ try{ return JSON.parse(localStorage.getItem(FREEKEY) || '[]') || []; }catch(e){ return []; } }
   document.addEventListener('fq-zukan', function(e){ var d = e.detail || {}; if (typeof d.goal_char === 'number' && d.goal_char > 0) GOAL = d.goal_char; });
   window.fqFreePick = function(){
-    var n; do { n = 1 + Math.floor(Math.random() * TOTAL); } while (n === GOAL && TOTAL > 1);   /* ★持っている子も出る */
-    var isNew = !owned[n];
+    /* fq-mon-v1: なかま86体＋福祉モンスター（自分の子は除く）から選ぶ。同じ子も出る。
+       ★4回つづけて「もう持っている子」だったら、5回目は必ず まだ持っていない子 → いつか必ずコンプリートできる */
+    var my = window.fqMyMon ? window.fqMyMon() : null, myNo = my ? my.no : 0;
+    var mo = monOwned(), pool = [], i;
+    for (i = 1; i <= TOTAL; i++) if (i !== GOAL) pool.push({ c: i });
+    for (i = 1; i <= 7; i++) if (i !== myNo) pool.push({ m: i });
+    function has(x){ return x.c ? !!owned[x.c] : !!mo[x.m]; }
+    var dry = 0; try{ dry = parseInt(localStorage.getItem(DRYKEY) || '0', 10) || 0; }catch(e){}
+    var fresh = pool.filter(function(x){ return !has(x); });
+    var list = (dry >= 4 && fresh.length) ? fresh : pool;
+    var x = list[Math.floor(Math.random() * list.length)];
+    var isNew = !has(x);
+    try{ localStorage.setItem(DRYKEY, String(isNew ? 0 : dry + 1)); }catch(e){}
+    if (x.m) {
+      var b = monFree(); if (b.indexOf(x.m) < 0) { b.push(x.m); try{ localStorage.setItem(MONKEY, JSON.stringify(b)); }catch(e){} }
+      var mn = 0, o2 = monOwned(); for (var q in o2) if (o2[q]) mn++;
+      return { mon: x.m, name: MONS[x.m - 1], is_new: isNew, mon_owned: mn };
+    }
+    var n = x.c;
     var a = freeGet(); if (a.indexOf(n) < 0) { a.push(n); try{ localStorage.setItem(FREEKEY, JSON.stringify(a)); }catch(e){} }
     var cnt = 0; for (var k in owned) if (owned[k]) cnt++;
     return { char: n, is_new: isNew, owned: cnt + (isNew ? 1 : 0), total: TOTAL };
@@ -3054,8 +3189,9 @@ if ('serviceWorker' in navigator) {
     if (window.busy || !freeOk() || !window.fqFreePick || !window.fqPlay) return;
     var z = window.fqFreePick();
     var r = Math.random(), mode = r < 0.50 ? 1 : r < 0.75 ? 2 : r < 0.90 ? 3 : 4;   /* 演出の派手さはランダム */
-    var nn = (z.char < 10 ? '0' : '') + z.char;
-    var d = { free: true, win: true, rarity: mode, prize_name: 'なかま No.' + nn, prize_no: null, zukan: z };
+    var nn = z.mon ? '' : ((z.char < 10 ? '0' : '') + z.char);
+    if (z.mon) mode = Math.max(mode, 3);   /* fq-mon-v1: 福祉モンスターのときは派手に */
+    var d = { free: true, win: true, rarity: mode, prize_name: z.mon ? ('福祉モンスター「' + z.name + '」') : ('なかま No.' + nn), prize_no: null, zukan: z };
     window.busy = true; busy = true;
     if (window.fqZukanGot) window.fqZukanGot(z);   /* 演出が終わってから図鑑の登場が出る */
     if (!window.fqPlay(d)) { busy = false; window.busy = false; }
