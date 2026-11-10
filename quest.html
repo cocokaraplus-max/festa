@@ -1794,7 +1794,20 @@ if ('serviceWorker' in navigator) {
     }).catch(function(e){ devP = null; console.warn('fq_device_new失敗（電波が戻ったらもう一度）', e); showDevId(); return false; });
     return devP;
   }
-  function forgetDevice(){ SECRET=''; lsSet(SECKEY,''); lsSet(SRVKEY,''); }
+  function forgetDevice(){ SECRET=''; lsSet(SECKEY,''); lsSet(SRVKEY,''); clearPlay(); }   /* fq-reset-local-v1 */
+  /* == fq-reset-local-v1 : 大会リセットのあと、スマホの中の遊びの記録も消して開き直す ==
+     ★サーバーが「この端末は知らない」と言ってきた ＝ 大会リセットで登録が消えた。
+     ★消すもの：ひとりでまわる・読んだQRの控え・ガチャの控え・図鑑の控え・ログポースのゴールの印
+     ★残すもの：なまえ・福祉タイプ診断の結果 */
+  var playCleared = false;
+  function clearPlay(){
+    if(playCleared) return; playCleared = true;
+    ['fq_g2_solo_v1', 'fq_vstate_v1', 'fq_pending_codes_v1', 'fukushi_quest_326_zukan',
+     'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+    try{ S.scanned = []; S.gacha = 0; S.prizes = []; S.snapTalk = [0,0,0]; S.snapEvent = [0,0,0]; save(); }catch(e){}
+    /* 新しい認識番号をもらえたら、開き直す（ほかの人の番号の図鑑などが残って見えないように） */
+    ensureDevice().then(function(ok){ if(ok) setTimeout(function(){ location.reload(); }, 300); });
+  }
 
   // ---- サーバーの状態（残りポイント・持っている引換券）を取り直す ----
   var stBusy=false;
