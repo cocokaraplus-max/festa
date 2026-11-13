@@ -468,6 +468,14 @@
   .zk-hero.open .zk-hero-stage{margin-top:0;}
   .zk-hero.open{container-type:inline-size;}
   .holo > .zk-stk-nm{z-index:3;}   /* 名前はキャラの上に */
+  /* fq-giragira-v1 : もっとギラギラ */
+  .holo::before{animation:fqflip 2.2s ease-in-out infinite alternate;}
+  @keyframes fqflip{0%{opacity:1;}35%{opacity:.25;}65%{opacity:.9;}100%{opacity:.15;}}
+  .holo::after{
+    background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.95) 42%,rgba(255,255,255,.35) 50%,transparent 64%) -200% 0/250% 100% no-repeat,
+      linear-gradient(125deg,#ff3d9a,#f2f2f2,#a8ff1f,#f2f2f2,#ff3d9a,#c9ff5a,#ff3d9a) 0 0/160% 160%;
+    opacity:.82;animation:fqholo 2.6s linear infinite alternate,fqsheen 1.9s ease-in-out infinite;}
+  .holo > .glint{position:absolute;z-index:1;}
   .zk-hero.open .zk-hero-stage{width:190px;height:190px;}
   .zk-stk-nm{display:flex;justify-content:center;margin:8px 0 2px;font-weight:900;font-size:9cqw;line-height:1.1;letter-spacing:-.02em;}
   .zk-stk-nm span{display:inline-block;color:#ee2b24;-webkit-text-stroke:.2em #1d1d1d;paint-order:stroke fill;text-shadow:0 .09em 0 #1d1d1d;}
@@ -2462,6 +2470,7 @@ if ('serviceWorker' in navigator) {
           + '</div>' + img;
     }
     el.innerHTML = '<div class="zk-hero ' + (open ? 'open holo' : 'sil') + (open && heroWas === 'sil' ? ' pop' : '') + '">'
+      + (open ? '<span class="glint"></span>' : '')   /* fq-giragira-v1 */
       + '<div class="zk-hero-tag">' + (open ? '🏆 あなたのモンスター' : '🏆 8か所 ぜんぶ まわった ごほうび') + '</div>'
       + img + dots + body + '</div>';
     heroWas = open ? 'open' : 'sil';
