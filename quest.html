@@ -387,6 +387,11 @@
   .sd-bd{display:block;margin:12px 0 0;font-size:13px;font-weight:900;text-align:left;}
   .sd-bd input{width:100%;margin-top:6px;font-family:inherit;font-size:17px;font-weight:800;color:var(--ink);
     background:#fbf6ea;border:2px solid var(--line);border-radius:var(--r);padding:11px 12px;}
+  /* fq-datebox-v1 : iPhone で日付の枠がはみ出さないように */
+  .sd-bd input{display:block;max-width:100%;min-width:0;-webkit-appearance:none;appearance:none;
+    height:52px;line-height:26px;text-align:left;}
+  .sd-bd input::-webkit-date-and-time-value{text-align:left;margin:0;}
+  .sd-bd input::-webkit-datetime-edit{padding:0;}
   .sd-err{color:var(--red);font-size:12.5px;font-weight:800;margin:8px 0 0;min-height:18px;}
   .sd-note{font-size:11.5px;color:var(--muted);line-height:1.7;font-weight:600;margin:12px 0 0;}
 </style>
