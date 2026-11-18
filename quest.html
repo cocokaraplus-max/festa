@@ -485,6 +485,10 @@
   .zk-hero.open .zk-hero-stage img{filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 0 1px #1d1d1d) drop-shadow(0 5px 5px rgba(0,0,0,.25));}
   .zk-hero.sil .zk-hero-stage img{filter:brightness(0) blur(14px) opacity(.6);transform:scale(.92);}
   .zk-mv{display:block;width:100%;height:100%;transform-origin:50% 100%;}
+  /* fq-monpop-v1 : 診断で出た自分のモンスター（図鑑の画面で大きく） */
+  #zkMonStk .zk-hero{margin:10px 0 4px;}
+  #zkMonStk .zk-hero.open .zk-hero-stage{width:200px;height:200px;}
+  #zkMonStk .zk-hero.pop .zk-hero-stage img{animation:zkpop .9s cubic-bezier(.2,1.6,.4,1) both;}
   .zk-mv picture{display:block;width:100%;height:100%;}
   .mv1{animation:mv1 1.6s cubic-bezier(.3,.7,.4,1) infinite;}
   @keyframes mv1{0%{transform:translateY(0) scale(1,1);}30%{transform:translateY(-26px) scale(.96,1.05);}45%{transform:translateY(0) scale(1.12,.86);}55%{transform:scale(.97,1.04) rotate(-2deg);}65%{transform:scale(1.03,.98) rotate(2deg);}75%,100%{transform:translateY(0) scale(1,1);}}
@@ -914,6 +918,7 @@ window.__FQ_Q0 = location.search;</script>
 <div class="modal zk-modal" id="zukanModal">
   <div class="modal-card">
     <div class="zk-em" id="zkEm">なかまが ふえた！</div>
+    <div id="zkMonStk"></div><!-- fq-monpop-v1: 自分のモンスターのシール -->
     <img class="zk-img" id="zkImg" alt="">
     <h3 class="hand" id="zkTtl">ゲット！</h3>
     <div class="zk-no" id="zkNo">No.—</div>
@@ -1835,7 +1840,7 @@ document.addEventListener('click', function(ev){
     if(typeof confetti==='function') confetti(3);
     if(typeof toast==='function') toast('🔮 あなたは <b>'+T[key].name+'</b>！');
     /* fq-goal294-v1: 診断した時点で、図鑑の福祉モンスターに入る */
-    if(window.fqZukanGot){ var no = '①②③④⑤⑥⑦'.indexOf(T[key].no) + 1; if(no > 0) window.fqZukanGot({mon: no, name: T[key].name, is_new: true}); }
+    if(window.fqZukanGot){ var no = '①②③④⑤⑥⑦'.indexOf(T[key].no) + 1; if(no > 0) window.fqZukanGot({mon: no, name: T[key].name, role: T[key].role, own: true, is_new: true});   /* fq-monpop-v1: own */ }
   }
 
   document.addEventListener('click', function(ev){
@@ -2232,6 +2237,9 @@ if ('serviceWorker' in navigator) {
 
   /* ---- 登場のモーダル ---- */
   function show(n, isNew, got){
+    var stk0 = document.getElementById('zkMonStk'); if(stk0) stk0.innerHTML = '';   /* fq-monpop-v1 */
+    var zi0 = document.getElementById('zkImg'), zt0 = document.getElementById('zkTtl'), zn0 = document.getElementById('zkNo');
+    if(zi0) zi0.style.display = ''; if(zt0) zt0.style.display = ''; if(zn0) zn0.style.display = '';
     var mo=document.getElementById('zukanModal'); if(!mo) return;
     document.getElementById('zkImg').src = src(n);
     document.getElementById('zkEm').textContent  = isNew ? 'なかまが ふえた！' : 'もう会ったことがあるね';
@@ -2416,6 +2424,29 @@ if ('serviceWorker' in navigator) {
       var mo = document.getElementById('zukanModal');
       if(mo){
         document.getElementById('zkImg').src = 'img/mon_' + z.mon + '.png';
+        /* fq-monpop-v1: 自分の子は 大きなギラギラのシールで */
+        var stk = document.getElementById('zkMonStk'), zi = document.getElementById('zkImg'), zt = document.getElementById('zkTtl'), zn = document.getElementById('zkNo');
+        if(stk){
+          if(z.own){
+            var es = function(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+            var cs = Array.from(String(z.name || '')), L = cs.length;
+            stk.innerHTML = '<div class="zk-hero open holo pop"><span class="glint"></span>'
+              + '<div class="zk-hero-tag">🏆 あなたのモンスター</div>'
+              + '<div class="zk-stk-nm">' + cs.map(function(ch, k){ var d = k - (L - 1) / 2;
+                  return '<span style="transform:translateY(' + (d * d * 0.55).toFixed(1) + 'px) rotate(' + (d * 2.2).toFixed(1) + 'deg)">' + es(ch) + '</span>'; }).join('') + '</div>'
+              + '<div class="zk-hero-stage"><span class="zk-mv mv' + z.mon + '"><picture><source srcset="img/mon_' + z.mon + '.webp" type="image/webp">'
+              + '<img src="img/mon_' + z.mon + '.png" alt=""></picture></span></div>'
+              + '<div class="zk-hero-ty">タイプ ' + z.mon + (z.role ? '　' + es(z.role) : '') + '</div></div>';
+            if(zi) zi.style.display = 'none';
+            if(zt) zt.style.display = 'none';
+            if(zn) zn.style.display = 'none';
+          } else {
+            stk.innerHTML = '';
+            if(zi) zi.style.display = '';
+            if(zt) zt.style.display = '';
+            if(zn) zn.style.display = '';
+          }
+        }
         document.getElementById('zkEm').textContent  = z.is_new !== false ? '福祉モンスターが 現れた！' : 'もう会ったことがあるね';
         document.getElementById('zkTtl').textContent = z.name || 'ゲット！';
         document.getElementById('zkNo').textContent  = 'タイプ ' + z.mon;
