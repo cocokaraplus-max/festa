@@ -569,6 +569,12 @@
   .lp-note{margin-top:10px;font-size:11.5px;color:var(--muted);
     font-weight:600;line-height:1.7;text-align:center;}
   .lp-note b{color:var(--ink);}
+  /* fq-goal294-v1 : ごほうびの予告と、お祝いの2体 */
+  .lp-goalrw{margin-top:10px;padding:8px 10px;border:2px dashed #c9a227;border-radius:12px;background:#fff8e1;
+    font-size:12.5px;font-weight:800;line-height:1.6;text-align:center;color:var(--ink);}
+  .lp-goalrw b{color:var(--red);}
+  .lp-modal .lp-pair{display:flex;justify-content:center;gap:2px;}
+  .lp-modal .lp-pair .zk-img{width:140px;height:150px;margin:8px 0 0;}
   .lp-title{display:flex;align-items:center;justify-content:center;gap:6px;
     margin:0 0 10px;padding:8px 10px;border-radius:var(--r);
     background:#fbf6ea;border:2px solid var(--mustard);
@@ -806,7 +812,6 @@ window.__FQ_Q0 = location.search;</script>
   <!-- == fq-zukan-v1 == -->
   <section id="zukanSec" data-tab="zukan">
     <div class="sec-h hand"><span class="em">📖</span>キャラクター図鑑</div>
-    <div id="zkMine"></div><!-- fq-zukan86-v1: 8か所ゴールのごほうび（あなたのモンスター） -->
     <!-- == fq-logpose-v1 : つぎの行き先。fq_logpose.sql を Run すると出る == -->
     <div class="lp-box" id="lpBox" style="display:none">
       <div class="lp-h"><span class="lp-em">🧭</span><span id="lpHead">つぎの ぼうけん</span></div>
@@ -817,6 +822,7 @@ window.__FQ_Q0 = location.search;</script>
       <div class="lp-hint" id="lpHint">…</div>
       <div class="lp-ans" id="lpAnsWrap"><button class="linkbtn" data-act="lpAns">こたえを見る</button></div>
       <div class="lp-name" id="lpName" style="display:none"></div>
+      <div class="lp-goalrw" id="lpGoalRw">🎁 8か所ぜんぶ まわると…<br><b>シークレットキャラ</b>が <b>2体</b> 出現するよ</div><!-- fq-goal294-v1 -->
       <div class="lp-note" id="lpNote">見つけたら、そこの<b>QR</b>を読み取ろう。<br>
         行き先は<b>人によってちがいます</b>。<b>チームの仲間</b>とは同じです。</div>
     </div>
@@ -834,10 +840,10 @@ window.__FQ_Q0 = location.search;</script>
     <!-- == fq-logpose-v1 : 称号（この端末の中で計算する） == -->
     <div class="lp-title" id="lpTitle" style="display:none"><span class="lp-tem">🏅</span><b id="lpTitleTx"></b></div>
     <div class="zk-grid" id="zkGrid"></div>
-    <!-- fq-mon-v1: 福祉モンスター7体（自分の子は8か所ゴールで、ほかの6体は おたのしみガチャで） -->
+    <!-- fq-goal294-v1: 福祉モンスター7体（自分の子は診断で、ほかの6体は おたのしみガチャで） -->
     <div class="zk-mon-h">🔮 福祉モンスター <small><b id="zkMonN">0</b>/7</small></div>
     <div class="zk-grid zk-mon-grid" id="zkMonGrid"></div>
-    <div class="zk-mon-note">自分のモンスターは8か所ゴールで、ほかの子は おたのしみガチャで出るよ</div>
+    <div class="zk-mon-note">自分のモンスターは福祉タイプ診断で、ほかの子は おたのしみガチャで出るよ</div>
     <div class="zk-comp holo" id="zkComp" style="display:none"><span>🎉 図鑑コンプリート！ 🎉</span></div>
     <div id="zkMsg"></div>
     <!-- == fq-zukan-retry-v1 : 「あとで受け取ります」の ==
@@ -921,9 +927,9 @@ window.__FQ_Q0 = location.search;</script>
   <div class="modal-card">
     <div class="lp-gem">🧭</div>
     <div class="zk-em">ぜんぶ まわった！</div>
-    <img class="zk-img" id="lpImg" alt="">
-    <h3 class="hand">ガチャ権利 ゲット！</h3>
-    <div class="lp-award" id="lpAward">あなたのモンスターが 現れた！<br>称号「<span id="lpAwardTx">夢を掴む冒険者</span>」</div>
+    <div class="lp-pair"><img class="zk-img" id="lpImg" src="img/zukan/z_85.png" alt="294くん"><img class="zk-img" id="lpImg2" src="img/zukan/z_86.png" alt="294ちゃん"></div>
+    <h3 class="hand">シークレットキャラ ゲット！</h3>
+    <div class="lp-award" id="lpAward">294くん と 294ちゃん が なかまになった！<br>称号「<span id="lpAwardTx">夢を掴む冒険者</span>」</div>
     <button class="btn" data-act="lpClose">やった！</button>
   </div>
 </div>
@@ -1828,6 +1834,8 @@ document.addEventListener('click', function(ev){
     if(sec && sec.scrollIntoView) sec.scrollIntoView({behavior:'smooth',block:'center'});
     if(typeof confetti==='function') confetti(3);
     if(typeof toast==='function') toast('🔮 あなたは <b>'+T[key].name+'</b>！');
+    /* fq-goal294-v1: 診断した時点で、図鑑の福祉モンスターに入る */
+    if(window.fqZukanGot){ var no = '①②③④⑤⑥⑦'.indexOf(T[key].no) + 1; if(no > 0) window.fqZukanGot({mon: no, name: T[key].name, is_new: true}); }
   }
 
   document.addEventListener('click', function(ev){
@@ -2423,6 +2431,9 @@ if ('serviceWorker' in navigator) {
     show(z.char, z.is_new !== false, z.owned || n);
     if(zq.length) setTimeout(zqRun, 700);
   }
+  document.addEventListener('fq-zukan', function(e){   /* fq-goal294-v1 */
+    var d = (e && e.detail) || {}; if(d.just_goal) setTimeout(refresh, 800);
+  });
   window.fqZukanGot = function(z){
     if(!z || (!z.char && !z.mon)) return;   /* fq-mon-v1: 福祉モンスターも受ける */
     if(z.total) TOTAL = z.total;
@@ -2434,7 +2445,7 @@ if ('serviceWorker' in navigator) {
      ゴール後 … 色がついて現れる（診断がまだなら、影のまま「診断すると現れる」） */
   var heroWas = '';
   function paintMine(){
-    var el = document.getElementById('zkMine'); if(!el) return;
+    var el = document.getElementById('zkMine'); if(!el) return;   /* fq-goal294-v1: 枠はなくした（#zkMine が無いので何もしない） */
     var m = window.fqMyMon ? window.fqMyMon() : null;
     var goal = false; try{ goal = localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){}
     var lb = document.getElementById('lpBox'), vEl = document.getElementById('lpVisited'), tEl = document.getElementById('lpTotal');
@@ -2483,7 +2494,7 @@ if ('serviceWorker' in navigator) {
     var o = {}; monFree().forEach(function(n){ o[n] = 1; });
     var m = window.fqMyMon ? window.fqMyMon() : null, goal = false;
     try{ goal = localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){}
-    if(m && goal) o[m.no] = 1;
+    if(m) o[m.no] = 1;   /* fq-goal294-v1: 診断した時点で並ぶ */
     return o;
   }
   var monCells = [];
@@ -2655,6 +2666,7 @@ if ('serviceWorker' in navigator) {
     $('lpTotal').textContent   = tot;
     $('lpBar').style.width = Math.round(v/Math.max(1,tot)*100)+'%';
 
+    var gr = $('lpGoalRw'); if(gr) gr.style.display = st.done ? 'none' : '';   /* fq-goal294-v1 */
     if(st.done){
       box.classList.add('done');
       $('lpHead').textContent = 'ぼうけん、ぜんぶ まわった！';
@@ -2702,14 +2714,9 @@ if ('serviceWorker' in navigator) {
     goaled = true;
     try{ localStorage.setItem(KEY_GOAL,'1'); }catch(e){}
     var mo=$('lpModal'); if(!mo) return;
-    var im=$('lpImg');   /* fq-zukan86-v1: ごほうびは あなたのモンスター（診断のキャラ） */
-    var mm = window.fqMyMon ? window.fqMyMon() : null;
-    if(im){ im.src = 'img/mon_' + (mm ? mm.no : 1) + '.png'; im.classList.toggle('sil', !mm); }
+    /* fq-goal294-v1: ごほうびは 294くん（No.85）と 294ちゃん（No.86） */
     var aw = $('lpAward');
-    if(aw) aw.innerHTML = mm
-      ? 'あなたのモンスター<br>「' + String(mm.name).replace(/</g,'&lt;') + '」が 現れた！<br>称号「' + GOAL_TITLE + '」'
-        + '<br><small>クエストの「おたのしみガチャ」で 何度でも遊べるよ（景品なし）</small>'
-      : '福祉タイプ診断をすると<br>あなたのモンスターが 現れるよ！<br>称号「' + GOAL_TITLE + '」'
+    if(aw) aw.innerHTML = '<b>294くん</b> と <b>294ちゃん</b> が<br>図鑑の なかまに なった！<br>称号「' + GOAL_TITLE + '」'
         + '<br><small>クエストの「おたのしみガチャ」で 何度でも遊べるよ（景品なし）</small>';
     mo.classList.add('show');
     if(typeof confetti==='function') confetti(3);
