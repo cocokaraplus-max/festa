@@ -933,7 +933,7 @@ window.__FQ_Q0 = location.search;</script>
     <div class="lp-gem">🧭</div>
     <div class="zk-em">ぜんぶ まわった！</div>
     <div class="lp-pair"><img class="zk-img" id="lpImg" src="img/zukan/z_85.png" alt="294くん"><img class="zk-img" id="lpImg2" src="img/zukan/z_86.png" alt="294ちゃん"></div>
-    <h3 class="hand">シークレットキャラ ゲット！</h3>
+    <h3 class="hand">シークレットキャラ<br>ゲット！</h3><!-- fq-goalorder-v1 -->
     <div class="lp-award" id="lpAward">294くん と 294ちゃん が なかまになった！<br>称号「<span id="lpAwardTx">夢を掴む冒険者</span>」</div>
     <button class="btn" data-act="lpClose">やった！</button>
   </div>
@@ -2765,7 +2765,11 @@ if ('serviceWorker' in navigator) {
          入っていないときだけ、あらためて聞きにいく。 */
     if(d.logpose) paintState(d.logpose);
     else if(d.char || d.reason) refresh();
-    if(d.just_goal && !goaled) setTimeout(celebrate, 1400);
+    if(d.just_goal && !goaled) setTimeout(function wait(){   /* fq-goalorder-v1: 8か所目のなかまを閉じてから */
+      var zm = document.getElementById('zukanModal');
+      if(zm && zm.classList.contains('show')){ setTimeout(wait, 600); return; }
+      celebrate();
+    }, 1400);
   });
 
   /* ---- ボタン ---- */
