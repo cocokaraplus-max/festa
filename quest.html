@@ -489,6 +489,13 @@
   #zkMonStk .zk-hero{margin:10px 0 4px;}
   #zkMonStk .zk-hero.open .zk-hero-stage{width:200px;height:200px;}
   #zkMonStk .zk-hero.pop .zk-hero-stage img{animation:zkpop .9s cubic-bezier(.2,1.6,.4,1) both;}
+  /* fq-mymon-big-v1 : 図鑑の 自分のモンスター */
+  #zkMyMon .zk-hero{max-width:340px;margin:4px auto 14px;text-align:center;}
+  #zkMyMon .zk-hero.open .zk-hero-stage{width:200px;height:200px;}
+  #zkMyMon .zk-my-none{max-width:340px;margin:4px auto 14px;border:2px dashed #b9a6d8;border-radius:14px;padding:14px 12px;
+                       text-align:center;font-size:13px;font-weight:800;color:#4A2775;line-height:1.7;background:#faf7ff;}
+  #zkMyMon .zk-my-none button{margin-top:8px;font:inherit;font-weight:900;font-size:14px;color:#fff;background:#6B3FA0;
+                       border:0;border-radius:999px;padding:9px 22px;cursor:pointer;}
   .zk-mv picture{display:block;width:100%;height:100%;}
   .mv1{animation:mv1 1.6s cubic-bezier(.3,.7,.4,1) infinite;}
   @keyframes mv1{0%{transform:translateY(0) scale(1,1);}30%{transform:translateY(-26px) scale(.96,1.05);}45%{transform:translateY(0) scale(1.12,.86);}55%{transform:scale(.97,1.04) rotate(-2deg);}65%{transform:scale(1.03,.98) rotate(2deg);}75%,100%{transform:translateY(0) scale(1,1);}}
@@ -846,6 +853,7 @@ window.__FQ_Q0 = location.search;</script>
     <div class="zk-grid" id="zkGrid"></div>
     <!-- fq-goal294-v1: 福祉モンスター7体（自分の子は診断で、ほかの6体は おたのしみガチャで） -->
     <div class="zk-mon-h">🔮 福祉モンスター <small><b id="zkMonN">0</b>/7</small></div>
+    <div id="zkMyMon"></div><!-- fq-mymon-big-v1: 自分のモンスター（大きく） -->
     <div class="zk-grid zk-mon-grid" id="zkMonGrid"></div>
     <div class="zk-mon-note">自分のモンスターは福祉タイプ診断で、ほかの子は おたのしみガチャで出るよ</div>
     <div class="zk-comp holo" id="zkComp" style="display:none"><span>🎉 図鑑コンプリート！ 🎉</span></div>
@@ -2537,8 +2545,32 @@ if ('serviceWorker' in navigator) {
       c.appendChild(im); g.appendChild(c); monCells.push(c);
     }
   })();
+  /* fq-mymon-big-v1: 自分のモンスターを大きく（中身が変わったときだけ書き直す） */
+  function paintMyMon(){
+    var el = document.getElementById('zkMyMon'); if(!el) return;
+    var m = window.fqMyMon ? window.fqMyMon() : null;
+    var k = m ? 'm' + m.no : 'none';
+    if(el.getAttribute('data-k') === k) return;
+    var first = el.getAttribute('data-k') === 'none';
+    el.setAttribute('data-k', k);
+    function es(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    if(!m){
+      el.innerHTML = '<div class="zk-my-none">🔮 福祉タイプ診断をすると、<br>ここに<b>あなたのモンスター</b>が現れるよ'
+                   + '<br><button type="button" data-g2="shindan">診断する</button></div>';
+      return;
+    }
+    var cs = Array.from(String(m.name || '')), L = cs.length;
+    el.innerHTML = '<div class="zk-hero open holo' + (first ? ' pop' : '') + '"><span class="glint"></span>'
+      + '<div class="zk-hero-tag">🏆 あなたのモンスター</div>'
+      + '<div class="zk-stk-nm">' + cs.map(function(ch, i){ var d = i - (L - 1) / 2;
+          return '<span style="transform:translateY(' + (d * d * 0.55).toFixed(1) + 'px) rotate(' + (d * 2.2).toFixed(1) + 'deg)">' + es(ch) + '</span>'; }).join('') + '</div>'
+      + '<div class="zk-hero-stage"><span class="zk-mv mv' + m.no + '"><picture><source srcset="img/mon_' + m.no + '.webp" type="image/webp">'
+      + '<img src="img/mon_' + m.no + '.png" alt=""></picture></span></div>'
+      + '<div class="zk-hero-ty">タイプ ' + m.no + (m.role ? '　' + es(m.role) : '') + '</div></div>';
+  }
   function paintMon(){
     var o = monOwned(), n = 0;
+    paintMyMon();   /* fq-mymon-big-v1 */
     monCells.forEach(function(c, i){ var has = !!o[i + 1]; if(has) n++; c.classList.toggle('got', has); c.classList.toggle('holo', has); });
     var el = document.getElementById('zkMonN'); if(el) el.textContent = n;
     var cnt = 0; for(var k in owned) if(owned[k] && +k <= TOTAL) cnt++;
