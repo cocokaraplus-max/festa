@@ -3437,7 +3437,7 @@ const FQ = {
     const inner = s.logo || FQ.sponsors.some(x => x.logo)
       ? '<span class="lgw'+(s.dark?' dk':'')+'">'
           + (s.logo ? '<img class="lg" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" loading="lazy">' : '<span class="lg-tx">'+esc(s.name)+'</span>')
-          + '</span>' + ((s.insta || s.url) ? '<span class="go'+(s.dark?' dk':'')+'" aria-hidden="true">↗</span>' : '')
+          + '</span>'   /* fq-sponsors-noarrow-v1: 右上の ↗ はなし */
           + '<span class="nm">'+esc(s.name)+'</span>'
       : '<span class="k '+esc(s.kind)+'">'+esc(s.kind)+'</span><span class="nm">'+esc(s.name)+'</span>'
         + (s.insta ? '<span style="margin-left:2px">'+IG+'</span>' : '');
