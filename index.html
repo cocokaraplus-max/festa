@@ -457,7 +457,7 @@ const FQ = {
     { name:'株式会社酒井設計事務所',    kind:'協賛', insta:'', url:'https://www.sakai-designoffice.com/', logo:'img/sponsors/s04.webp' },
     { name:'MAMEKICHI',                 kind:'協賛', insta:'', url:'https://mamekichicafe.com/', logo:'img/sponsors/s05.webp' },
     { name:'株式会社クマガイインテリア', kind:'協賛', insta:'', url:'https://kumagai-interior.com/', logo:'img/sponsors/s06.webp' },
-    { name:'株式会社aSPIRE（ハコトヨ）', kind:'協賛', insta:'', url:'', logo:'img/sponsors/s07.webp' },
+    { name:'株式会社aSPIRE（ハコトヨ）', kind:'協賛', insta:'', url:'', logo:'img/sponsors/s07.webp', dark:true },
     { name:'三井ホーム株式会社',        kind:'協賛', insta:'', url:'https://www.mitsuihome.co.jp/' },
     { name:'株式会社名鉄トヨタホテル',  kind:'協賛', insta:'', url:'https://www.toyota-hotel.co.jp/', logo:'img/sponsors/s09.webp' },
     { name:'トヨタT&S建設株式会社',     kind:'協賛', insta:'', url:'https://www.toyota-ts.co.jp/', logo:'img/sponsors/s10.webp' },
@@ -2508,6 +2508,50 @@ const FQ = {
                           font-size:15px;font-weight:900;line-height:1.4;}
   .orgs.logos .org .nm{font-size:11px;font-weight:800;line-height:1.4;text-align:center;color:var(--muted);}
   .orgs.logos .org .k{display:none;}
+  /* == fq-sponsors-style-v1 : 協賛のページ == */
+  .sp-hero{position:relative;overflow:hidden;background:var(--ink);color:#fff;border:3px solid var(--ink);
+           border-radius:var(--r);box-shadow:6px 7px 0 var(--yellow-d);padding:22px 20px 18px;
+           display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 16px;align-items:end;}
+  .sp-hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;
+           background:radial-gradient(circle,#fff 1.2px,transparent 1.6px) 0 0/14px 14px;}
+  .sp-hero > *{position:relative;}
+  .sp-en{grid-column:1/-1;font-family:"Jost","Century Gothic","Avenir Next",sans-serif;font-weight:300;
+         font-size:clamp(34px,10.5vw,58px);line-height:1;letter-spacing:.1em;color:var(--yellow);}
+  .sp-jp h2{font-size:19px;font-weight:900;letter-spacing:.06em;margin-bottom:4px;color:#fff;}
+  .sp-jp p{font-size:12.5px;font-weight:700;line-height:1.75;color:#e6dccb;}
+  .sp-n{text-align:right;white-space:nowrap;}
+  .sp-n b{display:block;font-family:"Jost","Century Gothic","Avenir Next",sans-serif;font-weight:300;
+          font-size:56px;line-height:.9;color:#fff;}
+  .sp-n span{display:block;font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--yellow);margin-top:6px;}
+  .sp-ribbon{margin:30px 0 4px;background:var(--yellow);border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);
+             overflow:hidden;padding:11px 0;}
+  .sp-track{display:flex;width:max-content;animation:spRun 46s linear infinite;}
+  .sp-chip{flex:0 0 auto;width:128px;height:56px;margin-right:12px;background:#fff;border:2px solid var(--ink);
+           border-radius:var(--r2);display:flex;align-items:center;justify-content:center;padding:7px 11px;}
+  .sp-chip.dk{background:#000;}
+  .sp-chip img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
+  @keyframes spRun{to{transform:translateX(-50%);}}
+  @media(prefers-reduced-motion:reduce){ .sp-ribbon{overflow-x:auto;} .sp-track{animation:none;} }
+  .pane > section.wrap.sp-list{padding-top:18px;}
+  .orgs.logos{gap:14px;grid-auto-rows:1fr;}
+  .orgs.logos .org{position:relative;padding:0;gap:0;min-height:0;justify-content:flex-start;align-items:stretch;
+                   overflow:hidden;border:2.5px solid var(--ink);box-shadow:4px 5px 0 var(--ink);
+                   transition:transform .12s ease,box-shadow .12s ease;}
+  .orgs.logos a.org:active{transform:translate(3px,4px);box-shadow:1px 1px 0 var(--ink);}
+  @media(hover:hover){ .orgs.logos a.org:hover{transform:translate(-1px,-2px);box-shadow:6px 8px 0 var(--ink);} }
+  .orgs.logos .org .lgw{flex:0 0 auto;height:112px;display:flex;align-items:center;justify-content:center;padding:14px 16px;background:#fff;}
+  @media (min-width:640px){ .orgs.logos .org .lgw{height:132px;} }
+  .orgs.logos .org .lgw.dk{background:#000;}
+  .orgs.logos .org .lg{width:100%;height:100%;min-height:0;object-fit:contain;}
+  .orgs.logos .org .lg-tx{min-height:0;font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN",sans-serif;
+                          font-size:17px;font-weight:900;letter-spacing:.05em;color:var(--ink);}
+  .orgs.logos .org .nm{border-top:2px dashed var(--line);padding:8px 10px 9px;font-size:11px;font-weight:800;
+                       color:var(--ink);text-align:center;line-height:1.45;min-height:3.3em;flex:1 1 auto;
+                       display:flex;align-items:center;justify-content:center;}
+  .orgs.logos .org .go{position:absolute;top:5px;right:8px;font-family:"Jost",sans-serif;font-size:14px;
+                       line-height:1;color:var(--muted);}
+  .orgs.logos .org .lgw.dk + .go, .orgs.logos .org .go.dk{color:#bbb;}
+  .sp-thx{margin:30px 0 4px;text-align:center;font-size:13px;font-weight:700;line-height:1.9;color:var(--muted);}
 
   /* ══════════ アクセス ══════════ */
   .acc{background:#fff;border:2.5px solid var(--ink);border-radius:var(--r);padding:18px;}
@@ -2828,10 +2872,18 @@ const FQ = {
 
 <!-- ══ 協賛・関係者 ══ -->
 <div class="pane" id="pane-support">
-<section class="wrap">
-  <div class="sec-h"><h2 class="h-pink">協賛・協力</h2></div>
-  <div class="sec-t">このイベントは、たくさんの企業・団体のみなさまに支えられています。</div>
+<!-- fq-sponsors-style-v1 -->
+<section class="wrap sp-top">
+  <div class="sp-hero">
+    <div class="sp-en">THANK YOU<br>SPONSORS</div>
+    <div class="sp-jp"><h2>協賛・協力</h2><p>このイベントは、地域の企業・団体の<br>みなさまに支えられています。</p></div>
+    <div class="sp-n"><b id="spN">0</b><span>社・団体</span></div>
+  </div>
+</section>
+<div class="sp-ribbon" id="spRibbon" aria-hidden="true"><div class="sp-track" id="spTrack"></div></div>
+<section class="wrap sp-list">
   <div class="orgs" id="orgs"></div>
+  <p class="sp-thx">ご協賛いただいたみなさま、<br>本当にありがとうございます。</p>
 </section>
 
 <section class="wrap">
@@ -3345,10 +3397,22 @@ const FQ = {
   /* ── 協賛・協力 ── */
   /* fq-sponsors-logo-v1: ロゴがあればタイル（ロゴ＋小さい名前）。ないときは名前を大きく */
   if (FQ.sponsors.some(s => s.logo)) $('#orgs').classList.add('logos');
+  /* fq-sponsors-style-v1: 社数・流れるロゴの帯・札（ロゴの枠＋名前＋↗） */
+  (function(){
+    const n = document.getElementById('spN'); if (n) n.textContent = FQ.sponsors.length;
+    const tr = document.getElementById('spTrack');
+    const lg = FQ.sponsors.filter(s => s.logo);
+    if (tr && lg.length) {
+      const one = lg.map(s => '<span class="sp-chip'+(s.dark?' dk':'')+'"><img src="'+esc(s.logo)+'" alt="" loading="lazy"></span>').join('');
+      tr.innerHTML = one + one;   /* 2回ならべて、半分進んだら元に戻す＝切れ目なく流れる */
+    } else { const rb = document.getElementById('spRibbon'); if (rb) rb.style.display = 'none'; }
+  })();
   $('#orgs').innerHTML = FQ.sponsors.map(s => {
     const inner = s.logo || FQ.sponsors.some(x => x.logo)
-      ? (s.logo ? '<img class="lg" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" loading="lazy"><span class="nm">'+esc(s.name)+'</span>'
-                : '<span class="lg-tx">'+esc(s.name)+'</span>')
+      ? '<span class="lgw'+(s.dark?' dk':'')+'">'
+          + (s.logo ? '<img class="lg" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" loading="lazy">' : '<span class="lg-tx">'+esc(s.name)+'</span>')
+          + '</span>' + ((s.insta || s.url) ? '<span class="go'+(s.dark?' dk':'')+'" aria-hidden="true">↗</span>' : '')
+          + '<span class="nm">'+esc(s.name)+'</span>'
       : '<span class="k '+esc(s.kind)+'">'+esc(s.kind)+'</span><span class="nm">'+esc(s.name)+'</span>'
         + (s.insta ? '<span style="margin-left:2px">'+IG+'</span>' : '');
     const href = s.insta || s.url;
