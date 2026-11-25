@@ -2531,6 +2531,11 @@ const FQ = {
   .sp-chip.dk{background:#000;}
   .sp-chip img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
   @keyframes spRun{to{transform:translateX(-50%);}}
+  /* fq-sponsors-ribbonlink-v1 */
+  a.sp-chip{text-decoration:none;transition:transform .12s ease;}
+  a.sp-chip:active{transform:translateY(2px);}
+  a.sp-chip:focus-visible{outline:3px solid var(--pink);outline-offset:2px;}
+  .sp-ribbon:hover .sp-track, .sp-ribbon:focus-within .sp-track{animation-play-state:paused;}
   @media(prefers-reduced-motion:reduce){ .sp-ribbon{overflow-x:auto;} .sp-track{animation:none;} }
   .pane > section.wrap.sp-list{padding-top:18px;}
   .orgs.logos{gap:14px;grid-auto-rows:1fr;}
@@ -2880,7 +2885,7 @@ const FQ = {
     <div class="sp-n"><b id="spN">0</b><span>社・団体</span></div>
   </div>
 </section>
-<div class="sp-ribbon" id="spRibbon" aria-hidden="true"><div class="sp-track" id="spTrack"></div></div>
+<div class="sp-ribbon" id="spRibbon" role="region" aria-label="協賛企業のロゴ"><!-- fq-sponsors-ribbonlink-v1 --><div class="sp-track" id="spTrack"></div></div>
 <section class="wrap sp-list">
   <div class="orgs" id="orgs"></div>
   <p class="sp-thx">ご協賛いただいたみなさま、<br>本当にありがとうございます。</p>
@@ -3403,8 +3408,14 @@ const FQ = {
     const tr = document.getElementById('spTrack');
     const lg = FQ.sponsors.filter(s => s.logo);
     if (tr && lg.length) {
-      const one = lg.map(s => '<span class="sp-chip'+(s.dark?' dk':'')+'"><img src="'+esc(s.logo)+'" alt="" loading="lazy"></span>').join('');
-      tr.innerHTML = one + one;   /* 2回ならべて、半分進んだら元に戻す＝切れ目なく流れる */
+      /* fq-sponsors-ribbonlink-v1: ホームページがあれば押せるロゴに。2回目は読み上げ・Tabの対象外 */
+      const row = dup => lg.map(s => {
+        const href = s.insta || s.url, c = 'sp-chip'+(s.dark?' dk':'');
+        const img = '<img src="'+esc(s.logo)+'" alt="'+(dup?'':esc(s.name))+'" loading="lazy">';
+        return href ? '<a class="'+c+'" href="'+esc(href)+'" target="_blank" rel="noopener"'+(dup?' tabindex="-1" aria-hidden="true"':'')+'>'+img+'</a>'
+                    : '<span class="'+c+'"'+(dup?' aria-hidden="true"':'')+'>'+img+'</span>';
+      }).join('');
+      tr.innerHTML = row(false) + row(true);   /* 2回ならべて、半分進んだら元に戻す＝切れ目なく流れる */
     } else { const rb = document.getElementById('spRibbon'); if (rb) rb.style.display = 'none'; }
   })();
   $('#orgs').innerHTML = FQ.sponsors.map(s => {
