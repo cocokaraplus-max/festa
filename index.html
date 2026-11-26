@@ -2579,7 +2579,24 @@ const FQ = {
   .mk-flags i:nth-child(5n+4){background:var(--green);} .mk-flags i:nth-child(5n){background:#fff;}
   .mk-en{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN",sans-serif;font-weight:900;
          font-size:clamp(40px,12vw,64px);line-height:1;letter-spacing:.08em;color:#fff;
-         -webkit-text-stroke:2.5px var(--ink);paint-order:stroke fill;text-shadow:4px 5px 0 var(--ink);}
+         /* fq-marche-title-v1: ふち取りは影を16方向に並べて作る（iPhone で影が最後の字だけになるのを防ぐ） */
+         text-shadow:2.60px 0.00px 0 var(--ink),
+           2.40px 0.99px 0 var(--ink),
+           1.84px 1.84px 0 var(--ink),
+           0.99px 2.40px 0 var(--ink),
+           0.00px 2.60px 0 var(--ink),
+           -0.99px 2.40px 0 var(--ink),
+           -1.84px 1.84px 0 var(--ink),
+           -2.40px 0.99px 0 var(--ink),
+           -2.60px 0.00px 0 var(--ink),
+           -2.40px -0.99px 0 var(--ink),
+           -1.84px -1.84px 0 var(--ink),
+           -0.99px -2.40px 0 var(--ink),
+           -0.00px -2.60px 0 var(--ink),
+           0.99px -2.40px 0 var(--ink),
+           1.84px -1.84px 0 var(--ink),
+           2.40px -0.99px 0 var(--ink),
+           4px 5px 0 var(--ink), 5.5px 6.5px 0 var(--ink);}
   .mk-jp{margin:8px 0 0;font-size:clamp(18px,5vw,22px);font-weight:900;color:var(--ink);letter-spacing:.04em;}
   .mk-lead{margin:6px 0 0;font-size:13px;font-weight:800;line-height:1.75;color:var(--ink);}
   .mk-cnt{display:inline-flex;align-items:baseline;gap:4px;margin-top:10px;background:var(--ink);color:#fff;
