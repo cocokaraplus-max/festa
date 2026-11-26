@@ -440,34 +440,34 @@ const FQ = {
   /* fq-marche-v2: ic＝絵文字 ／ menu＝出すもの（申込書の出店メニュー。| は折り返してよい場所で、画面には出ない）
      tags … food（ごはん）・sweet（おやつ・ドリンク）・goods（やさい・手づくり）・car（キッチンカー） */
   marche: [
-    { name:"City Cafe'", ic:'🥪', tags:['food','sweet','car'],
+    { name:"City Cafe'", img:'img/marche/mk_citycafe.webp', ic:'🥪', tags:['food','sweet','car'],
       menu:'ドリア・サンドイッチ・フルーツサンド・スイーツ・ドリンク', url:'https://www.instagram.com/ai_ai_marche/' },
-    { name:'和のん\u3000まつだいら店', ic:'🍱', tags:['food'],
+    { name:'和のん\u3000まつだいら店', img:'img/marche/mk_wanon.webp', ic:'🍱', tags:['food'],
       menu:'グルテンフリー＆|プラントベースの|お弁当', url:'https://wanontoyota.github.io/wanon/' },
-    { name:'ブンブン食堂', ic:'🍚', tags:['food','car'],
-      menu:'炒飯', url:'' },
-    { name:'鈴茶', ic:'🍋', tags:['sweet'],
-      menu:'レモネード・焼き菓子', url:'' },
-    { name:'社会福祉法人\u3000オンリーワン', ic:'🍪', tags:['sweet','goods'],
+    { name:'ブンブン食堂', img:'img/marche/mk_bunbun.webp', ic:'🍚', tags:['food','car'],
+      menu:'炒飯', url:'https://www.instagram.com/bunbun_satoshi/' },
+    { name:'鈴茶', img:'img/marche/mk_suzu.webp', ic:'🍋', tags:['sweet'],
+      menu:'レモネード・焼き菓子', url:'https://www.instagram.com/suzutea/' },
+    { name:'社会福祉法人\u3000オンリーワン', img:'img/marche/mk_onlyone.webp', ic:'🍪', tags:['sweet','goods'],
       menu:'焼き菓子・さをり織り小物', url:'https://www.instagram.com/bonds_cafe_okashi_grace/' },
-    { name:'でぶちゃん', ic:'🌭', tags:['food','car'],
-      menu:'焼きそば・フランクフルト', url:'' },
-    { name:'社会福祉法人\u3000輪音', ic:'🥟', tags:['food','car'],
-      menu:'とよたの|ぎょうざドッグ', url:'https://www.s-waon.com/' },
-    { name:'QUONチョコレート豊田店', ic:'🍫', tags:['sweet'],
+    { name:'でぶちゃん', img:'img/marche/mk_debu.webp', ic:'🌭', tags:['food','car'],
+      menu:'焼きそば・フランクフルト', url:'https://www.instagram.com/debuchan_debu/' },
+    { name:'社会福祉法人\u3000輪音', img:'img/marche/mk_waon.webp', ic:'🥟', tags:['food','car'],
+      menu:'とよたの|ぎょうざドッグ', url:'http://www.s-waon.com/' },
+    { name:'QUONチョコレート豊田店', img:'img/marche/mk_quon.webp', ic:'🍫', tags:['sweet'],
       menu:'チョコレート・焼き菓子セット', url:'https://www.instagram.com/quonchocolatetoyota/' },
-    { name:'morimori factory', ic:'🥬', tags:['goods'],
+    { name:'morimori factory', img:'img/marche/mk_morimori.webp', ic:'🥬', tags:['goods'],
       menu:'新鮮野菜', url:'https://www.instagram.com/morimori_factory/' },
-    { name:'はるとよりみち', ic:'🧶', tags:['goods'],
+    { name:'はるとよりみち', img:'img/marche/mk_yorimichi.webp', ic:'🧶', tags:['goods'],
       menu:'利用者の方と|一緒に作った|雑貨・小物', url:'https://www.instagram.com/npo_michi/' },
-    { name:'社会福祉法人\u3000無門福祉会', ic:'🍄', tags:['sweet','goods'],
+    { name:'社会福祉法人\u3000無門福祉会', img:'img/org_mumon.webp', ic:'🍄', tags:['sweet','goods'],
       menu:'お菓子・椎茸・野菜・加工品', url:'http://www.facebook.com/mumonfukushi' },
-    { name:'MAMEKICHI', ic:'🍙', tags:['food','sweet'],
+    { name:'MAMEKICHI', img:'img/marche/mk_mamekichi.webp', ic:'🍙', tags:['food','sweet'],
       menu:'ポータマおにぎり・サーターアンダギー', url:'https://mamekichicafe.com/' },
-    { name:'りすまいるステーション', ic:'🍦', tags:['sweet','goods'],
+    { name:'りすまいるステーション', img:'img/marche/mk_resmile.webp', ic:'🍦', tags:['sweet','goods'],
       menu:'アイス・ドリンク・お菓子・雑貨', url:'https://www.instagram.com/resmile_station/' },
-    { name:'薪窯パンダーシェンカ', ic:'🥐', tags:['food','sweet'],
-      menu:'バジルチーズ・ブリオッシュ|クリームパン・サクふわ|めろんぱん など', url:'https://www.instagram.com/p/De3_JJAmXnn/' },
+    { name:'薪窯パンダーシェンカ', img:'img/marche/mk_dasenka.webp', ic:'🥐', tags:['food','sweet'],
+      menu:'バジルチーズ・ブリオッシュ|クリームパン・サクふわ|めろんぱん など', url:'https://www.instagram.com/dashenka.toyota0123/' },
   ],
 
   /* ── ガチャの告知（fq-gacha-v1）──
@@ -2602,6 +2602,11 @@ const FQ = {
          display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1;position:relative;}
   @media(hover:hover){ a.st:hover .st-ic{animation:stWig .5s ease;} }
   @keyframes stWig{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(10deg)}}
+  /* fq-marche-icons-v1 : お店のアイコン */
+  .st-ic.st-img{overflow:hidden;padding:0;width:62px;height:62px;margin-top:-11px;}
+  .st-ic.st-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  .st-ic.st-img.fit{background:#fff;padding:6px;}
+  .st-ic.st-img.fit img{object-fit:contain;border-radius:50%;}
   .st-nm{font-size:13.5px;font-weight:900;line-height:1.4;text-wrap:balance;}
   .st-nm.brk{word-break:keep-all;overflow-wrap:anywhere;}
   .st-menu{margin-top:5px;font-size:11px;font-weight:700;line-height:1.55;color:var(--muted);text-wrap:balance;
@@ -3601,7 +3606,9 @@ const FQ = {
     box.innerHTML = L.map((m, i) => {
       const tg = (m.tags || []);
       const inner = '<span class="st-awn" style="--c:' + COL[i % COL.length] + '"></span>'
-        + '<span class="st-ic" aria-hidden="true">' + esc(m.ic || '🛍️') + '</span>'
+        + (m.img   /* fq-marche-icons-v1: お店のアイコン。なければ絵文字 */
+            ? '<span class="st-ic st-img' + (m.fit === 'contain' ? ' fit' : '') + '" aria-hidden="true"><img src="' + esc(m.img) + '" alt="" loading="lazy"></span>'
+            : '<span class="st-ic" aria-hidden="true">' + esc(m.ic || '🛍️') + '</span>')
         + nmH(m.name)
         + (m.menu ? '<span class="st-menu">' + mnH(m.menu) + '</span>' : '')
         + (tg.includes('car') ? '<span class="st-car">🚚 キッチンカー</span>' : '')
