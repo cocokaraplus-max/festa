@@ -435,6 +435,25 @@ const FQ = {
        戻したくなったら git の履歴から拾えます（fq-fcircle-v1 の1つ前）。 */
   },
 
+  /* ── とよた〇〇マルシェの出店者（fq-marche-v1）──
+     ★店名とリンクだけ。url は Instagram／Facebook／ホームページ（中身を見て札の小さい字が変わる）。空なら押せない札 */
+  marche: [
+    { name:"City Cafe'",              url:'https://www.instagram.com/ai_ai_marche/' },
+    { name:'和のん\u3000まつだいら店',      url:'https://wanontoyota.github.io/wanon/' },
+    { name:'ブンブン食堂',             url:'' },
+    { name:'鈴茶',                     url:'' },
+    { name:'社会福祉法人\u3000オンリーワン', url:'https://www.instagram.com/bonds_cafe_okashi_grace/' },
+    { name:'でぶちゃん',               url:'' },
+    { name:'社会福祉法人\u3000輪音',       url:'https://www.s-waon.com/' },
+    { name:'QUONチョコレート豊田店',    url:'https://www.instagram.com/quonchocolatetoyota/' },
+    { name:'morimori factory',         url:'https://www.instagram.com/morimori_factory/' },
+    { name:'はるとよりみち',            url:'https://www.instagram.com/npo_michi/' },
+    { name:'社会福祉法人\u3000無門福祉会',   url:'http://www.facebook.com/mumonfukushi' },
+    { name:'MAMEKICHI',                url:'https://mamekichicafe.com/' },
+    { name:'りすまいるステーション',     url:'https://www.instagram.com/resmile_station/' },
+    { name:'薪窯パンダーシェンカ',       url:'https://www.instagram.com/p/De3_JJAmXnn/' },
+  ],
+
   /* ── ガチャの告知（fq-gacha-v1）──
      チラシの「会場をまわって ガチャ をまわそう！」と同じ中身です。
      ★「ガチャ」の飾り文字（img/gacha_w.png）とガチャガチャの絵（img/gacha_m.png）は
@@ -2510,6 +2529,19 @@ const FQ = {
           border-radius:var(--r2);padding:2px 7px;}
   .org .k.協力{background:var(--blue);}
   .org .nm{font-size:13.5px;font-weight:900;}
+  /* fq-marche-v1 : マルシェの出店者の札 */
+  .mk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  @media (min-width:640px){ .mk-grid{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  .mk{display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:62px;padding:10px 12px;
+      background:#fff;border:2.5px solid var(--ink);border-radius:var(--r);box-shadow:3px 4px 0 var(--ink);
+      color:var(--ink);text-decoration:none;transition:transform .12s ease,box-shadow .12s ease;}
+  a.mk:active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--ink);}
+  @media(hover:hover){ a.mk:hover{transform:translate(-1px,-2px);box-shadow:4px 6px 0 var(--ink);} }
+  .mk .nm{font-size:13.5px;font-weight:900;line-height:1.4;text-wrap:balance;}
+  .mk .nm.brk{word-break:keep-all;overflow-wrap:anywhere;}
+  .mk .lk{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;color:var(--green);}
+  .mk .lk svg{width:12px;height:12px;}
+  .mk-n{font-size:12px;font-weight:900;color:var(--muted);margin:-8px 0 12px;}
   /* fq-sponsors-logo-v1 : ロゴのタイル */
   .orgs.logos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
   @media (min-width:640px){ .orgs.logos{grid-template-columns:repeat(3,minmax(0,1fr));} }
@@ -2839,6 +2871,14 @@ const FQ = {
     <span class="where w-blue">1F・3F・4F フロア</span></div>
   <div class="sec-t" id="discoverText"></div>
   <div class="fband" id="fband"></div>
+</section>
+
+<!-- fq-marche-v1 : とよた〇〇マルシェの出店者 -->
+<section class="wrap" id="marcheSec">
+  <div class="sec-h"><h2 class="h-green">MARCHE</h2>
+    <span class="where w-green">とよた〇〇マルシェ</span></div>
+  <div class="sec-t">地域のお店や福祉事業所が出店します。おいしいものや手づくりの品をお楽しみに！</div>
+  <div class="mk-grid" id="marche"></div>
 </section>
 
 <!-- ★fq-gacha-v1: チラシと同じガチャの告知。FOOD の節はチラシに無いのでやめました
@@ -3455,6 +3495,33 @@ const FQ = {
     return href ? '<a class="org" href="'+esc(href)+'" target="_blank" rel="noopener">'+inner+'</a>'
                 : '<div class="org">'+inner+'</div>';
   }).join('');
+
+  /* ── とよた〇〇マルシェの出店者（fq-marche-v1）── */
+  (function(){
+    const box = document.getElementById('marche'); if (!box || !FQ.marche) return;
+    /* 店名の「切ってよい場所」。| のところでだけ折り返す（表記は変えない） */
+    const MK_BRK = {
+      'QUONチョコレート豊田店':'QUON|チョコレート|豊田店',
+      'りすまいるステーション':'りすまいる|ステーション',
+      '薪窯パンダーシェンカ':'薪窯|パンダーシェンカ',
+      '社会福祉法人\u3000オンリーワン':'社会福祉法人\u3000|オンリーワン',
+      '社会福祉法人\u3000輪音':'社会福祉法人\u3000|輪音',
+      '社会福祉法人\u3000無門福祉会':'社会福祉法人\u3000|無門福祉会',
+      '和のん\u3000まつだいら店':'和のん\u3000|まつだいら店',
+    };
+    const kind = u => /instagram\.com/.test(u) ? 'Instagram' : /facebook\.com/.test(u) ? 'Facebook' : 'ホームページ';
+    box.insertAdjacentHTML('beforebegin', '<div class="mk-n">出店 ' + FQ.marche.length + ' 店</div>');
+    box.innerHTML = FQ.marche.map(m => {
+      const b = MK_BRK[m.name];
+      const inner = b && b.replace(/\|/g,'') === m.name
+        ? '<span class="nm brk">' + b.split('|').map(esc).join('<wbr>') + '</span>'
+        : '<span class="nm">' + esc(m.name) + '</span>';
+      return m.url
+        ? '<a class="mk" href="' + esc(m.url) + '" target="_blank" rel="noopener">' + inner
+          + '<span class="lk">' + (kind(m.url) === 'Instagram' ? IG : '') + esc(kind(m.url)) + 'を見る</span></a>'
+        : '<div class="mk">' + inner + '</div>';
+    }).join('');
+  })();
 
   /* ── 運営スタッフ ──
      == fq-staff-v1 ==
