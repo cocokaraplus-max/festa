@@ -2601,7 +2601,10 @@ const FQ = {
   .st-ic{width:56px;height:56px;margin:-9px auto 6px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);
          display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1;position:relative;}
   @media(hover:hover){ a.st:hover .st-ic{animation:stWig .5s ease;} }
-  @keyframes stWig{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(10deg)}}
+  @keyframes stWig{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg) scale(1.06)}45%{transform:rotate(11deg) scale(1.06)}70%{transform:rotate(-6deg)}85%{transform:rotate(3deg)}}
+  /* fq-marche-wiggle-v1 : 画面に入ったらゆれる */
+  .st.wig .st-ic{animation:stWig .7s ease both;animation-delay:var(--wd,0s);}
+  @media(prefers-reduced-motion:reduce){ .st.wig .st-ic{animation:none;} }
   /* fq-marche-icons-v1 : お店のアイコン */
   .st-ic.st-img{overflow:hidden;padding:0;width:62px;height:62px;margin-top:-11px;}
   .st-ic.st-img img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -3617,6 +3620,20 @@ const FQ = {
         ? '<a class="st" data-tags="' + esc(tg.join(' ')) + '" href="' + esc(m.url) + '" target="_blank" rel="noopener">' + inner + '</a>'
         : '<div class="st" data-tags="' + esc(tg.join(' ')) + '">' + inner + '</div>';
     }).join('');
+    /* fq-marche-wiggle-v1: 札が画面に入るたびにアイコンをゆらす（出たら印を外す） */
+    if ('IntersectionObserver' in window && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      const io = new IntersectionObserver(es => {
+        es.forEach(e => {
+          const st = e.target;
+          if (e.isIntersecting) {
+            const col = [...st.parentNode.children].filter(x => !x.hidden).indexOf(st) % 2;
+            st.style.setProperty('--wd', (col * 0.12) + 's');
+            st.classList.add('wig');
+          } else st.classList.remove('wig');
+        });
+      }, { threshold: 0.6 });
+      box.querySelectorAll('.st').forEach(st => io.observe(st));
+    }
     const TABS = [['all','すべて'],['food','🍽️ ごはん'],['sweet','🍰 おやつ・ドリンク'],['goods','🧺 やさい・手づくり'],['car','🚚 キッチンカー']];
     const tb = document.getElementById('mkTabs'); if (!tb) return;
     tb.innerHTML = TABS.map(([k, t]) => {
