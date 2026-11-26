@@ -2473,6 +2473,12 @@ const FQ = {
      ★[hidden] は .pcard{display:flex} に負けるので、
        打ち消しをここに書いておくこと。書かないと開きっぱなしになる。 */
   .per{background:none;border:0;padding:0;font:inherit;color:inherit;width:100%;cursor:pointer;}
+  /* fq-people-align-v1 : アイコンの高さをそろえる／名前の折り返しを整える */
+  .people{align-items:start;}
+  .per{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+  .per .av{flex:0 0 auto;}
+  .per .n{text-wrap:balance;max-width:100%;}
+  .per .n.brk{word-break:keep-all;overflow-wrap:anywhere;}
   .pcard{position:fixed;inset:0;z-index:80;background:rgba(54,39,30,.55);
          display:flex;align-items:center;justify-content:center;padding:20px;}
   .pcard[hidden]{display:none;}
@@ -3456,11 +3462,27 @@ const FQ = {
        前は「Instagramがある人だけ <a>」だったので、
        ほかの人は押しても何も起きず、押せるのかどうか分からなかった。
      ★Instagramへは、プロフィールの中のボタンから飛ぶ。 */
+  /* fq-people-align-v1: 名前の「切ってよい場所」。| のところでだけ折り返す（表記は変えない） */
+  const NAME_BRK = {
+    'ふるさと株式会社':'ふるさと|株式会社',
+    'とよた市民活動センター':'とよた|市民活動|センター',
+    '豊田市青少年センター':'豊田市|青少年|センター',
+    '豊田市男性保育師連盟':'豊田市|男性保育師|連盟',
+    'とよたさんそんセンター':'とよた|さんそん|センター',
+    '藤本建設株式会社\u3000障がい者グループホーム\u3000花しおり':'藤本建設|株式会社\u3000|障がい者|グループホーム\u3000|花しおり',
+    'みどりがおかコスモス':'みどりがおか|コスモス',
+    'グローアップ豊田':'グローアップ|豊田',
+    '社会福祉法人\u3000無門福祉会':'社会福祉法人\u3000|無門福祉会',
+    'とよた〇〇マルシェ':'とよた〇〇|マルシェ',
+  };
+  const nmHtml = n => NAME_BRK[n] && NAME_BRK[n].replace(/\|/g,'') === n
+    ? '<div class="n brk">' + NAME_BRK[n].split('|').map(esc).join('<wbr>') + '</div>'
+    : '<div class="n">' + esc(n) + '</div>';
   $('#staff').innerHTML = FQ.staff.map((p,i) => {
     const inner = '<div class="av" style="'+photoStyle(p.photo,i,p.pos)+'">'
       + (p.photo ? '' : phInner(p.name, i, false))
       + (p.insta ? '<span class="ig">'+IG+'</span>' : '')
-      + '</div><div class="n">'+esc(p.name)+'</div><div class="r">'+esc(p.role)+'</div>';
+      + '</div>' + nmHtml(p.name) + '<div class="r">'+esc(p.role)+'</div>';   /* fq-people-align-v1 */
     return '<button class="per" type="button" data-i="'+i+'">'+inner+'</button>';
   }).join('');
 
