@@ -437,21 +437,37 @@ const FQ = {
 
   /* ── とよた〇〇マルシェの出店者（fq-marche-v1）──
      ★店名とリンクだけ。url は Instagram／Facebook／ホームページ（中身を見て札の小さい字が変わる）。空なら押せない札 */
+  /* fq-marche-v2: ic＝絵文字 ／ menu＝出すもの（申込書の出店メニュー。| は折り返してよい場所で、画面には出ない）
+     tags … food（ごはん）・sweet（おやつ・ドリンク）・goods（やさい・手づくり）・car（キッチンカー） */
   marche: [
-    { name:"City Cafe'",              url:'https://www.instagram.com/ai_ai_marche/' },
-    { name:'和のん\u3000まつだいら店',      url:'https://wanontoyota.github.io/wanon/' },
-    { name:'ブンブン食堂',             url:'' },
-    { name:'鈴茶',                     url:'' },
-    { name:'社会福祉法人\u3000オンリーワン', url:'https://www.instagram.com/bonds_cafe_okashi_grace/' },
-    { name:'でぶちゃん',               url:'' },
-    { name:'社会福祉法人\u3000輪音',       url:'https://www.s-waon.com/' },
-    { name:'QUONチョコレート豊田店',    url:'https://www.instagram.com/quonchocolatetoyota/' },
-    { name:'morimori factory',         url:'https://www.instagram.com/morimori_factory/' },
-    { name:'はるとよりみち',            url:'https://www.instagram.com/npo_michi/' },
-    { name:'社会福祉法人\u3000無門福祉会',   url:'http://www.facebook.com/mumonfukushi' },
-    { name:'MAMEKICHI',                url:'https://mamekichicafe.com/' },
-    { name:'りすまいるステーション',     url:'https://www.instagram.com/resmile_station/' },
-    { name:'薪窯パンダーシェンカ',       url:'https://www.instagram.com/p/De3_JJAmXnn/' },
+    { name:"City Cafe'", ic:'🥪', tags:['food','sweet','car'],
+      menu:'ドリア・サンドイッチ・フルーツサンド・スイーツ・ドリンク', url:'https://www.instagram.com/ai_ai_marche/' },
+    { name:'和のん\u3000まつだいら店', ic:'🍱', tags:['food'],
+      menu:'グルテンフリー＆|プラントベースの|お弁当', url:'https://wanontoyota.github.io/wanon/' },
+    { name:'ブンブン食堂', ic:'🍚', tags:['food','car'],
+      menu:'炒飯', url:'' },
+    { name:'鈴茶', ic:'🍋', tags:['sweet'],
+      menu:'レモネード・焼き菓子', url:'' },
+    { name:'社会福祉法人\u3000オンリーワン', ic:'🍪', tags:['sweet','goods'],
+      menu:'焼き菓子・さをり織り小物', url:'https://www.instagram.com/bonds_cafe_okashi_grace/' },
+    { name:'でぶちゃん', ic:'🌭', tags:['food','car'],
+      menu:'焼きそば・フランクフルト', url:'' },
+    { name:'社会福祉法人\u3000輪音', ic:'🥟', tags:['food','car'],
+      menu:'とよたの|ぎょうざドッグ', url:'https://www.s-waon.com/' },
+    { name:'QUONチョコレート豊田店', ic:'🍫', tags:['sweet'],
+      menu:'チョコレート・焼き菓子セット', url:'https://www.instagram.com/quonchocolatetoyota/' },
+    { name:'morimori factory', ic:'🥬', tags:['goods'],
+      menu:'新鮮野菜', url:'https://www.instagram.com/morimori_factory/' },
+    { name:'はるとよりみち', ic:'🧶', tags:['goods'],
+      menu:'利用者の方と|一緒に作った|雑貨・小物', url:'https://www.instagram.com/npo_michi/' },
+    { name:'社会福祉法人\u3000無門福祉会', ic:'🍄', tags:['sweet','goods'],
+      menu:'お菓子・椎茸・野菜・加工品', url:'http://www.facebook.com/mumonfukushi' },
+    { name:'MAMEKICHI', ic:'🍙', tags:['food','sweet'],
+      menu:'ポータマおにぎり・サーターアンダギー', url:'https://mamekichicafe.com/' },
+    { name:'りすまいるステーション', ic:'🍦', tags:['sweet','goods'],
+      menu:'アイス・ドリンク・お菓子・雑貨', url:'https://www.instagram.com/resmile_station/' },
+    { name:'薪窯パンダーシェンカ', ic:'🥐', tags:['food','sweet'],
+      menu:'バジルチーズ・ブリオッシュ|クリームパン・サクふわ|めろんぱん など', url:'https://www.instagram.com/p/De3_JJAmXnn/' },
   ],
 
   /* ── ガチャの告知（fq-gacha-v1）──
@@ -2542,6 +2558,61 @@ const FQ = {
   .mk .lk{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;color:var(--green);}
   .mk .lk svg{width:12px;height:12px;}
   .mk-n{font-size:12px;font-weight:900;color:var(--muted);margin:-8px 0 12px;}
+  /* == fq-marche-v2 : マルシェ（テントの屋根・看板・屋台の札・しぼりこみ） == */
+  .mk-stage{position:relative;margin-bottom:22px;}
+  .mk-awn{position:relative;height:40px;border:3px solid var(--ink);border-bottom:0;border-radius:var(--r) var(--r) 0 0;
+          background:repeating-linear-gradient(90deg,var(--green) 0 30px,#fff 30px 60px);}
+  .mk-awn::after{content:"";position:absolute;left:-3px;right:-3px;top:100%;height:15px;z-index:2;
+          background:radial-gradient(circle at 15px 0,var(--green) 14px,transparent 15px) 3px 0/60px 15px repeat-x,
+                     radial-gradient(circle at 45px 0,#fff 14px,transparent 15px) 3px 0/60px 15px repeat-x;
+          filter:drop-shadow(0 2.5px 0 var(--ink));}
+  .mk-board{position:relative;background:var(--yellow);border:3px solid var(--ink);border-top:0;
+          border-radius:0 0 var(--r) var(--r);box-shadow:5px 6px 0 var(--ink);padding:30px 18px 18px;text-align:center;overflow:hidden;}
+  .mk-flags{display:flex;justify-content:center;gap:5px;margin:0 0 6px;}
+  .mk-flags i{width:15px;height:17px;clip-path:polygon(0 0,100% 0,50% 100%);background:var(--pink);}
+  .mk-flags i:nth-child(5n+2){background:var(--blue);} .mk-flags i:nth-child(5n+3){background:var(--orange);}
+  .mk-flags i:nth-child(5n+4){background:var(--green);} .mk-flags i:nth-child(5n){background:#fff;}
+  .mk-en{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN",sans-serif;font-weight:900;
+         font-size:clamp(40px,12vw,64px);line-height:1;letter-spacing:.08em;color:#fff;
+         -webkit-text-stroke:2.5px var(--ink);paint-order:stroke fill;text-shadow:4px 5px 0 var(--ink);}
+  .mk-jp{margin:8px 0 0;font-size:clamp(18px,5vw,22px);font-weight:900;color:var(--ink);letter-spacing:.04em;}
+  .mk-lead{margin:6px 0 0;font-size:13px;font-weight:800;line-height:1.75;color:var(--ink);}
+  .mk-cnt{display:inline-flex;align-items:baseline;gap:4px;margin-top:10px;background:var(--ink);color:#fff;
+          border-radius:999px;padding:5px 16px 6px;font-size:13px;font-weight:900;}
+  .mk-cnt b{font-size:22px;line-height:1;color:var(--yellow);}
+  .mk-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:0 0 16px;}
+  .mk-tabs button{font:inherit;font-size:12.5px;font-weight:900;color:var(--ink);background:#fff;cursor:pointer;
+          border:2.5px solid var(--ink);border-radius:999px;padding:6px 12px;box-shadow:2px 3px 0 var(--ink);}
+  .mk-tabs button small{font-size:10.5px;margin-left:4px;color:var(--muted);}
+  .mk-tabs button[aria-pressed="true"]{background:var(--ink);color:#fff;}
+  .mk-tabs button[aria-pressed="true"] small{color:var(--yellow);}
+  .st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  @media (min-width:640px){ .st-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;} }
+  @media (min-width:900px){ .st-grid{grid-template-columns:repeat(4,minmax(0,1fr));} }
+  .st{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;
+      background:#fff;border:2.5px solid var(--ink);border-radius:var(--r);box-shadow:3px 4px 0 var(--ink);
+      color:var(--ink);text-decoration:none;padding:0 10px 12px;overflow:hidden;
+      transition:transform .12s ease,box-shadow .12s ease;}
+  .st[hidden]{display:none;}
+  a.st:active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--ink);}
+  @media(hover:hover){ a.st:hover{transform:translate(-1px,-2px);box-shadow:4px 6px 0 var(--ink);} }
+  .st-awn{align-self:stretch;margin:0 -10px;height:18px;border-bottom:2.5px solid var(--ink);
+          background:repeating-linear-gradient(90deg,var(--c) 0 13px,#fff 13px 26px);}
+  .st-ic{width:56px;height:56px;margin:-9px auto 6px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);
+         display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1;position:relative;}
+  @media(hover:hover){ a.st:hover .st-ic{animation:stWig .5s ease;} }
+  @keyframes stWig{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(10deg)}}
+  .st-nm{font-size:13.5px;font-weight:900;line-height:1.4;text-wrap:balance;}
+  .st-nm.brk{word-break:keep-all;overflow-wrap:anywhere;}
+  .st-menu{margin-top:5px;font-size:11px;font-weight:700;line-height:1.55;color:var(--muted);text-wrap:balance;
+          word-break:keep-all;overflow-wrap:anywhere;}
+  .st-car{margin-top:7px;font-size:10.5px;font-weight:900;color:#fff;background:var(--orange);border-radius:999px;padding:2px 9px;}
+  .st-lk{margin-top:auto;padding-top:9px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:900;color:var(--green);}
+  .st-lk svg{width:12px;height:12px;}
+  .st.pop{animation:stPop .35s cubic-bezier(.2,1.5,.4,1) both;}
+  @keyframes stPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  .mk-note{margin-top:12px;font-size:11px;font-weight:700;color:var(--muted);text-align:center;}
+  @media(prefers-reduced-motion:reduce){ .st.pop, a.st:hover .st-ic{animation:none;} }
   /* fq-sponsors-logo-v1 : ロゴのタイル */
   .orgs.logos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
   @media (min-width:640px){ .orgs.logos{grid-template-columns:repeat(3,minmax(0,1fr));} }
@@ -2874,11 +2945,20 @@ const FQ = {
 </section>
 
 <!-- fq-marche-v1 : とよた〇〇マルシェの出店者 -->
-<section class="wrap" id="marcheSec">
-  <div class="sec-h"><h2 class="h-green">MARCHE</h2>
-    <span class="where w-green">とよた〇〇マルシェ</span></div>
-  <div class="sec-t">地域のお店や福祉事業所が出店します。おいしいものや手づくりの品をお楽しみに！</div>
-  <div class="mk-grid" id="marche"></div>
+<section class="wrap mk-sec" id="marcheSec"><!-- fq-marche-v2 -->
+  <div class="mk-stage">
+    <div class="mk-awn" aria-hidden="true"></div>
+    <div class="mk-board">
+      <div class="mk-flags" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="mk-en">MARCHE</div>
+      <h2 class="mk-jp">とよた〇〇マルシェ</h2>
+      <p class="mk-lead">地域のお店や福祉事業所が大集合！<br>おいしいもの・手づくりの品をさがしに行こう！</p>
+      <div class="mk-cnt"><b id="mkN">0</b>店が出店</div>
+    </div>
+  </div>
+  <div class="mk-tabs" id="mkTabs" aria-label="お店のしぼりこみ"></div>
+  <div class="st-grid" id="marche"></div>
+  <p class="mk-note">※出すものは予定です。当日かわることがあります。</p>
 </section>
 
 <!-- ★fq-gacha-v1: チラシと同じガチャの告知。FOOD の節はチラシに無いのでやめました
@@ -3496,31 +3576,56 @@ const FQ = {
                 : '<div class="org">'+inner+'</div>';
   }).join('');
 
-  /* ── とよた〇〇マルシェの出店者（fq-marche-v1）── */
+  /* ── とよた〇〇マルシェの出店者（fq-marche-v2：屋台の札・しぼりこみ）── */
   (function(){
     const box = document.getElementById('marche'); if (!box || !FQ.marche) return;
+    const L = FQ.marche;
+    const n = document.getElementById('mkN'); if (n) n.textContent = L.length;
+    const COL = ['var(--pink)','var(--blue)','var(--orange)','var(--green)','var(--yellow-d)'];
+    const kind = u => /instagram\.com/.test(u) ? 'Instagram' : /facebook\.com/.test(u) ? 'Facebook' : 'ホームページ';
     /* 店名の「切ってよい場所」。| のところでだけ折り返す（表記は変えない） */
-    const MK_BRK = {
+    const BRK = {
       'QUONチョコレート豊田店':'QUON|チョコレート|豊田店',
       'りすまいるステーション':'りすまいる|ステーション',
       '薪窯パンダーシェンカ':'薪窯|パンダーシェンカ',
-      '社会福祉法人\u3000オンリーワン':'社会福祉法人\u3000|オンリーワン',
-      '社会福祉法人\u3000輪音':'社会福祉法人\u3000|輪音',
-      '社会福祉法人\u3000無門福祉会':'社会福祉法人\u3000|無門福祉会',
-      '和のん\u3000まつだいら店':'和のん\u3000|まつだいら店',
+      '社会福祉法人　オンリーワン':'社会福祉法人　|オンリーワン',
+      '社会福祉法人　輪音':'社会福祉法人　|輪音',
+      '社会福祉法人　無門福祉会':'社会福祉法人　|無門福祉会',
+      '和のん　まつだいら店':'和のん　|まつだいら店',
     };
-    const kind = u => /instagram\.com/.test(u) ? 'Instagram' : /facebook\.com/.test(u) ? 'Facebook' : 'ホームページ';
-    box.insertAdjacentHTML('beforebegin', '<div class="mk-n">出店 ' + FQ.marche.length + ' 店</div>');
-    box.innerHTML = FQ.marche.map(m => {
-      const b = MK_BRK[m.name];
-      const inner = b && b.replace(/\|/g,'') === m.name
-        ? '<span class="nm brk">' + b.split('|').map(esc).join('<wbr>') + '</span>'
-        : '<span class="nm">' + esc(m.name) + '</span>';
+    const nmH = t => BRK[t] && BRK[t].replace(/\|/g,'') === t
+      ? '<span class="st-nm brk">' + BRK[t].split('|').map(esc).join('<wbr>') + '</span>'
+      : '<span class="st-nm">' + esc(t) + '</span>';
+    /* 出すもの：「・」「＆」と「|」のところでだけ折り返す（| は画面には出ない） */
+    const mnH = t => t.split('|').map(x => esc(x).replace(/・/g,'・<wbr>').replace(/＆/g,'＆<wbr>')).join('<wbr>');
+    box.innerHTML = L.map((m, i) => {
+      const tg = (m.tags || []);
+      const inner = '<span class="st-awn" style="--c:' + COL[i % COL.length] + '"></span>'
+        + '<span class="st-ic" aria-hidden="true">' + esc(m.ic || '🛍️') + '</span>'
+        + nmH(m.name)
+        + (m.menu ? '<span class="st-menu">' + mnH(m.menu) + '</span>' : '')
+        + (tg.includes('car') ? '<span class="st-car">🚚 キッチンカー</span>' : '')
+        + (m.url ? '<span class="st-lk">' + (kind(m.url) === 'Instagram' ? IG : '') + esc(kind(m.url)) + 'を見る</span>' : '');
       return m.url
-        ? '<a class="mk" href="' + esc(m.url) + '" target="_blank" rel="noopener">' + inner
-          + '<span class="lk">' + (kind(m.url) === 'Instagram' ? IG : '') + esc(kind(m.url)) + 'を見る</span></a>'
-        : '<div class="mk">' + inner + '</div>';
+        ? '<a class="st" data-tags="' + esc(tg.join(' ')) + '" href="' + esc(m.url) + '" target="_blank" rel="noopener">' + inner + '</a>'
+        : '<div class="st" data-tags="' + esc(tg.join(' ')) + '">' + inner + '</div>';
     }).join('');
+    const TABS = [['all','すべて'],['food','🍽️ ごはん'],['sweet','🍰 おやつ・ドリンク'],['goods','🧺 やさい・手づくり'],['car','🚚 キッチンカー']];
+    const tb = document.getElementById('mkTabs'); if (!tb) return;
+    tb.innerHTML = TABS.map(([k, t]) => {
+      const c = k === 'all' ? L.length : L.filter(m => (m.tags || []).includes(k)).length;
+      return '<button type="button" data-k="' + k + '" aria-pressed="' + (k === 'all') + '">' + t + '<small>' + c + '</small></button>';
+    }).join('');
+    tb.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const k = b.getAttribute('data-k');
+      tb.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      box.querySelectorAll('.st').forEach(st => {
+        const on = k === 'all' || (st.getAttribute('data-tags') || '').split(' ').includes(k);
+        st.hidden = !on;
+        if (on) { st.classList.remove('pop'); void st.offsetWidth; st.classList.add('pop'); }
+      });
+    });
   })();
 
   /* ── 運営スタッフ ──
