@@ -70,6 +70,7 @@
 <div class="wrap">
   <h1>受付（管理画面）<small>当たりのQRの読み取り・景品のお渡し（スタッフ用）</small></h1><!-- fq-self-draw-v1 -->
   <div class="who hide" id="who"></div>
+  <button type="button" class="camBtn hide" id="camBtn">📷 受け取りのQRを読む<small>カメラがひらきます</small></button><!-- fq-uke-cam-v1 -->
 
   <!-- はじめての端末：暗証番号 -->
   <div class="card hide" id="loginBox">
@@ -113,7 +114,7 @@
   <div class="card hide" id="helpBox">
     <p class="note">
       ・ガチャはお客さんが<b>自分のスマホ</b>でまわします。受付は<b>当たりの受け取り</b>だけです。<!-- fq-self-draw-v1 --><br>
-      ・お客さんの<b>「受け取りのQR」</b>を、この端末の<b>ふつうのカメラ</b>で読んでください。この画面が開きます。<br>
+      ・上の<b>「📷 受け取りのQRを読む」</b>を押して、お客さんの<b>「受け取りのQR」</b>を読んでください（端末のふつうのカメラで読んでも同じです）。<br><!-- fq-uke-cam-v1 -->
       ・ここに<b>番号と景品</b>が出ます。その番号の景品を渡して「景品を渡しました」を押してください。<br>
       ・<b>認識番号だけで渡さないでください。</b>他人の番号を言われると、他人の当たりを渡してしまいます。<br>
       ・<b>いつも同じブラウザ</b>で開いてください（ほかのブラウザでは、もう一度暗証番号が要ります）。
@@ -142,7 +143,7 @@
 
   function staffLost(){
     setStaff('');
-    show('tBox', false); show('pBox', false); show('helpBox', false); show('who', false);
+    show('tBox', false); show('pBox', false); show('helpBox', false); show('who', false); show('camBtn', false);   /* fq-uke-cam-v1 */
     show('loginBox', true);
     $('loginMsg').textContent = 'もう一度、暗証番号を入れてください。'; $('loginMsg').className = 'msg err';
   }
@@ -319,6 +320,7 @@
   function start(){
     show('loginBox', false); show('helpBox', true);
     show('lBox', true);   /* fq-staff-lookup-v1 */
+    show('camBtn', true);   /* fq-uke-cam-v1 */
     var l = ''; try{ l = localStorage.getItem(LKEY) || ''; }catch(e){}
     $('who').textContent = 'この端末：' + (l || '受付'); show('who', true);
     if (token) openTicket();
@@ -326,6 +328,107 @@
   }
   if (getStaff()) start(); else { show('loginBox', true); show('helpBox', false); }
   document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible' && getStaff()) { loadPending(); if (token && lastTicket && lastTicket.status !== 'drawn') watch(); } });
+})();
+</script>
+<!-- == fq-uke-cam-v1 : 受付の画面の中でQRを読む == -->
+<style>
+  .camBtn{display:block;width:100%;margin:0 0 12px;padding:16px 12px;border:3px solid var(--ink);border-radius:14px;background:var(--ink);color:#fff;
+    font-family:inherit;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.3);}
+  .camBtn small{display:block;font-size:12px;font-weight:700;opacity:.85;margin-top:2px;}
+  .camBtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.3);}
+  .camBtn.hide{display:none;}
+  #ukCam{position:fixed;inset:0;z-index:8000;background:#000;display:none;flex-direction:column;}
+  #ukCam.show{display:flex;}
+  #ukCam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  #ukCam .uc-mask{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+  #ukCam .uc-frame{width:min(68vw,320px);height:min(68vw,320px);border-radius:18px;border:4px solid #F5E83A;box-shadow:0 0 0 100vmax rgba(0,0,0,.55);}
+  #ukCam .uc-top{position:relative;z-index:2;padding:calc(env(safe-area-inset-top) + 14px) 16px 10px;color:#fff;text-align:center;font-size:17px;font-weight:900;text-shadow:0 1px 4px #000;}
+  #ukCam .uc-msg{position:relative;z-index:2;margin:auto 16px 0;color:#fff;text-align:center;font-size:15px;font-weight:800;line-height:1.6;text-shadow:0 1px 4px #000;min-height:3.2em;}
+  #ukCam .uc-msg.ng{background:rgba(194,56,31,.92);border-radius:12px;padding:10px 12px;text-shadow:none;}
+  #ukCam .uc-close{position:relative;z-index:2;margin:12px 16px calc(env(safe-area-inset-bottom) + 18px);padding:14px;border:0;border-radius:14px;
+    background:#fff;color:#222;font-family:inherit;font-size:17px;font-weight:900;}
+</style>
+<div id="ukCam" role="dialog" aria-modal="true" aria-label="受け取りのQRを読む">
+  <video id="ukCamV" playsinline muted autoplay></video>
+  <div class="uc-mask"><div class="uc-frame"></div></div>
+  <div class="uc-top">お客さんの「受け取りのQR」を、わくの中に入れてください</div>
+  <div class="uc-msg" id="ukCamMsg"></div>
+  <button type="button" class="uc-close" id="ukCamClose">とじる</button>
+</div>
+<script>
+(function(){
+  'use strict';
+  var box = document.getElementById('ukCam'), v = document.getElementById('ukCamV'), msg = document.getElementById('ukCamMsg');
+  var stream = null, timer = 0, det = null, cv = null, cx = null, busy = false, done = false;
+  function say(t, ng){ msg.textContent = t || ''; msg.className = 'uc-msg' + (ng ? ' ng' : ''); }
+  function stop(){
+    clearTimeout(timer); timer = 0;
+    if (stream) { stream.getTracks().forEach(function(t){ try { t.stop(); } catch(e) {} }); stream = null; }
+    try { v.srcObject = null; } catch(e) {}
+  }
+  function close(){ stop(); box.classList.remove('show'); }
+  function loadJsQR(){
+    return new Promise(function(ok, ng){
+      if (window.jsQR) return ok();
+      var s = document.createElement('script'); s.src = 'lib/jsQR.min.js'; s.onload = function(){ ok(); }; s.onerror = ng; document.head.appendChild(s);
+    });
+  }
+  function handle(text){
+    var u; try { u = new URL(String(text || '').trim(), location.href); } catch(e) { u = null; }
+    var t = u && u.searchParams.get('t');
+    if (!u || !/uketsuke\.html$/.test(u.pathname) || !t) { say('これは「受け取りのQR」ではありません。お客さんのアプリの「受け取りのQRを見せる」を押してもらってください', true); return false; }
+    try { if (navigator.vibrate) navigator.vibrate(60); } catch(e) {}
+    say('読めました！'); stop();
+    location.href = location.pathname + '?t=' + encodeURIComponent(t);
+    return true;
+  }
+  function tick(){
+    if (!stream || done) return;
+    if (busy || v.readyState < 2) { timer = setTimeout(tick, 150); return; }
+    busy = true;
+    var p;
+    if (det) {
+      p = det.detect(v).then(function(r){ return (r && r.length) ? r[0].rawValue : null; });
+    } else {
+      p = new Promise(function(ok){
+        var w = v.videoWidth, h = v.videoHeight; if (!w || !h) return ok(null);
+        var sc = Math.min(1, 640 / Math.max(w, h)); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc);
+        cx.drawImage(v, 0, 0, cv.width, cv.height);
+        var img = cx.getImageData(0, 0, cv.width, cv.height), r = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+        ok(r ? r.data : null);
+      });
+    }
+    p.then(function(t){
+      busy = false;
+      if (t && handle(t)) { done = true; return; }
+      timer = setTimeout(tick, t ? 1400 : 140);
+    }).catch(function(){ busy = false; timer = setTimeout(tick, 300); });
+  }
+  function open(){
+    done = false; say(''); box.classList.add('show');
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+      say('この端末では、ここからカメラが使えません。端末のふつうのカメラで読んでください', true); return;
+    }
+    var ready = ('BarcodeDetector' in window)
+      ? window.BarcodeDetector.getSupportedFormats().then(function(f){ if (f.indexOf('qr_code') >= 0) det = new window.BarcodeDetector({ formats: ['qr_code'] }); }).catch(function(){})
+      : Promise.resolve();
+    ready.then(function(){ if (!det) { cv = cv || document.createElement('canvas'); cx = cx || cv.getContext('2d', { willReadFrequently: true }); return loadJsQR(); } })
+      .then(function(){ return navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }); })
+      .then(function(s){
+        if (!box.classList.contains('show')) { s.getTracks().forEach(function(t){ t.stop(); }); return; }
+        stream = s; v.srcObject = s; var pl = v.play(); if (pl && pl.catch) pl.catch(function(){});
+        timer = setTimeout(tick, 300);
+      })
+      .catch(function(e){
+        var n = e && e.name;
+        say(n === 'NotAllowedError' ? 'カメラが許可されていません。ブラウザの設定でカメラを許可してください'
+                                    : 'カメラをひらけませんでした。端末のふつうのカメラで読んでください', true);
+      });
+  }
+  document.getElementById('camBtn').addEventListener('click', open);
+  document.getElementById('ukCamClose').addEventListener('click', close);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden' && box.classList.contains('show')) close(); });
+  window.fqUkCamHandle = handle;   /* 試すとき用 */
 })();
 </script>
 </body>
