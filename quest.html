@@ -1048,6 +1048,7 @@ function scan(code){
   try{var _pq=JSON.parse(localStorage.getItem('fq_pending_codes_v1')||'[]')||[]; if(_pq.indexOf(code)===-1){_pq.push(code); localStorage.setItem('fq_pending_codes_v1',JSON.stringify(_pq));}}catch(e){}
   if(window.fqFlushCodes) setTimeout(window.fqFlushCodes, 0);
   if(S.scanned.indexOf(base)!==-1){toast('このQRはもう読み取り済みだよ');render();return;}
+  if(/^f[34]_/.test(base)){ toast('📡 QRを確かめています…'); return; }   /* fq-booth-lock-v1: 行き先と合っているかはサーバーが確かめる */
   var wasAll=allDone();
   S.scanned.push(base); save();
   var label={start:'ガチャへの道 スタート！',f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「知る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「知る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
@@ -2006,6 +2007,23 @@ if ('serviceWorker' in navigator) {
       if(!d.ok && d.reason==='auth'){ forgetDevice(); ensureDevice().then(function(ok){ if(ok) flushCodes(); }); return; }
       pset(pget().filter(function(c){ return c!==code; }));
       if(d.ok){ V.balance=d.balance|0; saveV(); render(); refreshRanking(); }
+      /* fq-booth-lock-v1: ブースのQR … 行き先と合っていれば クリア、ちがえば 行き先を教える */
+      var bb0=String(code).split('.')[0];
+      if(/^f[34]_/.test(bb0)){
+        var lt=function(msg){ toast(msg); clearTimeout(toastTimer); toastTimer=setTimeout(function(){ var t=document.getElementById('toast'); if(t) t.classList.remove('show'); }, 5000); };
+        if(d.ok){
+          if(S.scanned.indexOf(bb0)===-1){ S.scanned.push(bb0); save(); render(); }
+          lt(d.new===false ? 'このQRはもう読み取り済みだよ' : ('✅ '+esc(d.label||'ブース')+' クリア！'));
+        } else if(d.reason==='wrong_booth'){
+          var nv=d.nav||{};
+          lt(nv.kind==='booth' ? ('ここは「'+esc(d.label||'')+'」。<br>いまの行き先は <b>'+(nv.floor|0)+'階の「'+esc(nv.label||'')+'」</b>だよ')
+             : nv.kind==='uketsuke' ? 'さきに ガチャを まわしてね。<br>ここのQRは まだ読めないよ'
+             : 'ブースめぐりは おわり！<br>つぎは <b>図鑑の8か所</b>へ');
+        } else if(d.reason==='claim_first'){
+          lt('さきに 当たった景品を<br><b>1Fの受付</b>で受け取ってね');
+        }
+        if(window.fqG2Refresh) setTimeout(window.fqG2Refresh, 300);
+      } else if(d.ok && window.fqG2Refresh){ setTimeout(window.fqG2Refresh, 300); }   /* サーバーに届いてから 表示を新しくする（リロードしなくても ✓ が付く） */
       if(d.ok && d.zukan && window.fqZukanGot) window.fqZukanGot(d.zukan);   /* fq-zukan2-v1: ブースのQRで図鑑に1体 */
       else if(d.reason==='bad_code'){
         var bb=String(code).split('.')[0];
@@ -3060,6 +3078,13 @@ if ('serviceWorker' in navigator) {
   .g2-cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:6px;}
   .g2-cat{border-radius:12px;padding:8px 4px;text-align:center;font-weight:900;font-size:15px;background:#EFE9DE;color:#5A4A3E;}
   .g2-cat small{display:block;font-size:11px;font-weight:700;margin-top:2px;}
+  /* fq-booth-lock-v1: 読んだところに 赤い「済」のはんこ */
+  .g2-cat{position:relative;}
+  .g2-sumi{position:absolute;top:-8px;right:-6px;width:34px;height:34px;border-radius:50%;border:2.5px solid #D7263D;
+    background:rgba(255,255,255,.95);color:#D7263D;font-size:17px;font-weight:900;line-height:29px;text-align:center;
+    transform:rotate(-14deg);box-shadow:0 1px 3px rgba(0,0,0,.25);animation:g2Sumi .45s cubic-bezier(.2,1.6,.4,1) both;}
+  @keyframes g2Sumi{0%{transform:rotate(-14deg) scale(2.2);opacity:0;} 100%{transform:rotate(-14deg) scale(1);opacity:1;}}
+  @media (prefers-reduced-motion: reduce){ .g2-sumi{animation:none;} }
   .g2-cat.on.exp{background:#C2410C;color:#fff;} .g2-cat.on.talk{background:#0B6AA8;color:#fff;} .g2-cat.on.see{background:#1E7B3A;color:#fff;}
   .g2-round{font-size:12.5px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:10px;}
   .g2-ticket{background:#F5E83A!important;color:var(--ink)!important;border:3px solid var(--ink)!important;box-shadow:0 5px 0 var(--ink)!important;margin:4px 0 12px;width:100%;font-size:18px;}
@@ -3245,7 +3270,7 @@ if ('serviceWorker' in navigator) {
       ct.innerHTML=['exp','talk','see'].map(function(c){
         var n=(m.n&&m.n[c])|0, on = n>=round;
         var fl=(m.floors&&m.floors[c])||[];
-        return '<div class="g2-cat '+c+(on?' on':'')+'">'+CAT[c]+(on?' ✓':'')+'<small>'+(on?(fl[fl.length-1]+'階で読んだ'):'まだ')+'</small></div>';
+        return '<div class="g2-cat '+c+(on?' on':'')+'">'+CAT[c]+(on?' ✓':'')+'<small>'+(on?(fl[fl.length-1]+'階で読んだ！'):'まだ')+'</small>'+(on?'<span class="g2-sumi" aria-label="済">済</span>':'')+'</div>';   /* fq-booth-lock-v1: 済のはんこ */
       }).join('')+'<div class="g2-round" style="grid-column:1/-1">ガチャ '+(drawn+1)+'回目にむけて（1人2回まで）</div>';
     }
     // ガチャ券
