@@ -1,6 +1,7 @@
 -- ============================================================
 -- fq_qr_remake.sql ［SupabaseのSQL・福祉クエスト］
 -- fq-qr-remake-v1 — 会場のQRを「テスト用」と「本番用」で分ける（2026-11-27）
+--   （直し 2026-11-27 17:10：WHERE のない UPDATE が Supabase に止められていたので where true を足した）
 --
 --  困りごと：学生さんたちとのテストで使ったQRを写真に撮られると、
 --            同じQRのまま当日をむかえたら、家からでもポイントや図鑑が取れてしまう
@@ -67,7 +68,8 @@ begin
 
   -- スタート・ブース・診断（?q=）：記号の前（start. f3_exp. など）は同じ。うしろの10文字だけ変える
   update fq_codes
-     set code = base || '.' || substr(encode(extensions.gen_random_bytes(8), 'hex'), 1, 10);
+     set code = base || '.' || substr(encode(extensions.gen_random_bytes(8), 'hex'), 1, 10)
+   where true;   -- Supabase は WHERE のない UPDATE を止めるので「全部」と書く
 
   -- 図鑑の8か所（?z=）：うしろの5文字だけ変える
   for r in select spot from logpose_spots loop
@@ -80,7 +82,8 @@ begin
 
   -- 笑顔コンテストの番号（?v=）：うしろの6文字だけ変える
   update fq_smiles
-     set code = no || '-' || substr(encode(extensions.gen_random_bytes(4), 'hex'), 1, 6);
+     set code = no || '-' || substr(encode(extensions.gen_random_bytes(4), 'hex'), 1, 6)
+   where true;
 
   v_at := to_char(now() at time zone 'Asia/Tokyo', 'MM/DD HH24:MI');
   update fq_admin set value = p_mode, updated_at = now() where key = 'qr_mode';

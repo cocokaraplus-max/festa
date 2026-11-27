@@ -22,7 +22,7 @@ insert into fq_settings (key, value) values ('fx10', 0) on conflict (key) do not
 do $$
 begin
   if fq_setting('fx10', 0) = 0 then
-    update prizes set rarity = case rarity when 2 then 4 when 3 then 6 when 4 then 9 else 1 end;
+    update prizes set rarity = case rarity when 2 then 4 when 3 then 6 when 4 then 9 else 1 end where true;
     update fq_tickets set rarity = case rarity when 2 then 4 when 3 then 6 when 4 then 9 else 1 end where rarity is not null;
     update fq_settings set value = 1 where key = 'fx10';
   end if;
