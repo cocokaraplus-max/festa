@@ -186,7 +186,7 @@
       else { note.innerHTML = 'この番号の<b>景品</b>を渡して、下のボタンを押してください。'; show('handBtn', true); }
     } else if (t.status === 'drawn') {
       big.className = 'big ng'; big.innerHTML = 'はずれ';
-      note.innerHTML = '大抽選会の対象です。「最後の大抽選会もお楽しみに！」とお伝えください。';
+      note.innerHTML = '「ありがとうございました！」とお伝えください。';   /* fq-nogrand-v1 */
     } else {
       big.className = 'big wait'; big.innerHTML = '確かめています…'; note.textContent = '';
     }
@@ -273,7 +273,7 @@
         var r = '<div class="r">ガチャ ' + esc(t.round) + '回目</div>';
         if (t.status === 'issued')   return '<div class="lk-it">' + r + '<div class="st">ガチャ券が出ています。<b>まだ受付で読んでいません。</b></div></div>';
         if (t.status === 'unlocked') return '<div class="lk-it">' + r + '<div class="st">受付で読みました（' + esc(hm(t.unlocked_at)) + '　' + esc(t.unlocked_by || '') + '）。<b>まだまわしていません。</b></div></div>';
-        if (!t.is_win)               return '<div class="lk-it">' + r + '<div class="st">はずれ（' + esc(hm(t.drawn_at)) + '）。大抽選会の対象です。</div></div>';
+        if (!t.is_win)               return '<div class="lk-it">' + r + '<div class="st">はずれ（' + esc(hm(t.drawn_at)) + '）。</div></div>';   /* fq-nogrand-v1 */
         var top = '<div class="pnm">' + esc(t.prize_name || '景品') + '</div>'
                 + '<div class="pno">景品番号 ' + (t.prize_no != null ? esc(t.prize_no) + '番' : '—') + '　（当たり ' + esc(hm(t.drawn_at)) + '）</div>';
         if (t.handed_at) return '<div class="lk-it">' + r + top + '<div class="st ok">✅ 渡し済み　' + esc(hm(t.handed_at)) + '　' + esc(t.handed_by || '') + '</div></div>';

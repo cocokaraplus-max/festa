@@ -148,7 +148,7 @@ if (!/[?&]admin=1/.test(location.search)) { location.replace(location.pathname +
     <button type="button" data-t="qr">🔳 QRコード</button>
     <button type="button" data-t="spot">🧭 図鑑の8か所</button>
     <button type="button" data-t="staff">📱 受付の端末</button>
-    <button type="button" data-t="event">🎉 大抽選会・笑顔</button>
+    <button type="button" data-t="event">😊 笑顔コンテスト</button><!-- fq-nogrand-v1 -->
     <button type="button" data-t="reset" class="danger">⚠ 大会リセット</button>
   </nav>
 </div>
@@ -865,6 +865,7 @@ boot();
   .gwin .l{ min-width:90px; color:var(--sub); }
   .gwin .nm{ flex:1; }
 </style>
+<style>#gWrap{display:none!important;}</style><!-- fq-nogrand-v1: 大抽選会はアプリでやらない -->
 <div class="wrap" id="gWrap" style="display:none;">
   <div class="card lpcard gcard" style="grid-column:1 / -1;">
     <h2>🎉 大抽選会</h2>

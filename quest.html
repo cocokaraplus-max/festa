@@ -755,8 +755,8 @@ window.__FQ_Q0 = location.search;</script>
       <label class="pinfo-l">なまえ<input id="playerName" maxlength="20" placeholder="ニックネームを入力" value=""></label>
       <div class="pinfo-id">認識番号<b id="devId">—</b></div>
     </div>
-    <p class="pinfo-note">大抽選会は、この「なまえ」と「認識番号」で当選が発表されます。会場受付で番号を伝えてください。</p>
-    <p class="pinfo-note" id="fqGrand" style="display:none;font-weight:800;font-size:12px;"></p><!-- fq-grand-v1 -->
+    <p class="pinfo-note">認識番号は、受付で記録を調べるときに使います。<!-- fq-nogrand-v1 --></p>
+    <p class="pinfo-note" id="fqGrand" style="display:none!important;font-weight:800;font-size:12px;"></p><!-- fq-grand-v1 / fq-nogrand-v1: 出さない -->
   </section>
 
   <!-- == fq-menu-v1 ==
@@ -2057,7 +2057,7 @@ if ('serviceWorker' in navigator) {
        前のポイント制の「1回 1pt」「ポイントを確かめています」は出さない */
     var gEl=document.getElementById('fqGrand');   /* fq-grand-v1 */
     if(gEl){
-      gEl.style.display = SECRET ? 'block' : 'none';
+      gEl.style.display = 'none';   /* fq-nogrand-v1: 大抽選会の行は出さない（前は ここで表示に戻していた） */
       gEl.style.color = V.grand ? 'var(--red)' : '';
       gEl.textContent = V.grand ? '🎉 大抽選会の対象です（認識番号 '+DID+'）' : 'ガチャを1回まわすと、大抽選会の対象になります';
     }
@@ -3183,7 +3183,7 @@ if ('serviceWorker' in navigator) {
     $('g2Results').innerHTML=(G.results||[]).map(function(r){
       if(r.is_win) return '<div class="g2-res"><div class="no">'+(r.prize_no!=null?esc(r.prize_no)+'番':'🎁')+'</div><div>'+r.round+'回目：あたり！<b class="g2-pn">'+esc(r.prize_name||'')+'</b>'
         +'<small>'+(r.handed?'景品を受け取りました':'受付で、この番号の景品を受け取ってね')+'</small></div></div>';
-      return '<div class="g2-res"><div class="no">—</div><div>'+r.round+'回目：はずれ<small>大抽選会の対象です</small></div></div>';
+      return '<div class="g2-res"><div class="no">—</div><div>'+r.round+'回目：はずれ<small>また遊んでね</small></div></div>';   /* fq-nogrand-v1 */
     }).join('');
     paintTicketModal();
     if(window.render) window.render();
