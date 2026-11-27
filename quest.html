@@ -3321,6 +3321,11 @@ if ('serviceWorker' in navigator) {
     var r = d.win ? (d.rarity|0) : 0;
     var m = !d.win ? 0 : Math.max(1, Math.min(4, r));
     var url = 'gacha_play.html#m=' + m + '&p=' + encodeURIComponent(d.prize_name || '') + '&n=' + encodeURIComponent(d.prize_no == null ? '' : d.prize_no);
+    var zk = d.zukan || {};   /* fq-slot-only-v1: スロットで揃える なかま */
+    if (zk.char) url += '&c=' + (zk.char|0);
+    else if (zk.mon) url += '&mon=' + (zk.mon|0) + '&mn=' + encodeURIComponent(zk.name || '');
+    if (zk.is_new === false) url += '&nw=0';
+    if (d.free) url += '&f=1';
     var ok = false;
     var fr = document.createElement('iframe');
     fr.src = url; fr.title = 'ガチャ';
