@@ -133,6 +133,19 @@ if (!/[?&]admin=1/.test(location.search)) { location.replace(location.pathname +
   .adm-qmode button:disabled{ opacity:.5; cursor:wait; }
   .adm-qmode .nt{ font-size:12.5px; color:var(--sub); margin-top:10px; line-height:1.7; }
   .adm-qc.test{ border-color:#d2462f; }
+  /* fq-qr-label-v1: テスト用＝赤、本番用＝緑 */
+  .adm-qc.test{ border:3px solid #d2462f; }
+  .adm-qc.live{ border:3px solid #2f9e5b; }
+  .adm-qc .tb.lv{ background:#2f9e5b; }
+  .adm-qbanner{ border-radius:12px; padding:14px 16px; margin:0 0 12px; color:#fff; font-weight:900; font-size:20px; line-height:1.4; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .adm-qbanner small{ font-size:13px; font-weight:700; opacity:.92; }
+  .adm-qbanner.test{ background:#c2381f; }
+  .adm-qbanner.live{ background:#23864b; }
+  .adm-qbanner.none{ background:#555; }
+  .adm-qbanner .big{ font-size:26px; letter-spacing:.06em; background:#fff; border-radius:8px; padding:2px 12px; }
+  .adm-qbanner.test .big{ color:#c2381f; } .adm-qbanner.live .big{ color:#23864b; } .adm-qbanner.none .big{ color:#555; }
+  .adm-qh .mtag{ font-size:12px; font-weight:900; color:#fff; border-radius:6px; padding:2px 8px; }
+  .adm-qh .mtag.test{ background:#c2381f; } .adm-qh .mtag.live{ background:#23864b; }
   .adm-qc .tb{ display:block; background:#d2462f; color:#fff; font-weight:900; font-size:13px; border-radius:6px; padding:3px 0; margin-bottom:8px; letter-spacing:.2em; }
   .adm-qc a{ display:inline-block; padding:7px 10px; border-radius:8px; background:#3f6b53; color:#fff; text-decoration:none; font-size:13px; font-weight:800; }
   .adm-qc.off{ opacity:.5; }
@@ -1165,7 +1178,7 @@ boot();
     var BASE = location.origin + location.pathname.replace(/[^\/]*$/, '');
     var cards = rows.map(function(r){
       var q = qrcode(0, 'M'); q.addData(BASE + '?v=' + encodeURIComponent(r.code)); q.make();
-      return '<div class="c">' + (window.FQ_QR_MODE === 'test' ? '<div class="tb">テスト用</div>' : '') + '<div class="t">笑顔コンテスト</div><div class="n">' + esc(r.no) + '<small>番</small></div>'
+      return '<div class="c">' + (window.FQ_QR_MODE === 'test' ? '<div class="tb">テスト用</div>' : window.FQ_QR_MODE === 'live' ? '<div class="tb" style="border-color:#23864b;color:#23864b">本番用</div>' : '')   /* fq-qr-label-v1 */ + '<div class="t">笑顔コンテスト</div><div class="n">' + esc(r.no) + '<small>番</small></div>'
            + '<div class="q">' + q.createSvgTag({cellSize: 5, margin: 2, scalable: true}) + '</div>'
            + '<div class="h">この写真に1票！<br>スマホのカメラで読んでね</div></div>';
     }).join('');
@@ -1331,7 +1344,10 @@ boot();
     if (!qi || !qi.ok) { box.innerHTML = '<div class="nt">テスト用と本番用のQRを分けるには、fq_qr_remake.sql を Supabase で流してください。</div>'; return; }
     var tag = qi.mode === 'test' ? '<span class="tg test">テスト用</span>'
             : qi.mode === 'live' ? '<span class="tg live">本番用</span>' : '<span class="tg none">まだ分けていません</span>';
-    box.innerHTML = '<div class="st">いまのQR：' + tag + (qi.made_at ? '<small>（' + esc(qi.made_at) + ' に作成）</small>' : '') + '</div>'
+    var bn = qi.mode === 'test' ? '<div class="adm-qbanner test"><span class="big">テスト用</span>テスト用のQRを表示中<small>本番では使えません。テストが終わったら「本番用のQRを作る」</small></div>'   /* fq-qr-label-v1 */
+           : qi.mode === 'live' ? '<div class="adm-qbanner live"><span class="big">本番用</span>本番用のQRを表示中<small>当日はこのQRを使います。もう「QRを作る」は押さない</small></div>'
+           : '<div class="adm-qbanner none"><span class="big">未設定</span>まだテスト用・本番用に分けていません</div>';
+    box.innerHTML = bn + '<div class="st">いまのQR：' + tag + (qi.made_at ? '<small>（' + esc(qi.made_at) + ' に作成）</small>' : '') + '</div>'
       + '<div class="bt"><button type="button" class="bt-test" data-remake="test">テスト用のQRを作る</button>'
       + '<button type="button" class="bt-live" data-remake="live">本番用のQRを作る</button></div>'
       + '<div class="nt">押すと、スタート・ブース・福祉タイプ診断・図鑑の8か所・笑顔コンテストの番号のQRが<b>全部新しく</b>なります。'
@@ -1359,13 +1375,14 @@ boot();
   });
   var CARDS = { start: [], booth3: [], booth4: [], check: [], spot: [] };   /* fq-g2-start-v1: スタートのQR */   /* fq-admin-ui-v2: ブースは階ごとに分ける */
   function card(c){
-    return '<div class="adm-qc' + (c.off ? ' off' : '') + (QM.mode === 'test' ? ' test' : '') + '">' + (QM.mode === 'test' ? '<span class="tb">テスト用</span>' : '') + '<b>' + esc(c.label) + '</b><div class="qr">' + qrSvg(c.url) + '</div>'
+    return '<div class="adm-qc' + (c.off ? ' off' : '') + (QM.mode === 'test' ? ' test' : QM.mode === 'live' ? ' live' : '') + '">'   /* fq-qr-label-v1 */
+         + (QM.mode === 'test' ? '<span class="tb">テスト用</span>' : QM.mode === 'live' ? '<span class="tb lv">本番用</span>' : '') + '<b>' + esc(c.label) + '</b><div class="qr">' + qrSvg(c.url) + '</div>'
          + '<div class="u">' + esc(c.url) + '</div>'
          + '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">このスマホで読んだことにする</a></div>';
   }
   function section(key, title){
     var L = CARDS[key]; if (!L.length) return '';
-    return '<div class="adm-qh">' + title + ' <button type="button" class="adm-pbtn" data-print="' + key + '">印刷用のカードを開く</button></div>'
+    return '<div class="adm-qh">' + (QM.mode === 'test' ? '<span class="mtag test">テスト用</span>' : QM.mode === 'live' ? '<span class="mtag live">本番用</span>' : '') + title   /* fq-qr-label-v1 */ + ' <button type="button" class="adm-pbtn" data-print="' + key + '">印刷用のカードを開く</button></div>'
          + '<div class="adm-qgrid">' + L.map(card).join('') + '</div>';
   }
   function loadQr(v){
@@ -1403,18 +1420,23 @@ boot();
     var b = e.target.closest('[data-print]'); if (!b) return;
     var key = b.getAttribute('data-print'), L = CARDS[key].filter(function(c){ return !c.off; });
     var w = window.open('', '_blank'); if (!w) { alert('新しいタブを開けませんでした。ポップアップを許可してください。'); return; }
-    var html = '<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>QRカード（印刷用）</title><style>'
+    var MN = QM.mode === 'test' ? 'テスト用' : QM.mode === 'live' ? '本番用' : '';   /* fq-qr-label-v1 */
+    var html = '<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>QRカード' + (MN ? '（' + MN + '）' : '（印刷用）') + '</title><style>'
       + '@page{size:A4;margin:10mm;} body{margin:0;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;color:#36271E;}'
       + '.pg{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:89mm;gap:0;page-break-after:always;}'
       + '.c{border:1px dashed #bbb;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6mm;text-align:center;}'
       + '.t{font-size:7mm;font-weight:900;margin-bottom:3mm;} .q{width:52mm;} .q svg{width:100%;height:auto;display:block;}'
       + '.h{font-size:3.6mm;font-weight:700;margin-top:3mm;line-height:1.5;} .f{font-size:3mm;color:#888;margin-top:2mm;}'
       + '.tb{border:.7mm solid #d2462f;color:#d2462f;background:#fff;font-weight:900;font-size:4mm;padding:.6mm 4mm;border-radius:2mm;margin-bottom:1.5mm;letter-spacing:.1em;}'      + '.c.tst{padding:3mm 6mm;outline:.8mm solid #d2462f;outline-offset:-1.5mm;} .c.tst .q{width:44mm;} .c.tst .t{margin-bottom:1.5mm;}'   /* fq-qr-remake-v1 */
+      + '.tb.lv{border-color:#23864b;color:#23864b;} .c.lv{padding:3mm 6mm;outline:.8mm solid #23864b;outline-offset:-1.5mm;} .c.lv .q{width:44mm;} .c.lv .t{margin-bottom:1.5mm;}'
+      + '.mh{font-size:22px;font-weight:900;color:#fff;padding:8px 14px;border-radius:8px;display:inline-block;margin-bottom:8px;} .mh.test{background:#c2381f;} .mh.live{background:#23864b;}'   /* fq-qr-label-v1 */
       + '.bar{padding:10px;text-align:center;} @media print{.bar{display:none;}}</style></head><body>'
-      + '<div class="bar"><button onclick="print()" style="font-size:16px;padding:8px 18px;">印刷する</button></div>';
+      + '<div class="bar">' + (MN ? '<div class="mh ' + (QM.mode === 'test' ? 'test' : 'live') + '">' + MN + 'のQRカード</div><br>' : '')   /* fq-qr-label-v1 */
+      + '<button onclick="print()" style="font-size:16px;padding:8px 18px;">印刷する</button></div>';
     for (var i = 0; i < L.length; i += 6) {
       html += '<div class="pg">' + L.slice(i, i + 6).map(function(c){
-        return '<div class="c' + (QM.mode === 'test' ? ' tst' : '') + '">' + (QM.mode === 'test' ? '<div class="tb">テスト用（本番では使えません）</div>' : '') + '<div class="t">' + esc(c.label) + '</div><div class="q">' + qrSvg(c.url) + '</div>'
+        return '<div class="c' + (QM.mode === 'test' ? ' tst' : QM.mode === 'live' ? ' lv' : '') + '">'   /* fq-qr-label-v1 */
+             + (QM.mode === 'test' ? '<div class="tb">テスト用（本番では使えません）</div>' : QM.mode === 'live' ? '<div class="tb lv">本番用</div>' : '') + '<div class="t">' + esc(c.label) + '</div><div class="q">' + qrSvg(c.url) + '</div>'
              + '<div class="h">' + esc(HOW[key]) + '</div><div class="f">つながるフェスタ 2026　福祉クエスト' + (QM.at ? '<br>' + (QM.mode === 'test' ? 'テスト用' : QM.mode === 'live' ? '本番用' : '') + '　' + esc(QM.at) + ' 作成' : '') + '</div></div>';
       }).join('') + '</div>';
     }
