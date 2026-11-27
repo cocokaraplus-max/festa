@@ -94,6 +94,16 @@
     <div class="msg" id="tMsg"></div>
   </div>
 
+  <!-- fq-rewards-v1: ステッカー・似顔絵 -->
+  <div class="card hide" id="rBox">
+    <div class="big" id="rBig">確かめています…</div>
+    <div id="rRows"></div>
+    <p class="note" id="rNote"></p>
+    <button class="btn hand hide" id="rHand">渡しました</button>
+    <button class="btn sub hide" id="rUnhand">渡したのを取り消す</button>
+    <div class="msg" id="rMsg"></div>
+  </div>
+
   <!-- まだ渡していない当たり -->
   <div class="card hide" id="pBox">
     <div style="font-weight:900;font-size:16px;margin-bottom:6px">まだ渡していない当たり</div>
@@ -116,6 +126,7 @@
       ・ガチャはお客さんが<b>自分のスマホ</b>でまわします。受付は<b>当たりの受け取り</b>だけです。<!-- fq-self-draw-v1 --><br>
       ・上の<b>「📷 受け取りのQRを読む」</b>を押して、お客さんの<b>「受け取りのQR」</b>を読んでください（端末のふつうのカメラで読んでも同じです）。<br><!-- fq-uke-cam-v1 -->
       ・ここに<b>番号と景品</b>が出ます。その番号の景品を渡して「景品を渡しました」を押してください。<br>
+      ・<b>ステッカー</b>（8か所ぜんぶ）と<b>326さんの似顔絵の権利</b>（図鑑コンプリート・先着）のQRも、同じように読んで「渡しました」を押してください。<br><!-- fq-rewards-v1 -->
       ・<b>認識番号だけで渡さないでください。</b>他人の番号を言われると、他人の当たりを渡してしまいます。<br>
       ・<b>いつも同じブラウザ</b>で開いてください（ほかのブラウザでは、もう一度暗証番号が要ります）。
     </p>
@@ -140,6 +151,7 @@
   function getStaff(){ try{ return localStorage.getItem(KEY) || ''; }catch(e){ return ''; } }
   function setStaff(v, l){ try{ if (v) { localStorage.setItem(KEY, v); localStorage.setItem(LKEY, l||''); } else { localStorage.removeItem(KEY); } }catch(e){} }
   var token = ''; try{ token = new URLSearchParams(location.search).get('t') || ''; }catch(e){}
+  var rtoken = ''; try{ rtoken = new URLSearchParams(location.search).get('r') || ''; }catch(e){}   /* fq-rewards-v1 */
 
   function staffLost(){
     setStaff('');
@@ -317,6 +329,38 @@
     hand(tok, function(t){ if (tok === token) paint(t); lookup(); });
   });
 
+  /* == fq-rewards-v1 : ステッカー・326さんの似顔絵 == */
+  function rPaint(r){
+    var lbl = r.kind === 'portrait' ? '🎨 326さんの似顔絵の権利' : '🎁 ステッカー';
+    $('rRows').innerHTML = '<div class="row"><div class="k">認識番号</div><div class="v">' + esc(r.recog_no) + '</div></div>'
+      + '<div class="row"><div class="k">なまえ</div><div class="v">' + (esc(r.nickname) || '（なし）') + '</div></div>';
+    show('rHand', false); show('rUnhand', false);
+    if (r.handed) {
+      $('rBig').className = 'big ng'; $('rBig').innerHTML = lbl + '<span class="no">渡し済み（' + esc(r.handed_at || '') + ' ' + esc(r.handed_by || '') + '）</span>';
+      $('rNote').innerHTML = '<b>もう渡してあります。</b>'; show('rUnhand', true);
+    } else {
+      $('rBig').className = 'big win'; $('rBig').innerHTML = lbl;
+      $('rNote').innerHTML = r.kind === 'portrait' ? '<b>326さんの似顔絵</b>の権利です。案内して、下のボタンを押してください。' : '<b>ステッカー</b>を渡して、下のボタンを押してください。';
+      show('rHand', true);
+    }
+  }
+  function openReward(){
+    show('rBox', true);
+    rpc('fq_reward_watch', {p_staff: getStaff(), p_token: rtoken}).then(function(d){
+      if (!d.ok) { if (d.reason === 'staff') return staffLost();
+        $('rBig').className = 'big bad'; $('rBig').textContent = 'このQRは見つかりません'; $('rNote').textContent = 'お客さんのアプリを開き直してもらってください。'; return; }
+      rPaint(d.reward);
+    }).catch(function(e){ $('rBig').className = 'big bad'; $('rBig').textContent = 'つながりませんでした'; $('rNote').textContent = '（' + (e.message||e) + '）'; });
+  }
+  function rHand(undo){
+    if (undo && !confirm('「渡しました」を取り消しますか？')) return;
+    rpc('fq_reward_hand', {p_staff: getStaff(), p_token: rtoken, p_undo: !!undo}).then(function(d){
+      if (!d.ok) { if (d.reason === 'staff') return staffLost(); return; }
+      rPaint(d.reward); $('rMsg').className = 'msg good'; $('rMsg').textContent = undo ? '取り消しました。' : '渡しました。';
+    }).catch(function(e){ alert('つながりませんでした（' + (e.message||e) + '）'); });
+  }
+  $('rHand').addEventListener('click', function(){ rHand(false); });
+  $('rUnhand').addEventListener('click', function(){ rHand(true); });
   function start(){
     show('loginBox', false); show('helpBox', true);
     show('lBox', true);   /* fq-staff-lookup-v1 */
@@ -324,6 +368,7 @@
     var l = ''; try{ l = localStorage.getItem(LKEY) || ''; }catch(e){}
     $('who').textContent = 'この端末：' + (l || '受付'); show('who', true);
     if (token) openTicket();
+    if (rtoken) openReward();   /* fq-rewards-v1 */
     loadPending();
   }
   if (getStaff()) start(); else { show('loginBox', true); show('helpBox', false); }
@@ -375,7 +420,8 @@
   }
   function handle(text){
     var u; try { u = new URL(String(text || '').trim(), location.href); } catch(e) { u = null; }
-    var t = u && u.searchParams.get('t');
+    var t = u && u.searchParams.get('t'), rr = u && u.searchParams.get('r');   /* fq-rewards-v1: ステッカー・似顔絵のQR（?r=） */
+    if (u && /uketsuke\.html$/.test(u.pathname) && rr) { try { if (navigator.vibrate) navigator.vibrate(60); } catch(e) {} say('読めました！'); stop(); location.href = location.pathname + '?r=' + encodeURIComponent(rr); return true; }
     if (!u || !/uketsuke\.html$/.test(u.pathname) || !t) { say('これは「受け取りのQR」ではありません。お客さんのアプリの「受け取りのQRを見せる」を押してもらってください', true); return false; }
     try { if (navigator.vibrate) navigator.vibrate(60); } catch(e) {}
     say('読めました！'); stop();

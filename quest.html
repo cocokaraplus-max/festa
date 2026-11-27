@@ -532,6 +532,20 @@
   /* == fq-free-gacha-v1 == */
   .free-box.fq-flash{animation:fqFlash .8s ease-in-out 3;}   /* fq-goal-free-v1 */
   @keyframes fqFlash{50%{box-shadow:0 0 0 6px rgba(107,63,160,.35);}}
+  /* fq-rewards-v1: ステッカー・似顔絵 */
+  .rw-tease{margin:10px 0 12px;padding:12px 10px;border-radius:14px;text-align:center;font-size:14px;font-weight:800;line-height:1.7;color:#7a2e12;
+    background:linear-gradient(135deg,#fff6d8,#ffe3ec);border:2px solid #f0b54a;}
+  .rw-tease b{color:#c2381f;}
+  .rw-tease small,.rw-tease2 small{display:block;font-size:12px;color:#8a5a3a;}
+  .rw-tease2{margin:0 0 10px;font-size:12.5px;font-weight:800;color:#7a2e12;line-height:1.6;}
+  .rw-box{margin-top:14px;}
+  .rw-it{border:3px solid #E7A43A;border-radius:var(--r);background:#fffaf0;padding:12px;text-align:center;margin-bottom:10px;}
+  .rw-it.done{border-color:#cfc4ae;background:#f7f3ea;}
+  .rw-t{font-size:18px;font-weight:900;color:#7a2e12;line-height:1.4;}
+  .rw-s{font-size:13px;font-weight:800;color:#5c4d3b;margin-top:4px;line-height:1.6;}
+  .rw-qr{width:200px;max-width:70%;margin:8px auto 4px;background:#fff;padding:6px;border-radius:10px;}
+  .rw-qr svg{display:block;width:100%;height:auto;}
+  .rw-n{font-size:11.5px;font-weight:700;color:#8a7a6a;}
   .free-box{margin-top:14px;border:3px dashed #6B3FA0;border-radius:var(--r);background:#f3ecfa;padding:12px 14px;text-align:center;}
   .free-t{font-size:17px;font-weight:900;color:#4A2775;}
   .free-t small{font-size:12px;color:#5b4a86;}
@@ -833,9 +847,11 @@ window.__FQ_Q0 = location.search;</script>
     <button class="btn btn-gacha" id="gachaBtn" data-act="gacha" disabled>ガチャをまわす</button>
     <div class="gacha-hint" id="gachaHint">読み込み中…</div><!-- fq-nopoint-v1 -->
     <!-- == fq-free-gacha-v1 : 8か所を全部まわった人だけ出る == -->
+    <div class="rw-box" id="rwBox" style="display:none"></div><!-- fq-rewards-v1: ステッカー・似顔絵 -->
     <div class="free-box" id="freeBox" style="display:none">
       <div class="free-t">🎮 おたのしみガチャ <small>（景品なし）</small></div>
       <div class="free-s"><span class="ib">8か所 ぜんぶ まわった ごほうび！</span><br><span class="ib"><b>何度でも</b> 遊べます。</span><br><span class="ib">遊ぶたびに、図鑑の なかまか</span><span class="ib"><b>福祉モンスター</b>が 1体 出るよ。</span><br><span class="ib">出るのは <b>まだ持っていない子</b> だけ。</span><br><span class="ib">ハズレも あるよ。</span><span class="ib">ぜんぶ そろえて <b>コンプリート</b>しよう！</span></div><!-- fq-free-nodup-v1 --><!-- fq-free-text-v1 -->
+      <div class="rw-tease2">🎨 コンプリートで <b>326さんの似顔絵の権利</b>！<small class="rwTeaseN"></small></div>
       <button type="button" class="free-b" id="freeBtn">おたのしみガチャで遊ぶ</button>
     </div>
   </section>
@@ -873,6 +889,7 @@ window.__FQ_Q0 = location.search;</script>
       <div class="zk-way"><i>🏪</i><b>ブース</b><span>体験・お話・見学の<br>あとに見せてもらうQR</span></div>
       <div class="zk-way"><i>🎰</i><b>ガチャ</b><span>ガチャを<br>まわしたとき</span><!-- fq-self-draw-v1 --></div>
     </div>
+    <div class="rw-tease" id="rwTease">🎨 図鑑を <b>コンプリート</b>すると…<br><b>326さんに 似顔絵を描いてもらえる権利</b>を プレゼント！<small class="rwTeaseN"></small></div><!-- fq-rewards-v1 -->
     <div class="zk-head">
       <div class="zk-count"><b id="zkOwned">0</b>/<span id="zkTotal">86</span></div>
       <div class="zk-bar"><i id="zkBar"></i></div>
@@ -2618,6 +2635,13 @@ if ('serviceWorker' in navigator) {
   var MONS = ['ガツガツモンスター','ヨシヨシモンスター','ウキウキモンスター','コツコツモンスター','イケイケモンスター','フワフワモンスター','ハピハピモンスター'];
   var MONKEY = 'fq_free_mon_v1', DRYKEY = 'fq_free_dry_v1';
   function monFree(){ try{ return JSON.parse(localStorage.getItem(MONKEY) || '[]') || []; }catch(e){ return []; } }
+  /* fq-rewards-v1: 福祉モンスターは サーバーの記録に合わせる／おたのしみガチャで出た子を足す */
+  window.fqMonSet = function(list){ try{ localStorage.setItem(MONKEY, JSON.stringify((list||[]).filter(function(n){ return n >= 1 && n <= 7; }))); }catch(e){} };
+  window.fqMonInfo = function(m){
+    var b = monFree(); if (b.indexOf(m) < 0) { b.push(m); try{ localStorage.setItem(MONKEY, JSON.stringify(b)); }catch(e){} }
+    var mn = 0, o2 = monOwned(); for (var q in o2) if (o2[q]) mn++;
+    return { mon: m, name: MONS[m - 1], is_new: true, mon_owned: mn };
+  };
   function monOwned(){
     var o = {}; monFree().forEach(function(n){ o[n] = 1; });
     var m = window.fqMyMon ? window.fqMyMon() : null, goal = false;
@@ -2711,6 +2735,7 @@ if ('serviceWorker' in navigator) {
   var FREEKEY = 'fq_free_zukan86_v1', GOAL = 0;   /* fq-zukan86-v1: ごほうびは診断のモンスターになったので、除外する子はなし。控えは86体の番号で取り直す */
   try{ localStorage.removeItem('fq_free_zukan_v1'); }catch(e){}
   function freeGet(){ try{ return JSON.parse(localStorage.getItem(FREEKEY) || '[]') || []; }catch(e){ return []; } }
+  try{ localStorage.removeItem(FREEKEY); }catch(e){}   /* fq-rewards-v1: おたのしみガチャはサーバーに記録する */
   document.addEventListener('fq-zukan', function(e){ var d = e.detail || {}; if (typeof d.goal_char === 'number' && d.goal_char > 0) GOAL = d.goal_char; });
   /* fq-free-nodup-v1: まだ持っていない子が いるか */
   window.fqFreeDone = function(){
@@ -3531,6 +3556,58 @@ if ('serviceWorker' in navigator) {
     var wy = document.querySelector('.zk-ways'); if(wy) wy.style.display = g ? 'none' : '';   /* fq-zkbig-v1 */ }
   paintCam(); setInterval(paintCam, 2000);
   paintFree(); setInterval(paintFree, 2000);
+  /* == fq-rewards-v1 : ステッカー・326さんの似顔絵 == */
+  var RW = null, rwBusy = false;
+  function rwItem(em, t, r){
+    if (r.handed) return '<div class="rw-it done"><div class="rw-t">' + em + ' ' + t + '</div><div class="rw-s">✅ 受け取りました</div></div>';
+    return '<div class="rw-it"><div class="rw-t">' + em + ' ' + t + '</div>'
+      + '<div class="rw-s"><b>景品交換所（1Fの受付）</b>で<br>このQRを 見せてね</div>'
+      + '<div class="rw-qr">' + qrSvg(base() + 'uketsuke.html?r=' + encodeURIComponent(r.token)) + '</div>'
+      + '<div class="rw-n">交換しなくても、おたのしみガチャは 遊べます</div></div>';
+  }
+  function rwPaint(){
+    var d = RW; if (!d) return;
+    var n = d.portrait_full && !d.portrait ? '（先着' + d.portrait_limit + '名・終了しました）' : '（先着' + d.portrait_limit + '名・のこり ' + d.portrait_left + '名）';
+    [].forEach.call(document.querySelectorAll('.rwTeaseN'), function(e){ e.textContent = n; });
+    var tz = $('rwTease'); if (tz) tz.style.display = d.portrait ? 'none' : '';
+    var bx = $('rwBox'); if (!bx) return;
+    var hh = '';
+    if (d.portrait) hh += rwItem('🎨', '326さんに 似顔絵を<br>描いてもらえる権利 GET！', d.portrait);
+    else if (d.complete && d.portrait_full) hh += '<div class="rw-it done"><div class="rw-t">🎨 図鑑コンプリート おめでとう！</div><div class="rw-s">似顔絵の権利は 先着' + d.portrait_limit + '名で 終了しました。</div></div>';
+    if (d.sticker) hh += rwItem('🎁', 'ステッカー プレゼント！', d.sticker);
+    if (bx.getAttribute('data-k') !== hh) { bx.innerHTML = hh; bx.setAttribute('data-k', hh); }
+    bx.style.display = hh ? '' : 'none';
+  }
+  function rwRefresh(){
+    var sec = secret(); if (!sec || !window.DID || rwBusy) return;
+    rwBusy = true;
+    var mm = window.fqMyMon ? window.fqMyMon() : null, k = String(window.DID) + ':' + (mm ? mm.no : 0);
+    var pre = (mm && mm.no && ls('fq_mon_self_v1') !== k)
+      ? sb.rpc('fq_mon_self', {p_recog: String(window.DID), p_secret: sec, p_mon: mm.no}).then(function(r){ if (r && r.data && r.data.ok) ls('fq_mon_self_v1', k); }).catch(function(){})
+      : Promise.resolve();
+    pre.then(function(){ return sb.rpc('fq_reward_state', {p_recog: String(window.DID), p_secret: sec}); }).then(function(res){
+      rwBusy = false;
+      var d = res && res.data; if (!d || !d.ok) return;
+      var before = RW; RW = d;
+      if (d.mons && window.fqMonSet) window.fqMonSet(d.mons);
+      rwPaint(); paintFree();
+      if (before && !before.portrait && d.portrait) {   /* いま 似顔絵の権利を とった */
+        if (typeof confetti === 'function') confetti(4);
+        toast('🎨 <b>326さんの似顔絵の権利</b> GET！');
+        if (window.FQ_TAB) window.FQ_TAB('quest', true);
+        setTimeout(function(){ var b = $('rwBox'); if (b && b.scrollIntoView) b.scrollIntoView({behavior: 'smooth', block: 'center'}); }, 400);
+      }
+    }).catch(function(){ rwBusy = false; });
+  }
+  window.fqRewardRefresh = rwRefresh;
+  setTimeout(rwRefresh, 2500);
+  setInterval(function(){
+    if (document.visibilityState !== 'visible') return;
+    var w = !RW || (RW.sticker && !RW.sticker.handed) || (RW.portrait && !RW.portrait.handed);
+    if (w) rwRefresh();
+  }, 15000);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') rwRefresh(); });
+  document.addEventListener('fq-zukan', function(e){ var d = (e && e.detail) || {}; if (d.just_goal) setTimeout(rwRefresh, 1500); });
   /* fq-goal-free-v1: おたのしみガチャまで移動 */
   window.fqGoFree = function(){
     if(window.FQ_TAB) window.FQ_TAB('quest', true);
@@ -3540,7 +3617,28 @@ if ('serviceWorker' in navigator) {
   };
   document.addEventListener('click', function(ev){ var b=ev.target.closest && ev.target.closest('[data-fqfree]'); if(b){ ev.preventDefault(); window.fqGoFree(); } });
   var fb = $('freeBtn');
-  if (fb) fb.addEventListener('click', function(){
+  if (fb) fb.addEventListener('click', function(){   /* fq-rewards-v1: おたのしみガチャは サーバーで引く */
+    if (window.busy || !freeOk() || !window.fqPlay) return;
+    var sec = secret(); if (!sec || !window.DID) { toast('もう一度 押してね'); return; }
+    window.busy = true; busy = true; fb.disabled = true;
+    function freeEnd(){ busy = false; window.busy = false; fb.disabled = false; }
+    sb.rpc('fq_free_draw', {p_recog: String(window.DID), p_secret: sec}).then(function(res){
+      var d = res && res.data;
+      if (!d || !d.ok) { freeEnd(); toast(d && d.reason === 'not_goal' ? '8か所 ぜんぶ まわると 遊べるよ' : 'つながりませんでした。もう一度 押してね'); return; }
+      if (d.done) { freeEnd(); toast('🎉 ぜんぶ そろった！ <b>コンプリート！</b>'); paintFree(); if (window.fqRewardRefresh) window.fqRewardRefresh(); return; }
+      fb.disabled = false;
+      if (d.lose) { if (!window.fqPlay({ free: true, win: false, rarity: 0, prize_name: '', prize_no: null })) freeEnd(); return; }
+      var z = d.mon ? window.fqMonInfo(d.mon) : { char: d.char, is_new: true, owned: d.owned, total: d.total };
+      var r = Math.random(), mode = r < 0.50 ? 1 : r < 0.75 ? 2 : r < 0.90 ? 3 : 4;
+      if (z.mon) mode = Math.max(mode, 3);
+      var nn = z.mon ? '' : ((z.char < 10 ? '0' : '') + z.char);
+      var dd = { free: true, win: true, rarity: mode, prize_name: z.mon ? ('福祉モンスター「' + z.name + '」') : ('なかま No.' + nn), prize_no: null, zukan: z };
+      if (window.fqZukanGot) window.fqZukanGot(z);
+      if (!window.fqPlay(dd)) freeEnd();
+      if (d.complete && window.fqRewardRefresh) setTimeout(window.fqRewardRefresh, 8000);
+    }).catch(function(){ freeEnd(); toast('つながりませんでした。もう一度 押してね'); });
+  });
+  if (false && fb) fb.addEventListener('click', function(){   /* 前のやり方（スマホの中で引く）。fq-rewards-v1 で止めた */
     if (window.busy || !freeOk() || !window.fqFreePick || !window.fqPlay) return;
     if (window.fqFreeDone && window.fqFreeDone()) { toast('🎉 ぜんぶ そろった！ <b>コンプリート！</b>'); paintFree(); return; }   /* fq-free-nodup-v1 */
     var FREE_LOSE = 0.3;   /* fq-zkbig-v1: ハズレの割合（0.3＝30%） */
