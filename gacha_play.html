@@ -706,6 +706,9 @@
       if (lose) { loseP = true; lose = false; title = '🎉 なかま ゲット！ 🎉'; desc = ''; }
       if (FQ.free) desc = 'おたのしみガチャで なかまが来たよ！';
     }
+    var freeLose = FQ.free && !FQ.img && lose;   /* fq-zkbig-v1: おたのしみガチャのハズレ（キャラの絵は出さない） */
+    if (freeLose) { title = '💀 ハズレ… 💀'; desc = 'ざんねん！ なかまは来なかった…　もう一回 まわしてみよう！'; }
+    $('result-img').style.display = freeLose ? 'none' : '';
     var fc = document.getElementById('fqChar');
     if (!fc) { fc = document.createElement('div'); fc.id = 'fqChar'; $('result-img').parentNode.insertBefore(fc, $('result-img').nextSibling); }
     fc.innerHTML = '';

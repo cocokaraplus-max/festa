@@ -556,6 +556,17 @@
     filter:brightness(0) opacity(.16);transition:filter .35s ease;}
   .zk-cell.got img{filter:none;}
   .zk-cell.got{background:#fff;border-color:#d9c9a3;}
+  /* fq-zkbig-v1: 押すと大きく */
+  .zk-cell{cursor:pointer;}
+  .zk-cell.got:active{transform:scale(.95);}
+  .zkb-card{text-align:center;}
+  .zkb-no{font-size:15px;font-weight:900;color:var(--mustard);letter-spacing:.06em;}
+  .zkb-stage{margin:6px auto 4px;width:min(78vw,320px);height:min(78vw,320px);border-radius:18px;background:#fbf6ea;display:flex;align-items:center;justify-content:center;}
+  .zkb-stage.holo{background:#fff;}
+  .zkb-stage img{width:92%;height:92%;object-fit:contain;animation:zkbPop .35s cubic-bezier(.2,1.5,.4,1) both;}
+  @keyframes zkbPop{0%{transform:scale(.6);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .zkb-nm{font-size:20px;font-weight:900;margin:6px 0 12px;line-height:2;}
+  .zkb-nm rt{font-size:11px;font-weight:800;}
   .zk-cell.justgot{border-color:var(--mustard);box-shadow:0 0 0 3px rgba(231,164,58,.35);}
   .zk-note{margin-top:10px;font-size:11.5px;color:var(--muted);font-weight:600;line-height:1.7;text-align:center;}
   .zk-cool{margin-top:10px;background:#fbf6ea;border:2px dashed var(--line);border-radius:var(--r);
@@ -966,6 +977,14 @@ window.__FQ_Q0 = location.search;</script>
   </div>
 </div>
 
+<div class="modal" id="zkBig"><!-- fq-zkbig-v1: 図鑑のキャラを大きく -->
+  <div class="modal-card zkb-card">
+    <div class="zkb-no" id="zkbNo"></div>
+    <div class="zkb-stage" id="zkbStage"><img id="zkbImg" alt=""></div>
+    <div class="zkb-nm" id="zkbNm"></div>
+    <button class="btn" data-act="close" data-mod="zkBig">とじる</button>
+  </div>
+</div>
 <div id="toast"></div>
 
 <div class="modal" id="prizeModal">
@@ -2605,6 +2624,31 @@ if ('serviceWorker' in navigator) {
     if(m) o[m.no] = 1;   /* fq-goal294-v1: 診断した時点で並ぶ */
     return o;
   }
+  /* fq-zkbig-v1: 図鑑のキャラを押すと大きく */
+  (function(){
+    function pad2(n){ return (n<10?'0':'')+n; }
+    function open(src, no, nm, holo){
+      var im=document.getElementById('zkbImg'); if(!im) return;
+      im.src=src; im.style.animation='none'; void im.offsetWidth; im.style.animation='';
+      document.getElementById('zkbNo').textContent=no;
+      document.getElementById('zkbNm').innerHTML=nm;
+      document.getElementById('zkbStage').classList.toggle('holo', !!holo);
+      document.getElementById('zkBig').classList.add('show');
+    }
+    document.addEventListener('click', function(ev){
+      var c = ev.target.closest && ev.target.closest('#zkGrid .zk-cell, #zkMonGrid .zk-cell'); if(!c) return;
+      if(!c.classList.contains('got')){ if(typeof toast==='function') toast('まだ なかまに なっていないよ'); return; }
+      var mon = !!c.closest('#zkMonGrid');
+      var i = [].indexOf.call(c.parentNode.children, c) + 1;
+      if(mon){
+        var MN=['ガツガツモンスター','ヨシヨシモンスター','ウキウキモンスター','コツコツモンスター','イケイケモンスター','フワフワモンスター','ハピハピモンスター'];
+        open('img/mon_'+i+'.png', '福祉モンスター', MN[i-1]||'', true);
+      } else {
+        var nm = i===85 ? '<ruby>294くん<rt>つくしくん</rt></ruby>' : i===86 ? '<ruby>294ちゃん<rt>ふくしちゃん</rt></ruby>' : i===84 ? '326さん' : '';
+        open('img/zukan/z_'+pad2(i)+'.png', 'No.'+pad2(i), nm, i>=84);
+      }
+    });
+  })();
   var monCells = [];
   (function(){
     var g = document.getElementById('zkMonGrid'); if(!g) return;
@@ -3455,7 +3499,8 @@ if ('serviceWorker' in navigator) {
     var st = sec && sec.querySelector('.gacha-stage'); if(st) st.style.display='none';
     var hd = sec && sec.querySelector('.sec-h'); if(hd) hd.style.display='none'; }
   /* fq-goal-nocam-v1: ゴールした人には「QRを読む」を出さない */
-  function paintCam(){ var g = freeOk(); [].forEach.call(document.querySelectorAll('.qrcam-btn[data-qrcam]'), function(b){ b.style.display = g ? 'none' : ''; }); }
+  function paintCam(){ var g = freeOk(); [].forEach.call(document.querySelectorAll('.qrcam-btn[data-qrcam]'), function(b){ b.style.display = g ? 'none' : ''; });
+    var wy = document.querySelector('.zk-ways'); if(wy) wy.style.display = g ? 'none' : '';   /* fq-zkbig-v1 */ }
   paintCam(); setInterval(paintCam, 2000);
   paintFree(); setInterval(paintFree, 2000);
   /* fq-goal-free-v1: おたのしみガチャまで移動 */
@@ -3469,6 +3514,12 @@ if ('serviceWorker' in navigator) {
   var fb = $('freeBtn');
   if (fb) fb.addEventListener('click', function(){
     if (window.busy || !freeOk() || !window.fqFreePick || !window.fqPlay) return;
+    var FREE_LOSE = 0.3;   /* fq-zkbig-v1: ハズレの割合（0.3＝30%） */
+    if (Math.random() < FREE_LOSE) {
+      window.busy = true; busy = true;
+      if (!window.fqPlay({ free: true, win: false, rarity: 0, prize_name: '', prize_no: null })) { busy = false; window.busy = false; }
+      return;
+    }
     var z = window.fqFreePick();
     var r = Math.random(), mode = r < 0.50 ? 1 : r < 0.75 ? 2 : r < 0.90 ? 3 : 4;   /* 演出の派手さはランダム */
     var nn = z.mon ? '' : ((z.char < 10 ? '0' : '') + z.char);
