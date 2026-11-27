@@ -121,6 +121,19 @@ if (!/[?&]admin=1/.test(location.search)) { location.replace(location.pathname +
   .adm-qc .qr{ background:#fff; border-radius:8px; padding:6px; width:150px; margin:0 auto; }
   .adm-qc .qr svg{ width:100%; height:auto; display:block; }
   .adm-qc .u{ font-size:10.5px; color:var(--sub); word-break:break-all; margin:8px 0; font-family:ui-monospace,Menlo,monospace; }
+  /* fq-qr-remake-v1: テスト用／本番用 */
+  .adm-qmode{ border:2px solid var(--line); border-radius:12px; padding:12px 14px; margin:0 0 14px; background:#1c180f; }
+  .adm-qmode .st{ font-size:16px; font-weight:900; margin-bottom:10px; }
+  .adm-qmode .st small{ font-size:13px; color:var(--sub); font-weight:700; }
+  .adm-qmode .tg{ display:inline-block; padding:2px 12px; border-radius:999px; margin-right:6px; color:#fff; }
+  .adm-qmode .tg.test{ background:#d2462f; } .adm-qmode .tg.live{ background:#3f6b53; } .adm-qmode .tg.none{ background:#666; }
+  .adm-qmode .bt{ display:flex; gap:10px; flex-wrap:wrap; }
+  .adm-qmode button{ padding:10px 16px; border-radius:9px; border:0; font-weight:900; font-size:14px; cursor:pointer; color:#fff; }
+  .adm-qmode .bt-test{ background:#d2462f; } .adm-qmode .bt-live{ background:#3f6b53; }
+  .adm-qmode button:disabled{ opacity:.5; cursor:wait; }
+  .adm-qmode .nt{ font-size:12.5px; color:var(--sub); margin-top:10px; line-height:1.7; }
+  .adm-qc.test{ border-color:#d2462f; }
+  .adm-qc .tb{ display:block; background:#d2462f; color:#fff; font-weight:900; font-size:13px; border-radius:6px; padding:3px 0; margin-bottom:8px; letter-spacing:.2em; }
   .adm-qc a{ display:inline-block; padding:7px 10px; border-radius:8px; background:#3f6b53; color:#fff; text-decoration:none; font-size:13px; font-weight:800; }
   .adm-qc.off{ opacity:.5; }
   .adm-pbtn{ padding:7px 14px; border-radius:8px; border:1px solid var(--gold); background:transparent; color:var(--gold); font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; }
@@ -158,6 +171,7 @@ if (!/[?&]admin=1/.test(location.search)) { location.replace(location.pathname +
     <p class="adm-note">★会場に置くQRの一覧です。<b>「このスマホで読んだことにする」</b>を押すと、この端末でそのQRを読んだのと同じになります（テスト用）。<br>
       ★<b>「印刷用のカードを開く」</b>で、A4に6枚ずつ並んだカードが開きます。そのまま印刷して、切って使えます。<br>
       ★QRの中身（URL）は、印刷したら変えないでください。変えると、印刷したQRが使えなくなります。</p>
+    <div id="admQrMode" class="adm-qmode" style="display:none;"></div><!-- fq-qr-remake-v1 -->
     <div id="admQrBody" class="adm-msg">合言葉を入れて「ひらく」を押してください。</div>
   </div>
 </div>
@@ -1151,7 +1165,7 @@ boot();
     var BASE = location.origin + location.pathname.replace(/[^\/]*$/, '');
     var cards = rows.map(function(r){
       var q = qrcode(0, 'M'); q.addData(BASE + '?v=' + encodeURIComponent(r.code)); q.make();
-      return '<div class="c"><div class="t">笑顔コンテスト</div><div class="n">' + esc(r.no) + '<small>番</small></div>'
+      return '<div class="c">' + (window.FQ_QR_MODE === 'test' ? '<div class="tb">テスト用</div>' : '') + '<div class="t">笑顔コンテスト</div><div class="n">' + esc(r.no) + '<small>番</small></div>'
            + '<div class="q">' + q.createSvgTag({cellSize: 5, margin: 2, scalable: true}) + '</div>'
            + '<div class="h">この写真に1票！<br>スマホのカメラで読んでね</div></div>';
     }).join('');
@@ -1161,6 +1175,7 @@ boot();
       + '.g{display:grid;grid-template-columns:repeat(2,1fr);gap:8mm}'
       + '.c{border:2px solid #2b2118;border-radius:6mm;padding:6mm;text-align:center;break-inside:avoid;height:80mm;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:space-between}'
       + '.t{font-size:13pt;font-weight:900;letter-spacing:.1em}.n{font-size:44pt;font-weight:900;line-height:1;color:#d2462f}.n small{font-size:18pt;margin-left:2pt}'
+      + '.tb{border:.7mm solid #d2462f;color:#d2462f;font-weight:900;font-size:11pt;padding:.5mm 5mm;border-radius:2mm;letter-spacing:.1em}'   /* fq-qr-remake-v1 */
       + '.q svg{width:38mm;height:38mm;display:block}.h{font-size:10pt;font-weight:900;line-height:1.4}'
       + '</style></head><body><div class="g">' + cards + '</div><script>setTimeout(function(){print()},400)<\/script></body></html>');
     w.document.close();
@@ -1310,9 +1325,37 @@ boot();
     try { var q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize: 6, margin: 2, scalable: true}); }
     catch(e) { return '<span>QRを出せませんでした</span>'; }
   }
+  var QM = { mode: '', at: '' };   /* fq-qr-remake-v1: いまのQRが test（テスト用）か live（本番用）か */
+  function drawMode(qi){
+    var box = $('admQrMode'); if (!box) return; box.style.display = '';
+    if (!qi || !qi.ok) { box.innerHTML = '<div class="nt">テスト用と本番用のQRを分けるには、fq_qr_remake.sql を Supabase で流してください。</div>'; return; }
+    var tag = qi.mode === 'test' ? '<span class="tg test">テスト用</span>'
+            : qi.mode === 'live' ? '<span class="tg live">本番用</span>' : '<span class="tg none">まだ分けていません</span>';
+    box.innerHTML = '<div class="st">いまのQR：' + tag + (qi.made_at ? '<small>（' + esc(qi.made_at) + ' に作成）</small>' : '') + '</div>'
+      + '<div class="bt"><button type="button" class="bt-test" data-remake="test">テスト用のQRを作る</button>'
+      + '<button type="button" class="bt-live" data-remake="live">本番用のQRを作る</button></div>'
+      + '<div class="nt">押すと、スタート・ブース・福祉タイプ診断・図鑑の8か所・笑顔コンテストの番号のQRが<b>全部新しく</b>なります。'
+      + '前のQRは、印刷した紙も写真に撮られたものも<b>使えなくなります</b>。<br>'
+      + '押せるのは<b>「大会リセット」の直後（お客さんが0人のとき）だけ</b>です。当日まちがえて押しても、お客さんがいれば断ります。<br>'
+      + '<b>流れ</b>：① 大会リセット →「テスト用のQRを作る」→ 印刷してテスト　'
+      + '② テストが終わったら 大会リセット →「本番用のQRを作る」→ 印刷し直す（テスト用の紙は捨てる）</div>';
+  }
+  $('admQrMode').addEventListener('click', function(e){
+    var b = e.target.closest('[data-remake]'); if (!b) return;
+    var m = b.getAttribute('data-remake'), name = m === 'test' ? 'テスト用' : '本番用';
+    if (!confirm(name + 'のQRを作り直します。\n今あるQR（印刷した紙も）は、全部使えなくなります。よろしいですか？')) return;
+    [].forEach.call(document.querySelectorAll('#admQrMode button'), function(x){ x.disabled = true; });
+    rpc('fq_admin_qr_remake', {p_pass: pass.value, p_mode: m}).then(function(d){
+      if (!d.ok) { alert(d.message || '作り直せませんでした。'); loadQr(pass.value); return; }
+      ['lpLoad', 'vLoad', 'smLoad'].forEach(function(id){ var x = $(id); if (x) x.click(); });   /* ほかの欄も新しい記号で読み直す */
+      loadQr(pass.value);
+      alert(name + 'のQRを作りました（' + d.made_at + '）。\n「印刷用のカードを開く」から印刷してください。笑顔コンテストの番号のQRも印刷し直してください。'
+            + (m === 'live' ? '\nテスト用に印刷した紙は捨ててください。' : ''));
+    }).catch(function(e){ alert('つながりませんでした（' + (e.message || e) + '）'); loadQr(pass.value); });
+  });
   var CARDS = { start: [], booth3: [], booth4: [], check: [], spot: [] };   /* fq-g2-start-v1: スタートのQR */   /* fq-admin-ui-v2: ブースは階ごとに分ける */
   function card(c){
-    return '<div class="adm-qc' + (c.off ? ' off' : '') + '"><b>' + esc(c.label) + '</b><div class="qr">' + qrSvg(c.url) + '</div>'
+    return '<div class="adm-qc' + (c.off ? ' off' : '') + (QM.mode === 'test' ? ' test' : '') + '">' + (QM.mode === 'test' ? '<span class="tb">テスト用</span>' : '') + '<b>' + esc(c.label) + '</b><div class="qr">' + qrSvg(c.url) + '</div>'
          + '<div class="u">' + esc(c.url) + '</div>'
          + '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">このスマホで読んだことにする</a></div>';
   }
@@ -1323,8 +1366,11 @@ boot();
   }
   function loadQr(v){
     var body = $('admQrBody'); body.textContent = '読み込み中…';
-    Promise.all([rpc('fq_admin_voucher_data', {p_pass: v}), rpc('logpose_admin_list', {p_pass: v})]).then(function(r){
+    Promise.all([rpc('fq_admin_voucher_data', {p_pass: v}), rpc('logpose_admin_list', {p_pass: v}),
+                 rpc('fq_admin_qr_info', {p_pass: v}).catch(function(){ return {ok: false}; })]).then(function(r){   /* fq-qr-remake-v1 */
       var codes = (r[0] && r[0].codes) || [], spots = (r[1] && r[1].spots) || [];
+      var qi = r[2] || {}; QM.mode = qi.ok ? (qi.mode || '') : ''; QM.at = qi.ok ? (qi.made_at || '') : '';
+      window.FQ_QR_MODE = QM.mode; drawMode(qi);   /* fq-qr-remake-v1 */
       function booth(fl){ return codes.filter(function(c){ return c.base.indexOf('f' + fl + '_') === 0; })
                                       .sort(function(a, b){ return (a.sort|0) - (b.sort|0); })
                                       .map(function(c){ return { label: c.label, url: BASE + '?q=' + c.code, kind: 'booth' }; }); }
@@ -1359,12 +1405,13 @@ boot();
       + '.c{border:1px dashed #bbb;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6mm;text-align:center;}'
       + '.t{font-size:7mm;font-weight:900;margin-bottom:3mm;} .q{width:52mm;} .q svg{width:100%;height:auto;display:block;}'
       + '.h{font-size:3.6mm;font-weight:700;margin-top:3mm;line-height:1.5;} .f{font-size:3mm;color:#888;margin-top:2mm;}'
+      + '.tb{border:.7mm solid #d2462f;color:#d2462f;background:#fff;font-weight:900;font-size:4mm;padding:.6mm 4mm;border-radius:2mm;margin-bottom:1.5mm;letter-spacing:.1em;}'      + '.c.tst{padding:3mm 6mm;outline:.8mm solid #d2462f;outline-offset:-1.5mm;} .c.tst .q{width:44mm;} .c.tst .t{margin-bottom:1.5mm;}'   /* fq-qr-remake-v1 */
       + '.bar{padding:10px;text-align:center;} @media print{.bar{display:none;}}</style></head><body>'
       + '<div class="bar"><button onclick="print()" style="font-size:16px;padding:8px 18px;">印刷する</button></div>';
     for (var i = 0; i < L.length; i += 6) {
       html += '<div class="pg">' + L.slice(i, i + 6).map(function(c){
-        return '<div class="c"><div class="t">' + esc(c.label) + '</div><div class="q">' + qrSvg(c.url) + '</div>'
-             + '<div class="h">' + esc(HOW[key]) + '</div><div class="f">つながるフェスタ 2026　福祉クエスト</div></div>';
+        return '<div class="c' + (QM.mode === 'test' ? ' tst' : '') + '">' + (QM.mode === 'test' ? '<div class="tb">テスト用（本番では使えません）</div>' : '') + '<div class="t">' + esc(c.label) + '</div><div class="q">' + qrSvg(c.url) + '</div>'
+             + '<div class="h">' + esc(HOW[key]) + '</div><div class="f">つながるフェスタ 2026　福祉クエスト' + (QM.at ? '<br>' + (QM.mode === 'test' ? 'テスト用' : QM.mode === 'live' ? '本番用' : '') + '　' + esc(QM.at) + ' 作成' : '') + '</div></div>';
       }).join('') + '</div>';
     }
     w.document.open(); w.document.write(html + '</body></html>'); w.document.close();
