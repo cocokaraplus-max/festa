@@ -2611,6 +2611,13 @@ const FQ = {
   .mk-ig:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink);}
   .mk-ig:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
   .mk-ig:focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
+  /* fq-marche-ig-v2: Instagram のマークを ときどき揺らす */
+  .mk-ig svg{transform-origin:50% 60%;animation:mkIgWig 2.6s ease-in-out infinite;}
+  .mk-ig:hover svg{animation:mkIgWig .9s ease-in-out infinite;}
+  @keyframes mkIgWig{0%,62%,100%{transform:rotate(0) scale(1);}
+    66%{transform:rotate(-16deg) scale(1.15);} 72%{transform:rotate(13deg) scale(1.15);}
+    78%{transform:rotate(-9deg) scale(1.08);} 84%{transform:rotate(5deg) scale(1.04);} 90%{transform:rotate(0) scale(1);}}
+  @media (prefers-reduced-motion: reduce){ .mk-ig svg, .mk-ig:hover svg{animation:none;} }
   .mk-jp a{color:inherit;text-decoration:none;}
   .mk-jp a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;}
   .mk-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:0 0 16px;}
