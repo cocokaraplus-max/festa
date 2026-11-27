@@ -561,7 +561,8 @@
   .zk-cell.got:active{transform:scale(.95);}
   .zkb-card{text-align:center;}
   .zkb-no{font-size:15px;font-weight:900;color:var(--mustard);letter-spacing:.06em;}
-  .zkb-stage{margin:6px auto 4px;width:min(78vw,320px);height:min(78vw,320px);border-radius:18px;background:#fbf6ea;display:flex;align-items:center;justify-content:center;}
+  .zkb-stage{margin:6px auto 4px;width:100%;max-width:320px;aspect-ratio:1/1;height:auto;box-sizing:border-box;overflow:hidden;   /* fq-zkbig-v2: カードの幅に合わせる */
+             border-radius:18px;background:#fbf6ea;display:flex;align-items:center;justify-content:center;}
   .zkb-stage.holo{background:#fff;}
   .zkb-stage img{width:92%;height:92%;object-fit:contain;animation:zkbPop .35s cubic-bezier(.2,1.5,.4,1) both;}
   @keyframes zkbPop{0%{transform:scale(.6);opacity:0;}100%{transform:scale(1);opacity:1;}}
@@ -2630,6 +2631,20 @@ if ('serviceWorker' in navigator) {
     function open(src, no, nm, holo){
       var im=document.getElementById('zkbImg'); if(!im) return;
       im.src=src; im.style.animation='none'; void im.offsetWidth; im.style.animation='';
+      /* fq-zkbig-v2: 絵のまわりの すき間を切って まん中に */
+      var raw=new Image(); raw.onload=function(){
+        try{
+          var w=raw.naturalWidth, h=raw.naturalHeight, c=document.createElement('canvas'); c.width=w; c.height=h;
+          var x=c.getContext('2d'); x.drawImage(raw,0,0); var d=x.getImageData(0,0,w,h).data;
+          var x0=w, y0=h, x1=-1, y1=-1;
+          for(var yy=0; yy<h; yy++) for(var xx=0; xx<w; xx++){ if(d[(yy*w+xx)*4+3] > 12){ if(xx<x0)x0=xx; if(xx>x1)x1=xx; if(yy<y0)y0=yy; if(yy>y1)y1=yy; } }
+          if(x1<0) return;
+          var bw=x1-x0+1, bh=y1-y0+1, s=Math.round(Math.max(bw,bh)*1.08), o=document.createElement('canvas'); o.width=s; o.height=s;
+          o.getContext('2d').drawImage(c, x0, y0, bw, bh, Math.round((s-bw)/2), Math.round((s-bh)/2), bw, bh);
+          if(im.getAttribute('data-src')===src) im.src=o.toDataURL('image/png');
+        }catch(e){}
+      };
+      im.setAttribute('data-src', src); raw.src=src;
       document.getElementById('zkbNo').textContent=no;
       document.getElementById('zkbNm').innerHTML=nm;
       document.getElementById('zkbStage').classList.toggle('holo', !!holo);
