@@ -530,6 +530,8 @@
     border:3px solid #c9a227;}
   .zk-comp span{background:rgba(255,255,255,.9);border-radius:10px;padding:4px 12px;}
   /* == fq-free-gacha-v1 == */
+  .free-box.fq-flash{animation:fqFlash .8s ease-in-out 3;}   /* fq-goal-free-v1 */
+  @keyframes fqFlash{50%{box-shadow:0 0 0 6px rgba(107,63,160,.35);}}
   .free-box{margin-top:14px;border:3px dashed #6B3FA0;border-radius:var(--r);background:#f3ecfa;padding:12px 14px;text-align:center;}
   .free-t{font-size:17px;font-weight:900;color:#4A2775;}
   .free-t small{font-size:12px;color:#5b4a86;}
@@ -609,6 +611,9 @@
     filter:drop-shadow(0 8px 14px rgba(0,0,0,.18));}
   .lp-modal h3{margin:10px 0 0;font-size:24px;color:var(--red);}
   .lp-award{margin-top:10px;font-size:15px;font-weight:900;color:var(--teal);line-height:1.7;}
+  .lp-award ruby rt{font-size:10px;font-weight:800;color:var(--teal);letter-spacing:.02em;}   /* fq-goal-free-v1: ふりがな */
+  .lp-award{line-height:2.05;}
+  .lp-later{display:block;margin:10px auto 0;background:none;border:0;color:#8a7a6a;font-family:inherit;font-size:13px;font-weight:800;text-decoration:underline;cursor:pointer;}
 </style>
 <style>/* == fq-menu-v1 : 下のメニュー（案内ページと同じもの）== */
   /* ★ここは index.html の .tabbar から そのまま写したもの。**2つで1組**。
@@ -955,8 +960,9 @@ window.__FQ_Q0 = location.search;</script>
     <div class="zk-em">ぜんぶ まわった！</div>
     <div class="lp-pair"><img class="zk-img" id="lpImg" src="img/zukan/z_85.png" alt="294くん"><img class="zk-img" id="lpImg2" src="img/zukan/z_86.png" alt="294ちゃん"></div>
     <h3 class="hand">シークレットキャラ<br>ゲット！</h3><!-- fq-goalorder-v1 -->
-    <div class="lp-award" id="lpAward">294くん と 294ちゃん が なかまになった！<br>称号「<span id="lpAwardTx">夢を掴む冒険者</span>」</div>
-    <button class="btn" data-act="lpClose">やった！</button>
+    <div class="lp-award" id="lpAward"><ruby>294くん<rt>つくしくん</rt></ruby> と <ruby>294ちゃん<rt>ふくしちゃん</rt></ruby> が なかまになった！<br>称号「<span id="lpAwardTx">夢を掴む冒険者</span>」</div>
+    <button class="btn" data-act="lpFree">🎮 おたのしみガチャへ</button><!-- fq-goal-free-v1 -->
+    <button type="button" class="lp-later" data-act="lpClose">あとで</button>
   </div>
 </div>
 
@@ -2851,8 +2857,8 @@ if ('serviceWorker' in navigator) {
     var mo=$('lpModal'); if(!mo) return;
     /* fq-goal294-v1: ごほうびは 294くん（No.85）と 294ちゃん（No.86） */
     var aw = $('lpAward');
-    if(aw) aw.innerHTML = '<b>294くん</b> と <b>294ちゃん</b> が<br>図鑑の なかまに なった！<br>称号「' + GOAL_TITLE + '」'
-        + '<br><small>クエストの「おたのしみガチャ」で 何度でも遊べるよ（景品なし）</small>';
+    if(aw) aw.innerHTML = '<b><ruby>294くん<rt>つくしくん</rt></ruby></b> と <b><ruby>294ちゃん<rt>ふくしちゃん</rt></ruby></b> が<br>図鑑の なかまに なった！<br>称号「' + GOAL_TITLE + '」'
+        + '<br><small>「おたのしみガチャ」で 何度でも遊べるよ（景品なし）</small>';   /* fq-goal-free-v1 */
     mo.classList.add('show');
     if(typeof confetti==='function') confetti(3);
     paintTitle(lastOwned);          /* ★称号に「ぼうけんしゃ」を足す */
@@ -2886,6 +2892,9 @@ if ('serviceWorker' in navigator) {
       if(lastState) paintState(lastState); else refresh();
     } else if(a==='lpClose'){
       var mo=$('lpModal'); if(mo) mo.classList.remove('show');
+    } else if(a==='lpFree'){   /* fq-goal-free-v1: おたのしみガチャへ */
+      var mo2=$('lpModal'); if(mo2) mo2.classList.remove('show');
+      if(window.fqGoFree) window.fqGoFree();
     }
   });
 
@@ -3277,8 +3286,14 @@ if ('serviceWorker' in navigator) {
       cls+=' uke'; v=G.self_draw ? 'ガチャがまわせるよ！' : '1Fの受付へ行こう！';   /* fq-self-draw-v1 */
       s=G.self_draw ? '下の<b>「ガチャをまわす」</b>を押してね。当たったら、1Fの受付で景品と交換できます。' : '受付で<b>ガチャ券</b>を見せると、ガチャがまわせます。';
     } else {
+      var lpGoal=false; try{ lpGoal = localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){}
+      if(lpGoal){   /* fq-goal-free-v1: 8か所ぜんぶ まわった人 */
+        v='🎮 おたのしみガチャで遊ぼう！';
+        s='8か所 ぜんぶ まわったね！ 何度でも遊べるよ（景品なし）。<br><button type="button" class="linkbtn" data-fqfree="1">おたのしみガチャへ</button>';
+      } else {
       v='📖 図鑑の8か所めぐりへ！';
       s='ガチャは1人2回まで。会場のキャラのQRを集めよう。<br><button type="button" class="linkbtn" data-g2="zukan">図鑑をひらく</button>';
+      }
     }
     if(started && G.claim_wait){   /* fq-self-draw-v1: 景品を受け取るまで、つぎに進めない */
       var cw=(G.results||[]).filter(function(r){ return r.is_win && !r.handed && r.token; })[0];
@@ -3440,6 +3455,14 @@ if ('serviceWorker' in navigator) {
     var st = sec && sec.querySelector('.gacha-stage'); if(st) st.style.display='none';
     var hd = sec && sec.querySelector('.sec-h'); if(hd) hd.style.display='none'; }
   paintFree(); setInterval(paintFree, 2000);
+  /* fq-goal-free-v1: おたのしみガチャまで移動 */
+  window.fqGoFree = function(){
+    if(window.FQ_TAB) window.FQ_TAB('quest', true);
+    paintFree();
+    setTimeout(function(){ var bx=$('freeBox'); if(bx && bx.scrollIntoView) bx.scrollIntoView({behavior:'smooth', block:'center'});
+      if(bx){ bx.classList.add('fq-flash'); setTimeout(function(){ bx.classList.remove('fq-flash'); }, 2400); } }, 350);
+  };
+  document.addEventListener('click', function(ev){ var b=ev.target.closest && ev.target.closest('[data-fqfree]'); if(b){ ev.preventDefault(); window.fqGoFree(); } });
   var fb = $('freeBtn');
   if (fb) fb.addEventListener('click', function(){
     if (window.busy || !freeOk() || !window.fqFreePick || !window.fqPlay) return;
