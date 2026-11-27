@@ -61,19 +61,20 @@
   .lk-it .pno{ font-size:13px; font-weight:800; color:var(--pink); }
   .lk-it .st{ font-size:14px; font-weight:800; margin-top:4px; line-height:1.6; }
   .lk-it .st.ok{ color:var(--ok); } .lk-it .st.wait{ color:#C2410C; }
+  .lk-it button.un{ border-color:#8A7F72; color:#5C5248; }   /* fq-self-draw-v1 */
   .lk-it button{ margin-top:6px; border:2px solid var(--pink); background:#fff; color:var(--pink); font-weight:900;
                  border-radius:10px; padding:8px 12px; font-family:inherit; font-size:14px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>受付（管理画面）<small>ガチャ券の読み取り・景品のお渡し（スタッフ用）</small></h1>
+  <h1>受付（管理画面）<small>当たりのQRの読み取り・景品のお渡し（スタッフ用）</small></h1><!-- fq-self-draw-v1 -->
   <div class="who hide" id="who"></div>
 
   <!-- はじめての端末：暗証番号 -->
   <div class="card hide" id="loginBox">
     <div style="font-weight:900;font-size:16px;margin-bottom:4px">この端末を受付にする</div>
-    <p class="note">受付の暗証番号を入れてください。<b>この端末で1回だけ</b>です。次からは、ガチャ券のQRを読むだけで使えます。</p>
+    <p class="note">受付の暗証番号を入れてください。<b>この端末で1回だけ</b>です。次からは、お客さんのQRを読むだけで使えます。</p>
     <label for="lbl">この端末の呼び名（例：受付1）</label>
     <input id="lbl" type="text" maxlength="20" autocomplete="off" placeholder="受付1">
     <label for="pass">受付の暗証番号</label>
@@ -88,6 +89,7 @@
     <div id="tRows"></div>
     <p class="note" id="tNote"></p>
     <button class="btn hand hide" id="handBtn">景品を渡しました</button><!-- fq-prize-no-v1 -->
+    <button class="btn sub hide" id="unhandBtn">渡したのを取り消す</button><!-- fq-self-draw-v1 -->
     <div class="msg" id="tMsg"></div>
   </div>
 
@@ -110,9 +112,10 @@
 
   <div class="card hide" id="helpBox">
     <p class="note">
-      ・お客さんの<b>ガチャ券のQR</b>を、この端末の<b>ふつうのカメラ</b>で読んでください。この画面が開きます。<br>
-      ・「OK」と出たら、お客さんのスマホに「ガチャをまわす」が出ます。押してもらってください。<br>
-      ・当たりなら、ここに<b>番号と景品</b>が出ます。その番号の景品を渡して「景品を渡しました」を押してください。<br>
+      ・ガチャはお客さんが<b>自分のスマホ</b>でまわします。受付は<b>当たりの受け取り</b>だけです。<!-- fq-self-draw-v1 --><br>
+      ・お客さんの<b>「受け取りのQR」</b>を、この端末の<b>ふつうのカメラ</b>で読んでください。この画面が開きます。<br>
+      ・ここに<b>番号と景品</b>が出ます。その番号の景品を渡して「景品を渡しました」を押してください。<br>
+      ・<b>認識番号だけで渡さないでください。</b>他人の番号を言われると、他人の当たりを渡してしまいます。<br>
       ・<b>いつも同じブラウザ</b>で開いてください（ほかのブラウザでは、もう一度暗証番号が要ります）。
     </p>
     <button class="btn sub" id="logoutBtn">この端末の受付をやめる</button>
@@ -174,7 +177,7 @@
     lastTicket = t;
     var big = $('tBig'), note = $('tNote');
     $('tRows').innerHTML = rows(t);
-    show('handBtn', false);
+    show('handBtn', false); show('unhandBtn', false);   /* fq-self-draw-v1 */
     if (t.status === 'unlocked') {
       big.className = 'big ok'; big.innerHTML = 'OK！ ' + t.round + '回目のガチャ券';
       note.innerHTML = 'お客さんのスマホに<b>「ガチャをまわす」</b>が出ています。押してもらってください。<br>まわすと、ここに結果が出ます。';
@@ -182,7 +185,7 @@
       big.className = 'big win';
       big.innerHTML = 'あたり！<span class="pnm">' + esc(t.prize_name || '') + '</span>'   /* fq-prize-big-v1 */
         + '<span class="no">' + (t.prize_no != null ? '景品番号 ' + esc(t.prize_no) + '番' : '') + '</span>';
-      if (t.handed) { note.innerHTML = '<b>景品は渡し済みです。</b>'; }
+      if (t.handed) { note.innerHTML = '<b>景品は渡し済みです。</b>'; show('unhandBtn', true); }   /* fq-self-draw-v1 */
       else { note.innerHTML = 'この番号の<b>景品</b>を渡して、下のボタンを押してください。'; show('handBtn', true); }
     } else if (t.status === 'drawn') {
       big.className = 'big ng'; big.innerHTML = 'はずれ';
@@ -246,6 +249,7 @@
   }
   $('pList').addEventListener('click', function(ev){
     var b = ev.target.closest && ev.target.closest('[data-hand]'); if (!b) return;
+    if (!confirm('QRを読まずに渡します。\nお客さんのスマホで、この当たりの画面（受け取りのQR）を確かめましたか？\n\n認識番号だけで渡すと、他人の当たりを受け取られることがあります。')) return;   /* fq-self-draw-v1 */
     b.disabled = true;
     var tok = b.getAttribute('data-hand');
     hand(tok, function(t){ if (tok === token) paint(t); });
@@ -276,16 +280,37 @@
         if (!t.is_win)               return '<div class="lk-it">' + r + '<div class="st">はずれ（' + esc(hm(t.drawn_at)) + '）。</div></div>';   /* fq-nogrand-v1 */
         var top = '<div class="pnm">' + esc(t.prize_name || '景品') + '</div>'
                 + '<div class="pno">景品番号 ' + (t.prize_no != null ? esc(t.prize_no) + '番' : '—') + '　（当たり ' + esc(hm(t.drawn_at)) + '）</div>';
-        if (t.handed_at) return '<div class="lk-it">' + r + top + '<div class="st ok">✅ 渡し済み　' + esc(hm(t.handed_at)) + '　' + esc(t.handed_by || '') + '</div></div>';
+        if (t.handed_at) return '<div class="lk-it">' + r + top + '<div class="st ok">✅ 渡し済み　' + esc(hm(t.handed_at)) + '　' + esc(t.handed_by || '') + '</div>'
+                             + '<button type="button" class="un" data-lkunhand="' + esc(t.token) + '" data-pz="' + esc((t.prize_no != null ? t.prize_no + '番 ' : '') + (t.prize_name || '景品')) + '">渡したのを取り消す</button></div>';   /* fq-self-draw-v1 */
         return '<div class="lk-it">' + r + top + '<div class="st wait">まだ渡していません。</div>'
              + '<button type="button" data-lkhand="' + esc(t.token) + '">景品を渡しました</button></div>';
       }).join('');
     }).catch(function(e){ out.innerHTML = '<p class="msg err">つながりませんでした（' + esc(e.message || e) + '）</p>'; });
   }
+  /* == fq-self-draw-v1 : 「景品を渡しました」の取り消し。必ず確認を出す == */
+  function unhand(tok, label, done){
+    if (!confirm('「' + label + '」を「まだ渡していない」に戻しますか？\n\n景品がまだお客さんに渡っていないときだけ押してください。\n（取り消したことは記録に残ります）')) return;
+    rpc('fq_ticket_unhand', {p_staff: getStaff(), p_token: tok}).then(function(d){
+      if (!d.ok) { if (d.reason === 'staff') return staffLost(); alert('取り消せませんでした。'); return; }
+      done && done(d.ticket); loadPending();
+    }).catch(function(e){ alert('つながりませんでした（' + (e.message||e) + '）'); });
+  }
+  $('unhandBtn').addEventListener('click', function(){
+    var t = lastTicket || {};
+    unhand(token, (t.prize_no != null ? t.prize_no + '番 ' : '') + (t.prize_name || '景品'), function(nt){
+      paint(nt); $('tMsg').className = 'msg'; $('tMsg').textContent = '取り消しました。「まだ渡していない」に戻りました。';
+    });
+  });
+  $('lkOut').addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-lkunhand]'); if (!b) return;
+    var tok = b.getAttribute('data-lkunhand');
+    unhand(tok, b.getAttribute('data-pz') || '景品', function(t){ if (tok === token) paint(t); lookup(); });
+  });
   $('lkBtn').addEventListener('click', lookup);
   $('lkNo').addEventListener('keydown', function(e){ if (e.key === 'Enter') lookup(); });
   $('lkOut').addEventListener('click', function(ev){
     var b = ev.target.closest && ev.target.closest('[data-lkhand]'); if (!b) return;
+    if (!confirm('QRを読まずに渡します。\nお客さんのスマホで、この当たりの画面（受け取りのQR）を確かめましたか？\n\n認識番号だけで渡すと、他人の当たりを受け取られることがあります。')) return;   /* fq-self-draw-v1 */
     b.disabled = true;
     var tok = b.getAttribute('data-lkhand');
     hand(tok, function(t){ if (tok === token) paint(t); lookup(); });
