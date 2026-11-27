@@ -3454,6 +3454,9 @@ if ('serviceWorker' in navigator) {
     ['sndBtn','gachaBtn','gachaHint'].forEach(function(id){ var e=$(id); if(e) e.style.display='none'; });
     var st = sec && sec.querySelector('.gacha-stage'); if(st) st.style.display='none';
     var hd = sec && sec.querySelector('.sec-h'); if(hd) hd.style.display='none'; }
+  /* fq-goal-nocam-v1: ゴールした人には「QRを読む」を出さない */
+  function paintCam(){ var g = freeOk(); [].forEach.call(document.querySelectorAll('.qrcam-btn[data-qrcam]'), function(b){ b.style.display = g ? 'none' : ''; }); }
+  paintCam(); setInterval(paintCam, 2000);
   paintFree(); setInterval(paintFree, 2000);
   /* fq-goal-free-v1: おたのしみガチャまで移動 */
   window.fqGoFree = function(){
