@@ -13,7 +13,8 @@
        つながらない時だけキャッシュを出す（＝オフラインでも開ける）。
      - アイコン・manifest だけ「キャッシュ優先」（変わらないので速さ優先）。
    ------------------------------------------------------------------ */
-const CACHE = 'fq326-v48';  // fq-qr-remake-v1: QRをテスト用と本番用に分けた
+const CACHE = 'fq326-v49';  // fq-qr-remake-v2: 本番用QRの作り直しは2回確かめる
+// (旧) const CACHE = 'fq326-v48';  // fq-qr-remake-v1: QRをテスト用と本番用に分けた
 // (旧) const CACHE = 'fq326-v47';  // fq-zukan86-v1: 図鑑の絵を86体に入れかえた
 // (旧) const CACHE = 'fq326-v21';  // fq-voucher-v1: lib/qrcode.min.js を足した
 // (旧) const CACHE = 'fq326-v20';  // fq-mon7-v1: mon_1〜mon_7 を切り抜き直したので版を上げる

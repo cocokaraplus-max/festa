@@ -1343,7 +1343,11 @@ boot();
   $('admQrMode').addEventListener('click', function(e){
     var b = e.target.closest('[data-remake]'); if (!b) return;
     var m = b.getAttribute('data-remake'), name = m === 'test' ? 'テスト用' : '本番用';
-    if (!confirm(name + 'のQRを作り直します。\n今あるQR（印刷した紙も）は、全部使えなくなります。よろしいですか？')) return;
+    if (QM.mode === 'live') {   /* fq-qr-remake-v2: 本番用ができているときは2回確かめる */
+      if (!confirm('⚠ いまは「本番用」のQRができています（' + (QM.at || '') + ' 作成）。\n\n'
+                   + name + 'のQRを作り直すと、会場に貼った本番用のQRが全部使えなくなり、印刷し直しが必要になります。\n\n本当に作り直しますか？')) return;
+      if (!confirm('もう一度確かめます。\n\n印刷した本番用のQRは、全部捨てて印刷し直すことになります。\nそれでも作り直しますか？')) return;
+    } else if (!confirm(name + 'のQRを作り直します。\n今あるQR（印刷した紙も）は、全部使えなくなります。よろしいですか？')) return;
     [].forEach.call(document.querySelectorAll('#admQrMode button'), function(x){ x.disabled = true; });
     rpc('fq_admin_qr_remake', {p_pass: pass.value, p_mode: m}).then(function(d){
       if (!d.ok) { alert(d.message || '作り直せませんでした。'); loadQr(pass.value); return; }
