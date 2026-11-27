@@ -3096,6 +3096,15 @@ if ('serviceWorker' in navigator) {
     <button class="btn" data-act="close" data-mod="g2ClaimModal" style="margin-top:10px">とじる</button>
   </div>
 </div>
+<div class="modal" id="g2TeamPick"><!-- fq-team-ux-v1: チームをつくる／入る をえらぶ -->
+  <div class="modal-card">
+    <div class="g2-big">チームでまわる</div>
+    <p class="g2-note" style="margin-bottom:10px">同じチームになると、<b>全員に同じ行き先</b>が出ます（10人まで）。</p>
+    <button type="button" class="btn" data-g2="teammake" style="width:100%;margin:6px 0;background:#B4205F;border-color:#B4205F;color:#fff">チームをつくる<br><small style="font-size:12px;font-weight:700">自分のQRを、仲間に読んでもらう</small></button>
+    <button type="button" class="btn" data-g2="teamjoin" style="width:100%;margin:6px 0">友だちのチームに入る<br><small style="font-size:12px;font-weight:700">友だちのチームのQRを、カメラで読む</small></button>
+    <button class="btn" data-act="close" data-mod="g2TeamPick" style="margin-top:10px;background:#fff">やめる</button>
+  </div>
+</div>
 <div class="modal" id="g2TeamModal">
   <div class="modal-card">
     <div class="g2-big">チームのQR</div>
@@ -3167,11 +3176,17 @@ if ('serviceWorker' in navigator) {
     // チーム
     var tm=$('g2Team');
     if(G.team){
+      if((G.team.count|0)<=1){   /* fq-team-ux-v1: まだ自分だけ → すぐやめられる */
+        tm.innerHTML='<div class="g2-tl">👫 チーム（まだ あなただけ）</div>'
+          +'<button type="button" class="main" data-g2="teamqr">チームのQRを見せる</button>'
+          +'<button type="button" data-g2="leave">やめる</button>'
+          +'<div class="g2-memnote">いっしょにまわる人に、チームのQRを読んでもらってね。友だちのチームに入るなら「やめる」→「チームでまわる」→「友だちのチームに入る」。</div>';
+      } else
       tm.innerHTML='<div class="g2-tl">👫 チーム（'+G.team.count+'人）</div>'
         +'<button type="button" class="main" data-g2="teamqr">チームのQR</button>'
         +'<button type="button" data-g2="leave">ぬける</button>';
       var MEM=G.team.members||[];   /* fq-team-names-v1: 仲間の なまえ */
-      if(MEM.length){
+      if(MEM.length>1){   /* fq-team-ux-v1: 自分だけのときは並べない */
         tm.innerHTML+='<div class="g2-mems">'+MEM.map(function(x){
           return '<span class="g2-mem'+(x.me?' me':'')+'">'+(x.nick?esc(x.nick):'認識番号 '+esc(x.no))+(x.me?'<small>あなた</small>':'')+'</span>';
         }).join('')+'</div>';
@@ -3179,7 +3194,7 @@ if ('serviceWorker' in navigator) {
         if(mine && !mine.nick) tm.innerHTML+='<div class="g2-memnote">上の「なまえ」を入れると、仲間の画面にあなたのなまえが出ます。</div>';
       }
     } else if(ls(SOLO)==='1'){
-      tm.innerHTML='<div class="g2-tl">🚶 ひとりでまわっています</div><button type="button" data-g2="team">チームにする</button>';
+      tm.innerHTML='<div class="g2-tl">🚶 ひとりでまわっています</div><button type="button" data-g2="team">チームにする</button>';   /* fq-team-ux-v1: 押すと えらぶ画面 */
     } else {
       tm.innerHTML='<div class="g2-q">友だちや家族といっしょ？　ひとり？</div><div class="g2-choose">'
         +'<button type="button" class="main" data-g2="team">チームでまわる</button>'
@@ -3391,7 +3406,10 @@ if ('serviceWorker' in navigator) {
       $('g2ClaimModal').classList.add('show'); return;
     }
     if(!sec){ toast('電波の良い場所で開き直してね'); return; }
-    if(a==='team' || a==='teamqr'){
+    if(a==='team'){ $('g2TeamPick').classList.add('show'); return; }   /* fq-team-ux-v1: まずえらぶ（ここではチームを作らない） */
+    if(a==='teamjoin'){ $('g2TeamPick').classList.remove('show'); if(window.fqQrCamOpen) window.fqQrCamOpen(); return; }
+    if(a==='teammake' || a==='teamqr'){
+      $('g2TeamPick').classList.remove('show');
       sb.rpc('fq_team_create', {p_recog:String(DID), p_secret:sec}).then(function(res){
         var d=res && res.data; if(!d || !d.ok){ toast('つくれませんでした。もう一度ためしてね'); return; }
         ls(SOLO,null);
@@ -3401,8 +3419,13 @@ if ('serviceWorker' in navigator) {
         window.fqG2Refresh(); if(window.fqLpRefresh) window.fqLpRefresh();   /* fq-daycheck-v1 */
       }).catch(function(){ toast('つながりませんでした'); });
     } else if(a==='leave'){
-      if(!confirm('チームをぬけて、ひとりでまわりますか？')) return;
-      sb.rpc('fq_team_leave', {p_recog:String(DID), p_secret:sec}).then(function(){ ls(SOLO,'1'); window.fqG2Refresh(); if(window.fqLpRefresh) window.fqLpRefresh(); });
+      var alone = !(G && G.team) || (G.team.count|0) <= 1;   /* fq-team-ux-v1: 自分だけなら確認なしでやめる */
+      if(!alone && !confirm('チームをぬけますか？\n（ぬけたあと、ひとりでまわるか、ほかのチームに入るかをえらべます）')) return;
+      b.disabled = true;
+      sb.rpc('fq_team_leave', {p_recog:String(DID), p_secret:sec}).then(function(){
+        ls(SOLO,null); if(G) G.team=null; paint();   /* 元の えらぶ画面に戻す */
+        window.fqG2Refresh(); if(window.fqLpRefresh) window.fqLpRefresh();
+      }).catch(function(){ b.disabled = false; toast('つながりませんでした'); });
     }
   });
   $('g2TicketBtn').addEventListener('click', function(){
@@ -3686,6 +3709,7 @@ if ('serviceWorker' in navigator) {
   document.getElementById('qrCamClose').addEventListener('click', close);
   document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden' && box.classList.contains('show')) close(); });
   window.fqQrCamHandle = handle;   /* 試すとき用 */
+  window.fqQrCamOpen = open;   /* fq-team-ux-v1: 「友だちのチームに入る」から開く */
 })();
 </script>
 </body>
