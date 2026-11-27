@@ -3270,7 +3270,7 @@ if ('serviceWorker' in navigator) {
       ct.innerHTML=['exp','talk','see'].map(function(c){
         var n=(m.n&&m.n[c])|0, on = n>=round;
         var fl=(m.floors&&m.floors[c])||[];
-        return '<div class="g2-cat '+c+(on?' on':'')+'">'+CAT[c]+(on?' ✓':'')+'<small>'+(on?(fl[fl.length-1]+'階で読んだ！'):'まだ')+'</small>'+(on?'<span class="g2-sumi" aria-label="済">済</span>':'')+'</div>';   /* fq-booth-lock-v1: 済のはんこ */
+        return '<div class="g2-cat '+c+(on?' on':'')+'">'+CAT[c]+(on?' ✓':'')+'<small>'+(on?'&nbsp;':'まだ')+'</small>'/* fq-no-floor-v1: ○階で読んだ は出さない */+(on?'<span class="g2-sumi" aria-label="済">済</span>':'')+'</div>';   /* fq-booth-lock-v1: 済のはんこ */
       }).join('')+'<div class="g2-round" style="grid-column:1/-1">ガチャ '+(drawn+1)+'回目にむけて（1人2回まで）</div>';
     }
     // ガチャ券
