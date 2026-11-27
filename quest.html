@@ -386,6 +386,10 @@
   .sd-tile small{color:#6b5d48;font-size:10px;}
   .sd-note{color:#6b5d48;}
   .sd-again{margin-top:10px;text-align:center;}
+  .sd-go{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:14px 0 4px;padding:14px;border:3px solid var(--ink);border-radius:14px;
+    background:#F5E83A;color:var(--ink);box-shadow:0 5px 0 var(--ink);font-family:inherit;font-size:19px;font-weight:900;cursor:pointer;}   /* fq-shindan-quest-v1 */
+  .sd-go small{display:block;font-size:12px;font-weight:700;}
+  .sd-go:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink);}
   .sd-modal .modal-card{max-width:340px;}
   .sd-bd{display:block;margin:12px 0 0;font-size:13px;font-weight:900;text-align:left;}
   .sd-bd input{width:100%;margin-top:6px;font-family:inherit;font-size:17px;font-weight:800;color:var(--ink);
@@ -785,6 +789,7 @@ window.__FQ_Q0 = location.search;</script>
     </div>
     <div id="g2Team" class="g2-team"></div>
     <div id="g2Nav" class="g2-nav"><div class="g2-nav-k">つぎの行き先</div><div class="g2-nav-v">読み込み中…</div></div>
+    <button type="button" class="qrcam-btn" data-qrcam="1"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13 13h3v3"/></svg><span>QRを読む<small>カメラがひらきます</small></span></button><!-- fq-qrcam-v1 -->
     <div id="g2Cats" class="g2-cats"></div>
     <button type="button" class="btn g2-ticket" id="g2TicketBtn" style="display:none">🎟 ガチャ券を見せる</button>
     <div id="g2Results" class="g2-results"></div>
@@ -826,6 +831,7 @@ window.__FQ_Q0 = location.search;</script>
   <!-- == fq-zukan-v1 == -->
   <section id="zukanSec" data-tab="zukan">
     <div class="sec-h hand"><span class="em">📖</span>キャラクター図鑑</div>
+    <button type="button" class="qrcam-btn" data-qrcam="1"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13 13h3v3"/></svg><span>QRを読む<small>カメラがひらきます</small></span></button><!-- fq-qrcam-v1 -->
     <!-- == fq-logpose-v1 : つぎの行き先。fq_logpose.sql を Run すると出る == -->
     <div class="lp-box" id="lpBox" style="display:none">
       <div class="lp-h"><span class="lp-em">🧭</span><span id="lpHead">つぎの ぼうけん</span></div>
@@ -1044,7 +1050,7 @@ function scan(code){
   if(S.scanned.indexOf(base)!==-1){toast('このQRはもう読み取り済みだよ');render();return;}
   var wasAll=allDone();
   S.scanned.push(base); save();
-  var label={start:'ガチャへの道 スタート！',f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「見る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「見る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
+  var label={start:'ガチャへの道 スタート！',f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「知る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「知る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
   toast(base==='check' ? '🔮 福祉タイプ診断のQRを読んだよ' : ('✅ '+label));   /* fq-daycheck-v1: ポイントの表示はもう出さない */
   if(window.fqG2Refresh) setTimeout(window.fqG2Refresh, 1200);
   render();
@@ -1804,6 +1810,7 @@ document.addEventListener('click', function(ev){
       + '<div class="sd-blk sd-good"><h5>強み</h5><p>'+esc(t.good)+'</p></div>'
       + '<div class="sd-blk sd-weak"><h5>苦手なところ</h5><p class="sd-weak">'+esc(t.weak)+'</p></div>'
       + '</div>'
+      + '<button type="button" class="sd-go" data-act="sdQuest"><span>🧭</span><span>クエストをはじめる<small>会場をまわって、ガチャをまわそう！</small></span></button>'   /* fq-shindan-quest-v1 */
       + '<div class="sd-again"><button class="linkbtn" data-act="sdOpen">生年月日を入れ直す</button></div>'
       + allTypesHtml(r.key);   // fq-shindan-all-v1
     /* ★fq-monster-v1: 7体そろったが、この控えは残してある。
@@ -1862,6 +1869,7 @@ document.addEventListener('click', function(ev){
     else if(a==='sdType'){ openType(el.getAttribute('data-key')); }   // fq-shindan-all-v1
     else if(a==='sdClose'){ closeShindan(); }
     else if(a==='sdRun'){ runShindan(); }
+    else if(a==='sdQuest'){ if(window.FQ_TAB) window.FQ_TAB('quest', true); }   /* fq-shindan-quest-v1 */
   });
 
   /* 既存の「適性診断」QR（?q=check）と連動。scan は後から Supabase 配線側でも
@@ -3005,7 +3013,7 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 <!-- == fq-gacha2-v1 : 新しいガチャ（チーム・ログポース・ガチャ券・受付で読み取り） ==
-     ★決まり：3階・4階の「体験」「話を聞く」「見る」を1つずつ → ガチャ券1枚。1人2回まで
+     ★決まり：3階・4階の「体験」「話を聞く」「知る」（fq-shiru-v1：前は「見る」）を1つずつ → ガチャ券1枚。1人2回まで
      ★ガチャ券のQRを受付のスタッフが読む（uketsuke.html）と、ここで「ガチャをまわす」が押せる
      ★当たり外れ・券・チームの行き先は、すべてサーバー（fq_gacha2.sql）が決める。ここは表示だけ
      ★前のポイントのガチャ（fq_draw）は使わない。drawGacha をここで差し替えている -->
@@ -3015,6 +3023,11 @@ if ('serviceWorker' in navigator) {
   .g2-team .g2-tl{flex:1 1 auto;font-weight:800;font-size:14px;}
   .g2-team button{border:2px solid var(--ink);background:#fff;border-radius:10px;padding:8px 12px;font-weight:900;font-family:inherit;font-size:14px;color:var(--ink);}
   .g2-team button.main{background:#B4205F;border-color:#B4205F;color:#fff;}
+  .g2-mems{width:100%;display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;}   /* fq-team-names-v1 */
+  .g2-mem{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 11px;font-size:13.5px;font-weight:900;line-height:1.5;}
+  .g2-mem.me{background:#B4205F;border-color:#B4205F;color:#fff;}
+  .g2-mem small{font-size:10.5px;margin-left:4px;opacity:.92;}
+  .g2-memnote{width:100%;font-size:12px;font-weight:700;color:var(--muted);}
   .g2-team .g2-choose{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
   .g2-team .g2-choose button{padding:12px 6px;font-size:15px;}
   .g2-team .g2-q{width:100%;font-size:13px;color:var(--muted);font-weight:700;}
@@ -3084,7 +3097,7 @@ if ('serviceWorker' in navigator) {
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){ return null; } }
   function secret(){ return ls('fq_secret_v1') || ''; }
-  var CAT = {exp:'体験', talk:'話を聞く', see:'見る'};
+  var CAT = {exp:'体験', talk:'話を聞く', see:'知る'};   /* fq-shiru-v1 */
   var G = null;                // サーバーから聞いた状態
   var SOLO = 'fq_g2_solo_v1';  // 「ひとりでまわる」を選んだ
 
@@ -3138,6 +3151,14 @@ if ('serviceWorker' in navigator) {
       tm.innerHTML='<div class="g2-tl">👫 チーム（'+G.team.count+'人）</div>'
         +'<button type="button" class="main" data-g2="teamqr">チームのQR</button>'
         +'<button type="button" data-g2="leave">ぬける</button>';
+      var MEM=G.team.members||[];   /* fq-team-names-v1: 仲間の なまえ */
+      if(MEM.length){
+        tm.innerHTML+='<div class="g2-mems">'+MEM.map(function(x){
+          return '<span class="g2-mem'+(x.me?' me':'')+'">'+(x.nick?esc(x.nick):'認識番号 '+esc(x.no))+(x.me?'<small>あなた</small>':'')+'</span>';
+        }).join('')+'</div>';
+        var mine=MEM.filter(function(x){ return x.me; })[0];
+        if(mine && !mine.nick) tm.innerHTML+='<div class="g2-memnote">上の「なまえ」を入れると、仲間の画面にあなたのなまえが出ます。</div>';
+      }
     } else if(ls(SOLO)==='1'){
       tm.innerHTML='<div class="g2-tl">🚶 ひとりでまわっています</div><button type="button" data-g2="team">チームにする</button>';
     } else {
@@ -3314,7 +3335,7 @@ if ('serviceWorker' in navigator) {
       else if(t) hint.innerHTML='<b>ガチャ券</b>があります。1Fの受付で見せてね';
       else if(G.claim_wait) hint.innerHTML='<b>当たりの景品</b>を1Fの受付で受け取ってね（受け取ると、つぎに進めます）';   /* fq-self-draw-v1 */
       else if(drawn>=2) hint.innerHTML='🎊 ガチャは2回まわしました。図鑑のキャラ集めへ！';
-      else hint.innerHTML='「体験」「話を聞く」「見る」を1つずつそろえると、ガチャ券がもらえます';
+      else hint.innerHTML='「体験」「話を聞く」「知る」を1つずつそろえると、ガチャ券がもらえます';   /* fq-shiru-v1 */
     }
   };
 
@@ -3532,6 +3553,120 @@ if ('serviceWorker' in navigator) {
     try { if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]); } catch(e) {}
     setTimeout(function(){ if (!FW.on) close(); }, (top ? 16 : 12) * 1000 + 2500);
   };
+})();
+</script>
+<!-- == fq-qrcam-v1 : アプリの中でQRを読む == -->
+<style>
+  .qrcam-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin:10px 0 14px;padding:12px 14px;
+    background:var(--ink);color:#fff;border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 rgba(0,0,0,.35);
+    font-family:inherit;font-size:20px;font-weight:900;cursor:pointer;text-align:left;line-height:1.2;}
+  .qrcam-btn small{display:block;font-size:12px;font-weight:700;opacity:.85;margin-top:2px;}
+  .qrcam-btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.35);}
+  #qrCam{position:fixed;inset:0;z-index:8000;background:#000;display:none;flex-direction:column;}
+  #qrCam.show{display:flex;}
+  #qrCam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  #qrCam .qc-mask{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+  #qrCam .qc-frame{width:min(68vw,320px);height:min(68vw,320px);border-radius:18px;box-shadow:0 0 0 100vmax rgba(0,0,0,.55);position:relative;}
+  #qrCam .qc-frame::before,#qrCam .qc-frame::after{content:"";position:absolute;inset:-3px;border-radius:20px;border:4px solid #F5E83A;
+    -webkit-mask:linear-gradient(#000 0 0) top/100% 26% no-repeat,linear-gradient(#000 0 0) bottom/100% 26% no-repeat;
+            mask:linear-gradient(#000 0 0) top/100% 26% no-repeat,linear-gradient(#000 0 0) bottom/100% 26% no-repeat;}
+  #qrCam .qc-frame::after{-webkit-mask:linear-gradient(#000 0 0) left/26% 100% no-repeat,linear-gradient(#000 0 0) right/26% 100% no-repeat;
+            mask:linear-gradient(#000 0 0) left/26% 100% no-repeat,linear-gradient(#000 0 0) right/26% 100% no-repeat;}
+  #qrCam .qc-line{position:absolute;left:8%;right:8%;height:3px;background:#F5E83A;border-radius:2px;box-shadow:0 0 12px #F5E83A;top:10%;animation:qcl 1.8s ease-in-out infinite alternate;}
+  @keyframes qcl{to{top:88%;}}
+  #qrCam .qc-top{position:relative;z-index:2;padding:calc(env(safe-area-inset-top) + 14px) 16px 10px;color:#fff;text-align:center;font-size:17px;font-weight:900;text-shadow:0 1px 4px #000;}
+  #qrCam .qc-msg{position:relative;z-index:2;margin:auto 16px 0;color:#fff;text-align:center;font-size:15px;font-weight:800;line-height:1.6;text-shadow:0 1px 4px #000;min-height:3.2em;}
+  #qrCam .qc-msg.ng{background:rgba(194,56,31,.92);border-radius:12px;padding:10px 12px;text-shadow:none;}
+  #qrCam .qc-close{position:relative;z-index:2;margin:12px 16px calc(env(safe-area-inset-bottom) + 18px);padding:14px;border:0;border-radius:14px;
+    background:#fff;color:#222;font-family:inherit;font-size:17px;font-weight:900;}
+</style>
+<div id="qrCam" role="dialog" aria-modal="true" aria-label="QRを読む">
+  <video id="qrCamV" playsinline muted autoplay></video>
+  <div class="qc-mask"><div class="qc-frame"><div class="qc-line"></div></div></div>
+  <div class="qc-top">会場のQRを、わくの中に入れてね</div>
+  <div class="qc-msg" id="qrCamMsg"></div>
+  <button type="button" class="qc-close" id="qrCamClose">とじる</button>
+</div>
+<script>
+(function(){
+  'use strict';
+  var box = document.getElementById('qrCam'), v = document.getElementById('qrCamV'), msg = document.getElementById('qrCamMsg');
+  var stream = null, timer = 0, det = null, cv = null, cx = null, busy = false, done = false;
+  function say(t, ng){ msg.textContent = t || ''; msg.className = 'qc-msg' + (ng ? ' ng' : ''); }
+  function stop(){
+    clearTimeout(timer); timer = 0;
+    if (stream) { stream.getTracks().forEach(function(t){ try { t.stop(); } catch(e) {} }); stream = null; }
+    try { v.srcObject = null; } catch(e) {}
+  }
+  function close(){ stop(); box.classList.remove('show'); }
+  function loadJsQR(){
+    return new Promise(function(ok, ng){
+      if (window.jsQR) return ok();
+      var s = document.createElement('script'); s.src = 'lib/jsQR.min.js'; s.onload = function(){ ok(); }; s.onerror = ng; document.head.appendChild(s);
+    });
+  }
+  /* 読んだ中身 → 福祉クエストのQRなら、アプリの中でそのまま開く */
+  function handle(text){
+    var u; try { u = new URL(String(text || '').trim(), location.href); } catch(e) { u = null; }
+    if (!u || !/^https?:$/.test(u.protocol)) { say('これは福祉クエストのQRではないみたい。会場のQRを読んでね', true); return false; }
+    var sameSite = (u.host === location.host) || /(^|\.)lifeplusllc\.com$/.test(u.hostname);
+    if (!sameSite) { say('これは福祉クエストのQRではないみたい（' + u.hostname + '）', true); return false; }
+    if (/(uketsuke|atari|honbu|shop)\.html$/.test(u.pathname)) { say('これはスタッフ用のQRです', true); return false; }
+    var p = u.searchParams;
+    if (!(p.get('q') || p.get('z') || p.get('v') || p.get('team'))) { say('このQRでは何も起きないみたい。会場のQRを読んでね', true); return false; }
+    try { if (navigator.vibrate) navigator.vibrate(60); } catch(e) {}
+    say('読めた！'); stop();
+    var base = location.pathname.replace(/[^\/]*$/, '');
+    location.href = base + 'quest.html' + u.search;   /* スマホのカメラで読んだときと同じ道すじ（アプリの外に出ない） */
+    return true;
+  }
+  function tick(){
+    if (!stream || done) return;
+    if (busy || v.readyState < 2) { timer = setTimeout(tick, 150); return; }
+    busy = true;
+    var p;
+    if (det) {
+      p = det.detect(v).then(function(r){ return r && r[0] ? r[0].rawValue : null; });
+    } else {
+      p = new Promise(function(ok){
+        var w = v.videoWidth, h = v.videoHeight; if (!w || !h) return ok(null);
+        var sc = Math.min(1, 640 / Math.max(w, h)); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc);
+        cx.drawImage(v, 0, 0, cv.width, cv.height);
+        var img = cx.getImageData(0, 0, cv.width, cv.height), r = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+        ok(r ? r.data : null);
+      });
+    }
+    p.then(function(t){
+      busy = false;
+      if (t && handle(t)) { done = true; return; }
+      timer = setTimeout(tick, t ? 1400 : 140);   // ちがうQRだったときは、読めるまで少し待つ
+    }).catch(function(){ busy = false; timer = setTimeout(tick, 300); });
+  }
+  function open(){
+    done = false; say(''); box.classList.add('show');
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+      say('このスマホでは、ここからカメラが使えません。スマホのカメラアプリでQRを読んでね', true); return;
+    }
+    var ready = ('BarcodeDetector' in window)
+      ? window.BarcodeDetector.getSupportedFormats().then(function(f){ if (f.indexOf('qr_code') >= 0) det = new window.BarcodeDetector({ formats: ['qr_code'] }); }).catch(function(){})
+      : Promise.resolve();
+    ready.then(function(){ if (!det) { cv = cv || document.createElement('canvas'); cx = cx || cv.getContext('2d', { willReadFrequently: true }); return loadJsQR(); } })
+      .then(function(){ return navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }); })
+      .then(function(s){
+        if (!box.classList.contains('show')) { s.getTracks().forEach(function(t){ t.stop(); }); return; }
+        stream = s; v.srcObject = s; var pl = v.play(); if (pl && pl.catch) pl.catch(function(){});
+        timer = setTimeout(tick, 300);
+      })
+      .catch(function(e){
+        var n = e && e.name;
+        say(n === 'NotAllowedError' ? 'カメラが許可されていません。スマホの設定でカメラを許可するか、スマホのカメラアプリでQRを読んでね'
+                                    : 'カメラをひらけませんでした。スマホのカメラアプリでQRを読んでね', true);
+      });
+  }
+  document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('[data-qrcam]'); if (b) { e.preventDefault(); open(); } });
+  document.getElementById('qrCamClose').addEventListener('click', close);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden' && box.classList.contains('show')) close(); });
+  window.fqQrCamHandle = handle;   /* 試すとき用 */
 })();
 </script>
 </body>

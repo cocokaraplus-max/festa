@@ -13,7 +13,11 @@
        つながらない時だけキャッシュを出す（＝オフラインでも開ける）。
      - アイコン・manifest だけ「キャッシュ優先」（変わらないので速さ優先）。
    ------------------------------------------------------------------ */
-const CACHE = 'fq326-v56';  // fq-marche-ig-v3: マルシェの Instagram の札を目立たせる
+const CACHE = 'fq326-v60';  // fq-shiru-v1: 「見る」→「知る」
+// (旧) const CACHE = 'fq326-v59';  // fq-shindan-quest-v1: 診断の結果の下に「クエストをはじめる」
+// (旧) const CACHE = 'fq326-v58';  // fq-team-names-v1: チームの仲間の なまえ を出す
+// (旧) const CACHE = 'fq326-v57';  // fq-qrcam-v1: クエストの中でQRを読むカメラ（lib/jsQR.min.js）
+// (旧) const CACHE = 'fq326-v56';  // fq-marche-ig-v3: マルシェの Instagram の札を目立たせる
 // (旧) const CACHE = 'fq326-v55';  // fq-marche-ig-v2: マルシェの Instagram のマークを揺らす
 // (旧) const CACHE = 'fq326-v54';  // fq-marche-ig-v1: マルシェの看板に Instagram の札
 // (旧) const CACHE = 'fq326-v53';  // fq-fx10-v1: 演出を10段階に。1等・特賞はスマホにも花火
@@ -45,7 +49,7 @@ const ASSETS = ['./', './index.html', './quest.html', './config.js', './manifest
   './img/app/m_check.png', './img/app/m_event.png',
   './img/app/sw1.png', './img/app/sw2.png', './img/app/sw3.png',
   './img/app/sw4.png', './img/app/sw5.png', './img/app/sw6.png',
-  './lib/qrcode.min.js', './shop.html'];  // fq-voucher-v1
+  './lib/qrcode.min.js', './lib/jsQR.min.js', './shop.html'];  // fq-voucher-v1
 
 self.addEventListener('install', e => {
   // 1つでも落ちると全部入らないので、個別に入れて失敗は無視する
