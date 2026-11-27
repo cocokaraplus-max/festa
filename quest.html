@@ -3193,7 +3193,8 @@ if ('serviceWorker' in navigator) {
   }
   function schedule(){
     var fast = Date.now() < fastUntil || ($('g2TicketModal').classList.contains('show'));
-    timer=setTimeout(refresh, fast ? 2500 : 20000);
+    var teamOn = !!(G && G.team && (G.team.count|0) > 1 && G.member && (G.member.drawn|0) < 2);   /* fq-team-poll-v1: チームで回っているあいだは 6秒ごと */
+    timer=setTimeout(refresh, fast ? 2500 : teamOn ? 6000 : 20000);
   }
   window.fqG2Refresh = function(){ fastUntil = Date.now()+15000; refresh(); };
 
