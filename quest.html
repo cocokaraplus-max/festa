@@ -400,6 +400,9 @@
   .sd-bd input::-webkit-date-and-time-value{text-align:left;margin:0;}
   .sd-bd input::-webkit-datetime-edit{padding:0;}
   .sd-err{color:var(--red);font-size:12.5px;font-weight:800;margin:8px 0 0;min-height:18px;}
+  /* fq-bd-num-v1: 数字で入れる欄 */
+  .sd-bd.sd-num{margin-top:10px;font-size:12px;color:#7a6a5c;}
+  .sd-bd.sd-num input{letter-spacing:.08em;}
   .sd-note{font-size:11.5px;color:var(--muted);line-height:1.7;font-weight:600;margin:12px 0 0;}
 </style>
 <style>/* == fq-zukan-v1 : キャラクター図鑑 == */
@@ -924,6 +927,7 @@ window.__FQ_Q0 = location.search;</script>
     <div class="big">🔮</div>
     <h3 class="hand">福祉タイプ診断</h3>
     <label class="sd-bd">生年月日<input type="date" id="sdBirth" min="1900-01-01"></label>
+    <label class="sd-bd sd-num">数字で入れる（8けた）<input type="text" id="sdNum" inputmode="numeric" maxlength="10" placeholder="例）19800115" autocomplete="off"></label><!-- fq-bd-num-v1 -->
     <div class="sd-err" id="sdErr"></div>
     <button class="btn" data-act="sdRun">診断する</button>
     <p class="sd-note">入力した生年月日は、この端末の中で計算に使うだけです。サーバーには送りませんし、保存もしません（残るのは結果のタイプだけ）。</p>
@@ -1839,9 +1843,23 @@ document.addEventListener('click', function(ev){
     var m=document.getElementById('shindanModal'); if(m) m.classList.remove('show');
     if(window.S){ S.shindanSkip=true; if(typeof save==='function') save(); }
   }
+  /* fq-bd-num-v1: 数字（19800115 / 1980/1/15 / 1980.1.15 / 1980-1-15）を YYYY-MM-DD に */
+  function sdNumToDate(s){
+    s=String(s||'').replace(/[０-９]/g,function(c){ return String.fromCharCode(c.charCodeAt(0)-0xFEE0); }).trim();
+    var mm=/^(\d{4})(\d{2})(\d{2})$/.exec(s) || /^(\d{4})\D+(\d{1,2})\D+(\d{1,2})\D*$/.exec(s);
+    if(!mm) return '';
+    return mm[1]+'-'+('0'+mm[2]).slice(-2)+'-'+('0'+mm[3]).slice(-2);
+  }
+  document.addEventListener('input', function(ev){
+    var t=ev.target; if(!t) return;
+    if(t.id==='sdNum'){ var v=sdNumToDate(t.value), b=document.getElementById('sdBirth'); if(v && b) b.value=v; var e=document.getElementById('sdErr'); if(e) e.textContent=''; }
+    if(t.id==='sdBirth'){ var n=document.getElementById('sdNum'); if(n && t.value) n.value=t.value.replace(/-/g,''); }
+  });
   function runShindan(){
     var inp=document.getElementById('sdBirth'), err=document.getElementById('sdErr');
-    var v=(inp&&inp.value)||'';
+    var nm=document.getElementById('sdNum');
+    if(nm && nm.value.trim() && !sdNumToDate(nm.value)){ if(err) err.textContent='数字は 8けたで入れてね（例 19800115）'; return; }   /* fq-bd-num-v1 */
+    var v=(nm && sdNumToDate(nm.value)) || (inp&&inp.value)||'';
     var mm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
     if(!mm){ if(err) err.textContent='生年月日を入れてください'; return; }
     var y=+mm[1], m=+mm[2], d=+mm[3], dt=new Date(y,m-1,d);
