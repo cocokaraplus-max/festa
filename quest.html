@@ -2388,6 +2388,10 @@ if ('serviceWorker' in navigator) {
       } else if(d.reason==='cooldown'){
         paint(0);
         countdown(d.wait);
+      } else if(d.reason==='locked'){   /* fq-spot-lock-v1: ガチャを2回まわすまで */
+        paint(0);
+        msg('<b>8か所めぐり</b>は、ガチャを<b>2回</b>まわしてから はじまるよ。<br>'
+          + 'まずは<b>ブース</b>をまわって、ガチャをまわそう！（いま ' + ((d.drawn|0)) + '/2 回）', true);
       } else if(d.reason==='wrong_spot'){   /* fq-spot-order-v1: ログポースが指した場所ではない */
         paint(0);
         var nx = d.logpose && d.logpose.next;
@@ -2757,6 +2761,15 @@ if ('serviceWorker' in navigator) {
       return;
     }
 
+    if(st.locked){   /* fq-spot-lock-v1 */
+      box.classList.remove('done');
+      $('lpHead').textContent = '8か所めぐりは まだ ロック中';
+      $('lpHint').innerHTML = 'ガチャを <b>2回</b> まわすと はじまるよ！<br><small>いま ' + (st.drawn|0) + '/2 回</small>';
+      $('lpAnsWrap').style.display='none';
+      $('lpName').style.display='none';
+      $('lpNote').innerHTML = 'まずは「クエスト」の<b>ガチャへの道</b>で、ブースをまわろう。';
+      return;
+    }
     box.classList.remove('done');
     $('lpHead').textContent = 'つぎの ぼうけん';
     var nx = st.next || {};
