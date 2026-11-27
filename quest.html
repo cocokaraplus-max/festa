@@ -3243,6 +3243,7 @@ if ('serviceWorker' in navigator) {
       var d=res && res.data;
       if(!d){ throw (res && res.error) || new Error('no data'); }
       if(!d.ok){ busy=false; window.busy=false; toast(d.reason==='claim_first'?'先に、当たった景品を1Fの受付で受け取ってね':d.reason==='not_unlocked'?'受付でガチャ券を見せてね':'もう一度ためしてね');   /* fq-self-draw-v1 */ refresh(); return; }
+      if(d.win){ d.fx = Math.max(1, Math.min(10, d.rarity|0)); d.rarity = d.fx<=3?1 : d.fx<=5?2 : d.fx<=7?3 : 4; }   /* fq-fx10-v1: 10段階 → スマホの4種類 */
       if(d.zukan && window.fqZukanGot) window.fqZukanGot(d.zukan);   /* fq-zukan2-v1: 演出が終わってから図鑑に1体 */
       /* == fq-gacha-play-v1 : お客さんが遊びを選ぶ演出（gacha_play.html）。開けないときは今までの演出 == */
       if(window.fqPlay && window.fqPlay(d)) return;
@@ -3275,6 +3276,7 @@ if ('serviceWorker' in navigator) {
       if(fr.parentNode) fr.parentNode.removeChild(fr);
       playFrame = null; busy = false; window.busy = false;
       if(d.win && !d.free && typeof toast === 'function') toast('🎁 1Fの受付で<b>「' + esc(d.prize_name || '景品') + '」</b>' + (d.prize_no != null ? '（' + d.prize_no + '番）' : '') + 'と交換してね。「受け取りのQRを見せる」を押すとQRが出るよ');   /* fq-self-draw-v1 */   /* fq-prize-big-v1 */
+      if(d.win && !d.free && (d.fx|0) >= 9 && window.fqBigFx) window.fqBigFx(d);   /* fq-fx10-v1: 1等・特賞はスマホにも花火 */
       refresh();
     }
     function onMsg(ev){
@@ -3294,7 +3296,7 @@ if ('serviceWorker' in navigator) {
       if(!d.win){ runLose(function(){ busy=false; window.busy=false; refresh(); }); return; }
       var lv = Math.max(1, Math.min(4, d.rarity|0));
       var p = { em:'🎁', name:d.prize_name||'景品', kind:(d.prize_no!=null?('景品番号【'+d.prize_no+'番】'):''), r:lv };
-      runFx(lv, function(){ busy=false; window.busy=false; showPrize(p, lv); confetti(lv); refresh(); }, false);
+      runFx(lv, function(){ busy=false; window.busy=false; showPrize(p, lv); confetti(lv); refresh(); if((d.fx|0) >= 9 && window.fqBigFx) window.fqBigFx(d); }, false);   /* fq-fx10-v1 */
     }, 8000);
     return true;
   };
@@ -3408,6 +3410,128 @@ if ('serviceWorker' in navigator) {
     d.innerHTML = '⚠️ ホーム画面から開いたアプリでは、QRの記録がつながりません。<br>ブースのQRを<b>カメラで読んで開く Safari</b> の画面で遊んでね。';
     document.body.insertBefore(d, document.body.firstChild);
   }catch(e){}
+})();
+</script>
+<!-- == fq-fx10-v1 : 1等・特賞のとき、スマホにも花火 == -->
+<style>
+  #fqBig{ position:fixed; inset:0; z-index:9000; display:none; align-items:center; justify-content:center; background:rgba(10,6,20,.9); }
+  #fqBig.show{ display:flex; }
+  #fqBig .bx{ position:relative; z-index:2; text-align:center; color:#fff; padding:22px 18px; animation:fqbp .9s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes fqbp{ 0%{ transform:scale(.5); opacity:0; } 60%{ transform:scale(1.06); opacity:1; } 100%{ transform:scale(1); } }
+  #fqBig .lb{ font-size:46px; font-weight:900; letter-spacing:.06em; line-height:1.15;
+              background:linear-gradient(90deg,#ff7a7a,#ffe27a,#7affa1,#7ad6ff,#c27aff,#ff7a7a); background-size:300% 100%;
+              -webkit-background-clip:text; background-clip:text; color:transparent; animation:fqbr 3s linear infinite; text-shadow:none; }
+  @keyframes fqbr{ to{ background-position:300% 0; } }
+  #fqBig .pz{ font-size:26px; font-weight:900; margin-top:10px; color:#ffe27a; line-height:1.35; }
+  #fqBig .no{ display:inline-block; margin-top:10px; background:#ffe27a; color:#1b1430; font-weight:900; font-size:18px; border-radius:10px; padding:4px 12px; }
+  #fqBig .nt{ font-size:14px; font-weight:800; margin-top:14px; opacity:.95; line-height:1.6; }
+  #fqBig .cl{ margin-top:16px; border:0; border-radius:12px; padding:10px 22px; font-weight:900; font-size:16px; background:#fff; color:#1b1430; font-family:inherit; }
+</style>
+<div id="fqBig" aria-live="polite"><div class="bx"><div class="lb" id="fqBigL"></div><div class="pz" id="fqBigP"></div><div class="no" id="fqBigN"></div>
+  <div class="nt">1Fの受付で「受け取りのQR」を見せて、<br>景品と交換してね！</div><button type="button" class="cl" id="fqBigC">とじる</button></div></div>
+<script>
+(function(){
+  'use strict';
+  var AC = null, NB = null;
+  function aud(){
+    try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch(e) { return null; }
+    if (!NB) { NB = AC.createBuffer(1, AC.sampleRate, AC.sampleRate); var d = NB.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    return AC;
+  }
+  function hit(a, t, vol, len, freq, type){
+    var s = a.createBufferSource(); s.buffer = NB; var f = a.createBiquadFilter(); f.type = type || 'bandpass'; f.frequency.value = freq; f.Q.value = 0.7;
+    var g = a.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+    s.connect(f); f.connect(g); g.connect(a.destination); s.start(t, Math.random() * 0.5); s.stop(t + len + 0.05);
+  }
+  function brass(a, t, fq, len, vol){
+    [1, 1.004].forEach(function(det){
+      var o = a.createOscillator(), f = a.createBiquadFilter(), g = a.createGain(); o.type = 'sawtooth'; o.frequency.value = fq * det;
+      f.type = 'lowpass'; f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(3200, t + 0.06); f.Q.value = 1.2;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+      g.gain.setValueAtTime(vol, t + Math.max(0.04, len - 0.08)); g.gain.exponentialRampToValueAtTime(0.0008, t + len);
+      o.connect(f); f.connect(g); g.connect(a.destination); o.start(t); o.stop(t + len + 0.05);
+    });
+  }
+  function fanfare(){
+    var a = aud(); if (!a) return; var t = a.currentTime + 0.02;
+    var C5 = 523.25, E5 = 659.25, G5 = 783.99, C6 = 1046.5, G4 = 392.0, D5 = 587.33, F5 = 698.46;
+    [[G4,.10,.13],[G4,.26,.13],[G4,.42,.13],[C5,.58,.45],[E5,1.08,.13],[D5,1.24,.13],[E5,1.40,.13],[G5,1.56,.40],
+     [F5,2.00,.13],[E5,2.16,.13],[D5,2.32,.13],[C6,2.48,1.60]].forEach(function(n){ brass(a, t + n[1], n[0], n[2], 0.1); });
+    [C5, E5, G5].forEach(function(fq){ brass(a, t + 2.48, fq, 1.60, 0.05); });
+    hit(a, t + 2.48, 0.6, 2.4, 6000, 'highpass');
+  }
+  /* 花火（景品モニター・大抽選会と同じ） */
+  var FW = { cv: null, ctx: null, shells: [], parts: [], glows: [], on: false, until: 0 };
+  var COL = [['#ffd36b', '#fff2c4'], ['#ff5a4f', '#ffc2a8'], ['#5fe08f', '#d6ffe2'], ['#5fb8ff', '#d9f0ff'], ['#c98bff', '#f0dcff'], ['#ffffff', '#fff6d8'], ['#ff8ad0', '#ffe0f2']];
+  function cvs(){
+    if (FW.cv) return;
+    var c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9001;';
+    document.body.appendChild(c); FW.cv = c; FW.ctx = c.getContext('2d');
+    function fit(){ var r = window.devicePixelRatio || 1; c.width = innerWidth * r; c.height = innerHeight * r; FW.ctx.setTransform(r, 0, 0, r, 0, 0); }
+    fit(); window.addEventListener('resize', fit);
+  }
+  function boom(){ var a = aud(); if (!a) return; var t = a.currentTime; hit(a, t, 0.7, 1.4, 110, 'lowpass'); for (var i = 0; i < 12; i++) hit(a, t + 0.3 + Math.random(), 0.04 + Math.random() * 0.05, 0.03, 3500); }
+  function launch(delay){
+    setTimeout(function(){
+      if (!FW.on) return; var W = innerWidth, H = innerHeight, ty = H * (0.08 + Math.random() * 0.35);
+      FW.shells.push({ x: W * (0.12 + Math.random() * 0.76), y: H + 10, vx: (Math.random() - 0.5) * 0.8, vy: -Math.sqrt(2 * 0.13 * (H - ty)), trail: [],
+                       col: COL[Math.floor(Math.random() * COL.length)], type: ['peony', 'peony', 'willow', 'ring', 'double'][Math.floor(Math.random() * 5)] });
+    }, delay);
+  }
+  function burst(s){
+    var n = s.type === 'ring' ? 90 : 150, base = Math.min(innerWidth, innerHeight) / 52, tilt = Math.random() * Math.PI;
+    for (var i = 0; i < n; i++) {
+      var ang = Math.random() * Math.PI * 2, sp = base * (0.55 + Math.random() * 0.55);
+      if (s.type === 'ring') { ang = (i / n) * Math.PI * 2; sp = base; }
+      var vx = Math.cos(ang) * sp, vy = Math.sin(ang) * sp; if (s.type === 'ring') vy *= Math.cos(tilt);
+      var wl = s.type === 'willow';
+      FW.parts.push({ x: s.x, y: s.y, vx: vx, vy: vy, life: 1, decay: wl ? 0.0065 : 0.012 + Math.random() * 0.007, col: wl ? '#ffcf6b' : (i % 3 === 0 ? s.col[1] : s.col[0]),
+                      trail: [], tl: wl ? 12 : 6, drag: wl ? 0.965 : 0.955, g: wl ? 0.045 : 0.06, gl: Math.random() < 0.3 });
+    }
+    if (s.type === 'double') { var c2 = COL[Math.floor(Math.random() * COL.length)][0];
+      for (var j = 0; j < 50; j++) { var a2 = Math.random() * Math.PI * 2, s2 = base * 0.45 * (0.6 + Math.random() * 0.4);
+        FW.parts.push({ x: s.x, y: s.y, vx: Math.cos(a2) * s2, vy: Math.sin(a2) * s2, life: 1, decay: 0.015, col: c2, trail: [], tl: 5, drag: 0.95, g: 0.06, gl: false }); } }
+    FW.glows.push({ x: s.x, y: s.y, r: base * 8, life: 1, col: s.col[0] }); boom();
+  }
+  function frame(){
+    var c = FW.ctx, W = innerWidth, H = innerHeight;
+    c.globalCompositeOperation = 'source-over'; c.clearRect(0, 0, W, H); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+    for (var i = FW.shells.length - 1; i >= 0; i--) { var s = FW.shells[i]; s.trail.push([s.x, s.y]); if (s.trail.length > 10) s.trail.shift();
+      s.x += s.vx; s.y += s.vy; s.vy += 0.13; c.strokeStyle = 'rgba(255,220,160,.8)'; c.lineWidth = 2; c.beginPath(); c.moveTo(s.trail[0][0], s.trail[0][1]);
+      for (var k = 1; k < s.trail.length; k++) c.lineTo(s.trail[k][0], s.trail[k][1]); c.lineTo(s.x, s.y); c.stroke();
+      if (s.vy >= -0.5) { burst(s); FW.shells.splice(i, 1); } }
+    for (var p = FW.parts.length - 1; p >= 0; p--) { var q = FW.parts[p]; q.trail.push([q.x, q.y]); if (q.trail.length > q.tl) q.trail.shift();
+      q.vx *= q.drag; q.vy = q.vy * q.drag + q.g; q.x += q.vx; q.y += q.vy; q.life -= q.decay; if (q.life <= 0) { FW.parts.splice(p, 1); continue; }
+      c.globalAlpha = Math.max(0, q.life) * (q.gl && Math.random() < 0.35 ? 0.25 : 1); c.strokeStyle = q.col; c.lineWidth = 2.8 * Math.max(0.45, q.life);
+      c.beginPath(); c.moveTo(q.trail[0][0], q.trail[0][1]); for (var m = 1; m < q.trail.length; m++) c.lineTo(q.trail[m][0], q.trail[m][1]); c.lineTo(q.x, q.y); c.stroke(); }
+    for (var g = FW.glows.length - 1; g >= 0; g--) { var gw = FW.glows[g]; gw.life -= 0.06; if (gw.life <= 0) { FW.glows.splice(g, 1); continue; }
+      var grd = c.createRadialGradient(gw.x, gw.y, 0, gw.x, gw.y, gw.r); grd.addColorStop(0, gw.col); grd.addColorStop(1, 'rgba(0,0,0,0)');
+      c.globalAlpha = gw.life * 0.45; c.fillStyle = grd; c.beginPath(); c.arc(gw.x, gw.y, gw.r, 0, Math.PI * 2); c.fill(); }
+    c.globalAlpha = 1;
+    if (FW.on || FW.shells.length || FW.parts.length || FW.glows.length) requestAnimationFrame(frame); else c.clearRect(0, 0, W, H);
+  }
+  function fireworks(sec){
+    cvs(); var was = FW.on; FW.on = true; FW.until = Date.now() + sec * 1000; var t = 0;
+    while (t < sec * 1000 - 2000) { launch(t); if (Math.random() < 0.55) launch(t + 160); t += 420 + Math.random() * 360; }
+    for (var f = 0; f < 8; f++) launch(sec * 1000 - 1900 + f * 120);
+    setTimeout(function(){ if (Date.now() >= FW.until) FW.on = false; }, sec * 1000);
+    if (!was) requestAnimationFrame(frame);
+  }
+  function stop(){ FW.on = false; FW.shells = []; FW.parts = []; FW.glows = []; }
+  function close(){ document.getElementById('fqBig').classList.remove('show'); stop(); }
+  document.getElementById('fqBigC').addEventListener('click', close);
+  document.getElementById('fqBig').addEventListener('click', function(e){ if (e.target === this) close(); });
+  window.fqBigFx = function(d){
+    var L = d.fx | 0, top = L >= 10;
+    document.getElementById('fqBigL').textContent = top ? '特賞 あたり！' : '1等 あたり！';
+    document.getElementById('fqBigP').textContent = d.prize_name || '景品';
+    var no = document.getElementById('fqBigN'); no.textContent = d.prize_no != null ? '景品番号 ' + d.prize_no + '番' : ''; no.style.display = d.prize_no != null ? '' : 'none';
+    var box = document.getElementById('fqBig'); box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
+    fireworks(top ? 16 : 12);
+    setTimeout(fanfare, 300);
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]); } catch(e) {}
+    setTimeout(function(){ if (!FW.on) close(); }, (top ? 16 : 12) * 1000 + 2500);
+  };
 })();
 </script>
 </body>
