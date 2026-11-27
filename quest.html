@@ -2388,6 +2388,12 @@ if ('serviceWorker' in navigator) {
       } else if(d.reason==='cooldown'){
         paint(0);
         countdown(d.wait);
+      } else if(d.reason==='wrong_spot'){   /* fq-spot-order-v1: ログポースが指した場所ではない */
+        paint(0);
+        var nx = d.logpose && d.logpose.next;
+        msg('ここは <b>ちがう場所</b> みたい…！<br>'
+          + (nx && nx.hint ? 'ヒント「<b>' + String(nx.hint).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</b>」の場所をさがしてね。' : 'ログポースのヒントの場所をさがしてね。'), true);
+        try{ if(navigator.vibrate) navigator.vibrate([80, 60, 80]); }catch(e){}
       } else if(d.reason==='bad_spot'){   /* fq-zukan2-v1: 会場の8か所のQRではない */
         msg('このQRは、図鑑のQRではありませんでした。<br>会場の<b>キャラクターのQR</b>を読み取ってね。', true);
       } else if(d.reason==='auth'){       /* fq-zukan2-v1: 端末の合言葉を作り直している途中 → あとで送る */

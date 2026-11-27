@@ -13,7 +13,8 @@
        つながらない時だけキャッシュを出す（＝オフラインでも開ける）。
      - アイコン・manifest だけ「キャッシュ優先」（変わらないので速さ優先）。
    ------------------------------------------------------------------ */
-const CACHE = 'fq326-v60';  // fq-shiru-v1: 「見る」→「知る」
+const CACHE = 'fq326-v61';  // fq-spot-order-v1: 図鑑はログポースが指した場所だけ
+// (旧) const CACHE = 'fq326-v60';  // fq-shiru-v1: 「見る」→「知る」
 // (旧) const CACHE = 'fq326-v59';  // fq-shindan-quest-v1: 診断の結果の下に「クエストをはじめる」
 // (旧) const CACHE = 'fq326-v58';  // fq-team-names-v1: チームの仲間の なまえ を出す
 // (旧) const CACHE = 'fq326-v57';  // fq-qrcam-v1: クエストの中でQRを読むカメラ（lib/jsQR.min.js）
