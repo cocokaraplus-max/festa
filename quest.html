@@ -3085,6 +3085,9 @@ if ('serviceWorker' in navigator) {
     transform:rotate(-14deg);box-shadow:0 1px 3px rgba(0,0,0,.25);animation:g2Sumi .45s cubic-bezier(.2,1.6,.4,1) both;}
   @keyframes g2Sumi{0%{transform:rotate(-14deg) scale(2.2);opacity:0;} 100%{transform:rotate(-14deg) scale(1);opacity:1;}}
   @media (prefers-reduced-motion: reduce){ .g2-sumi{animation:none;} }
+  /* fq-cat-align-v1: 文字は1行でまん中。はんこは右上の角に */
+  .g2-cat .g2-cn{display:block;white-space:nowrap;font-weight:900;letter-spacing:-.02em;}
+  .g2-sumi{top:-10px;right:-8px;width:30px;height:30px;font-size:15px;line-height:25px;}
   .g2-cat.on.exp{background:#C2410C;color:#fff;} .g2-cat.on.talk{background:#0B6AA8;color:#fff;} .g2-cat.on.see{background:#1E7B3A;color:#fff;}
   .g2-round{font-size:12.5px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:10px;}
   .g2-ticket{background:#F5E83A!important;color:var(--ink)!important;border:3px solid var(--ink)!important;box-shadow:0 5px 0 var(--ink)!important;margin:4px 0 12px;width:100%;font-size:18px;}
@@ -3270,7 +3273,7 @@ if ('serviceWorker' in navigator) {
       ct.innerHTML=['exp','talk','see'].map(function(c){
         var n=(m.n&&m.n[c])|0, on = n>=round;
         var fl=(m.floors&&m.floors[c])||[];
-        return '<div class="g2-cat '+c+(on?' on':'')+'">'+CAT[c]+(on?' ✓':'')+'<small>'+(on?'&nbsp;':'まだ')+'</small>'/* fq-no-floor-v1: ○階で読んだ は出さない */+(on?'<span class="g2-sumi" aria-label="済">済</span>':'')+'</div>';   /* fq-booth-lock-v1: 済のはんこ */
+        return '<div class="g2-cat '+c+(on?' on':'')+'"><b class="g2-cn">'+CAT[c]+'</b><small>'+(on?'&nbsp;':'まだ')+'</small>'/* fq-no-floor-v1: ○階で読んだ は出さない */+(on?'<span class="g2-sumi" aria-label="済">済</span>':'')+'</div>';   /* fq-booth-lock-v1: 済のはんこ */
       }).join('')+'<div class="g2-round" style="grid-column:1/-1">ガチャ '+(drawn+1)+'回目にむけて（1人2回まで）</div>';
     }
     // ガチャ券
