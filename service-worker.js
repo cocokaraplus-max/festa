@@ -13,7 +13,8 @@
        つながらない時だけキャッシュを出す（＝オフラインでも開ける）。
      - アイコン・manifest だけ「キャッシュ優先」（変わらないので速さ優先）。
    ------------------------------------------------------------------ */
-const CACHE = 'fq326-v55';  // fq-marche-ig-v2: マルシェの Instagram のマークを揺らす
+const CACHE = 'fq326-v56';  // fq-marche-ig-v3: マルシェの Instagram の札を目立たせる
+// (旧) const CACHE = 'fq326-v55';  // fq-marche-ig-v2: マルシェの Instagram のマークを揺らす
 // (旧) const CACHE = 'fq326-v54';  // fq-marche-ig-v1: マルシェの看板に Instagram の札
 // (旧) const CACHE = 'fq326-v53';  // fq-fx10-v1: 演出を10段階に。1等・特賞はスマホにも花火
 // (旧) const CACHE = 'fq326-v52';  // fq-atari-v2: 景品モニターに鐘と花火、なまえと景品番号

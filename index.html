@@ -2618,6 +2618,20 @@ const FQ = {
     66%{transform:rotate(-16deg) scale(1.15);} 72%{transform:rotate(13deg) scale(1.15);}
     78%{transform:rotate(-9deg) scale(1.08);} 84%{transform:rotate(5deg) scale(1.04);} 90%{transform:rotate(0) scale(1);}}
   @media (prefers-reduced-motion: reduce){ .mk-ig svg, .mk-ig:hover svg{animation:none;} }
+  /* fq-marche-ig-v3: もっと目立たせる */
+  .mk-ig{position:relative;gap:8px;padding:5px 16px 5px 6px;font-size:14.5px;animation:mkIgHop 2.6s ease-in-out infinite;}
+  .mk-ig .mk-igic{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex:none;
+    background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%);
+    box-shadow:inset 0 0 0 1.5px rgba(54,39,30,.25);transform-origin:50% 60%;animation:mkIgWig 2.6s ease-in-out infinite;}
+  .mk-ig .mk-igic svg{animation:none;}
+  .mk-ig:hover .mk-igic{animation:mkIgWig .9s ease-in-out infinite;}
+  .mk-ig .mk-igt{letter-spacing:.04em;}
+  .mk-ig::before{content:"";position:absolute;inset:-3px;border-radius:999px;border:3px solid #e1306c;opacity:0;pointer-events:none;
+    animation:mkIgRing 2.6s ease-out infinite;}
+  @keyframes mkIgRing{0%,60%{opacity:0;transform:scale(1);} 64%{opacity:.85;transform:scale(1);} 100%{opacity:0;transform:scale(1.28,1.6);}}
+  @keyframes mkIgHop{0%,60%,100%{transform:translateY(0);} 66%{transform:translateY(-6px);} 74%{transform:translateY(0);} 80%{transform:translateY(-2px);} 86%{transform:translateY(0);}}
+  .mk-ig:hover{animation:none;}
+  @media (prefers-reduced-motion: reduce){ .mk-ig, .mk-ig .mk-igic, .mk-ig::before{animation:none;} }
   .mk-jp a{color:inherit;text-decoration:none;}
   .mk-jp a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;}
   .mk-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:0 0 16px;}
@@ -3001,7 +3015,7 @@ const FQ = {
       <div class="mk-en">MARCHE</div>
       <h2 class="mk-jp"><a href="https://www.instagram.com/toyota_marumaru_marushe/" target="_blank" rel="noopener">とよた〇〇マルシェ</a></h2><!-- fq-marche-ig-v1 -->
       <p class="mk-lead">地域のお店や福祉事業所が大集合！<br>おいしいもの・手づくりの品をさがしに行こう！</p>
-      <div class="mk-row"><div class="mk-cnt"><b id="mkN">0</b>店が出店</div><a class="mk-ig" href="https://www.instagram.com/toyota_marumaru_marushe/" target="_blank" rel="noopener" aria-label="とよた〇〇マルシェの Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.4"/><circle cx="17.6" cy="6.4" r="1.3" fill="currentColor" stroke="none"/></svg><span>Instagram</span></a></div>
+      <div class="mk-row"><div class="mk-cnt"><b id="mkN">0</b>店が出店</div><a class="mk-ig" href="https://www.instagram.com/toyota_marumaru_marushe/" target="_blank" rel="noopener" aria-label="とよた〇〇マルシェの Instagram"><span class="mk-igic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1.3" fill="#fff" stroke="none"/></svg></span><span class="mk-igt">インスタをみる</span><!-- fq-marche-ig-v3 --></a></div>
     </div>
   </div>
   <div class="mk-tabs" id="mkTabs" aria-label="お店のしぼりこみ"></div>
