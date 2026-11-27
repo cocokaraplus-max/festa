@@ -535,7 +535,7 @@
   .free-box{margin-top:14px;border:3px dashed #6B3FA0;border-radius:var(--r);background:#f3ecfa;padding:12px 14px;text-align:center;}
   .free-t{font-size:17px;font-weight:900;color:#4A2775;}
   .free-t small{font-size:12px;color:#5b4a86;}
-  .free-s{font-size:12.5px;font-weight:700;color:#5c4d3b;line-height:1.7;margin:4px 0 10px;}
+  .free-s{font-size:13px;font-weight:700;color:#5c4d3b;line-height:1.8;margin:6px 0 12px;}   /* fq-free-text-v1 */
   .free-b{border:0;background:#6B3FA0;color:#fff;border-radius:12px;padding:12px 18px;font-weight:900;font-size:16px;font-family:inherit;}
   .free-b:disabled{opacity:.5;}
   /* == fq-zukan2-v1 : あなたのモンスター（福祉タイプ診断）。69体の数には入らない == */
@@ -835,7 +835,7 @@ window.__FQ_Q0 = location.search;</script>
     <!-- == fq-free-gacha-v1 : 8か所を全部まわった人だけ出る == -->
     <div class="free-box" id="freeBox" style="display:none">
       <div class="free-t">🎮 おたのしみガチャ <small>（景品なし）</small></div>
-      <div class="free-s">8か所ぜんぶまわったごほうび！<b>何度でも</b>遊べます。<br>遊ぶたびに、図鑑のなかまか<b>福祉モンスター</b>が1体出るよ。<br>同じ子も出るけど、まわし続ければ<b>いつか必ずコンプリート</b>できるよ</div>
+      <div class="free-s"><span class="ib">8か所 ぜんぶ まわった ごほうび！</span><br><span class="ib"><b>何度でも</b> 遊べます。</span><br><span class="ib">遊ぶたびに、図鑑の なかまか</span><span class="ib"><b>福祉モンスター</b>が 1体 出るよ。</span><br><span class="ib">出るのは <b>まだ持っていない子</b> だけ。</span><br><span class="ib">ハズレも あるよ。</span><span class="ib">ぜんぶ そろえて <b>コンプリート</b>しよう！</span></div><!-- fq-free-nodup-v1 --><!-- fq-free-text-v1 -->
       <button type="button" class="free-b" id="freeBtn">おたのしみガチャで遊ぶ</button>
     </div>
   </section>
@@ -2712,6 +2712,13 @@ if ('serviceWorker' in navigator) {
   try{ localStorage.removeItem('fq_free_zukan_v1'); }catch(e){}
   function freeGet(){ try{ return JSON.parse(localStorage.getItem(FREEKEY) || '[]') || []; }catch(e){ return []; } }
   document.addEventListener('fq-zukan', function(e){ var d = e.detail || {}; if (typeof d.goal_char === 'number' && d.goal_char > 0) GOAL = d.goal_char; });
+  /* fq-free-nodup-v1: まだ持っていない子が いるか */
+  window.fqFreeDone = function(){
+    var my = window.fqMyMon ? window.fqMyMon() : null, myNo = my ? my.no : 0, mo = monOwned(), i;
+    for (i = 1; i <= TOTAL; i++) if (i !== GOAL && !owned[i]) return false;
+    for (i = 1; i <= 7; i++) if (i !== myNo && !mo[i]) return false;
+    return true;
+  };
   window.fqFreePick = function(){
     /* fq-mon-v1: なかま86体＋福祉モンスター（自分の子は除く）から選ぶ。同じ子も出る。
        ★4回つづけて「もう持っている子」だったら、5回目は必ず まだ持っていない子 → いつか必ずコンプリートできる */
@@ -2722,7 +2729,8 @@ if ('serviceWorker' in navigator) {
     function has(x){ return x.c ? !!owned[x.c] : !!mo[x.m]; }
     var dry = 0; try{ dry = parseInt(localStorage.getItem(DRYKEY) || '0', 10) || 0; }catch(e){}
     var fresh = pool.filter(function(x){ return !has(x); });
-    var list = (dry >= 4 && fresh.length) ? fresh : pool;
+    if (!fresh.length) return null;   /* fq-free-nodup-v1: ぜんぶ そろった */
+    var list = fresh;   /* fq-free-nodup-v1: かぶりなし（まだ持っていない子だけ） */
     var x = list[Math.floor(Math.random() * list.length)];
     var isNew = !has(x);
     try{ localStorage.setItem(DRYKEY, String(isNew ? 0 : dry + 1)); }catch(e){}
@@ -3165,6 +3173,10 @@ if ('serviceWorker' in navigator) {
   .g2-nav-v{font-size:24px;font-weight:900;line-height:1.35;margin-top:2px;}
   .g2-nav-v .fl{display:inline-block;background:var(--ink);color:#fff;border-radius:8px;padding:0 10px;margin-right:6px;}
   .g2-nav-s{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:6px;line-height:1.6;}
+  /* fq-free-text-v1: 言葉の切れ目で改行する */
+  .ib{display:inline-block;}
+  .g2-nav-v .ib{font-size:22px;}
+  .g2-free-go{margin-top:10px;border:0;background:#6B3FA0;color:#fff;border-radius:12px;padding:10px 18px;font-weight:900;font-size:15px;font-family:inherit;cursor:pointer;}
   .g2-nav.exp{background:#FBE3D6;border-color:#C2410C;} .g2-nav.talk{background:#DCEBF6;border-color:#0B6AA8;}
   .g2-nav.see{background:#DCF0E1;border-color:#1E7B3A;} .g2-nav.uke{background:#FCE4EE;border-color:#B4205F;}
   .g2-cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:6px;}
@@ -3347,8 +3359,8 @@ if ('serviceWorker' in navigator) {
     } else {
       var lpGoal=false; try{ lpGoal = localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){}
       if(lpGoal){   /* fq-goal-free-v1: 8か所ぜんぶ まわった人 */
-        v='🎮 おたのしみガチャで遊ぼう！';
-        s='8か所 ぜんぶ まわったね！ 何度でも遊べるよ（景品なし）。<br><button type="button" class="linkbtn" data-fqfree="1">おたのしみガチャへ</button>';
+        v='<span class="ib">🎮 おたのしみガチャで</span><span class="ib">遊ぼう！</span>';   /* fq-free-text-v1 */
+        s='<span class="ib">8か所 ぜんぶ まわったね！</span><br><span class="ib">何度でも 遊べるよ（景品なし）</span><br><button type="button" class="g2-free-go" data-fqfree="1">おたのしみガチャへ ▶</button>';
       } else {
       v='📖 図鑑の8か所めぐりへ！';
       s='ガチャは1人2回まで。会場のキャラのQRを集めよう。<br><button type="button" class="linkbtn" data-g2="zukan">図鑑をひらく</button>';
@@ -3508,6 +3520,7 @@ if ('serviceWorker' in navigator) {
   /* == fq-free-gacha-v1 : おたのしみガチャ（景品なし・サーバーに通信しない） == */
   function freeOk(){ try{ return localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){ return false; } }
   function paintFree(){ var bx = $('freeBox'); if(bx) bx.style.display = freeOk() ? '' : 'none';
+    var fbn = $('freeBtn'); if(fbn && window.fqFreeDone){ var dn = window.fqFreeDone(); fbn.disabled = dn; fbn.textContent = dn ? '🎉 コンプリート！' : 'おたのしみガチャで遊ぶ'; }   /* fq-free-nodup-v1 */
     /* fq-booth-fix-v1: 「ガチャに挑戦」の箱は、おたのしみガチャの人だけ。ガチャをまわすボタンは上の箱にあるので出さない */
     var sec = bx && bx.closest('section'); if(sec) sec.classList.toggle('fq-gone', !freeOk());
     ['sndBtn','gachaBtn','gachaHint'].forEach(function(id){ var e=$(id); if(e) e.style.display='none'; });
@@ -3529,6 +3542,7 @@ if ('serviceWorker' in navigator) {
   var fb = $('freeBtn');
   if (fb) fb.addEventListener('click', function(){
     if (window.busy || !freeOk() || !window.fqFreePick || !window.fqPlay) return;
+    if (window.fqFreeDone && window.fqFreeDone()) { toast('🎉 ぜんぶ そろった！ <b>コンプリート！</b>'); paintFree(); return; }   /* fq-free-nodup-v1 */
     var FREE_LOSE = 0.3;   /* fq-zkbig-v1: ハズレの割合（0.3＝30%） */
     if (Math.random() < FREE_LOSE) {
       window.busy = true; busy = true;
@@ -3536,6 +3550,7 @@ if ('serviceWorker' in navigator) {
       return;
     }
     var z = window.fqFreePick();
+    if (!z) { toast('🎉 ぜんぶ そろった！ <b>コンプリート！</b>'); paintFree(); return; }   /* fq-free-nodup-v1 */
     var r = Math.random(), mode = r < 0.50 ? 1 : r < 0.75 ? 2 : r < 0.90 ? 3 : 4;   /* 演出の派手さはランダム */
     var nn = z.mon ? '' : ((z.char < 10 ? '0' : '') + z.char);
     if (z.mon) mode = Math.max(mode, 3);   /* fq-mon-v1: 福祉モンスターのときは派手に */
