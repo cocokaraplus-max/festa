@@ -1047,8 +1047,8 @@ function scan(code){
   if(code.indexOf('.')<=0){toast('このQRは使えません');return;}
   try{var _pq=JSON.parse(localStorage.getItem('fq_pending_codes_v1')||'[]')||[]; if(_pq.indexOf(code)===-1){_pq.push(code); localStorage.setItem('fq_pending_codes_v1',JSON.stringify(_pq));}}catch(e){}
   if(window.fqFlushCodes) setTimeout(window.fqFlushCodes, 0);
-  if(S.scanned.indexOf(base)!==-1){toast('このQRはもう読み取り済みだよ');render();return;}
-  if(/^f[34]_/.test(base)){ toast('📡 QRを確かめています…'); return; }   /* fq-booth-lock-v1: 行き先と合っているかはサーバーが確かめる */
+  if(/^f[34]_/.test(base)){ toast('📡 QRを確かめています…'); return; }   /* fq-booth-fix-v1: ブースは控えを見ずにサーバーへ */
+  if(S.scanned.indexOf(base)!==-1){toast('このQRはもう読み取り済みだよ');render();return;}   /* fq-booth-lock-v1: 行き先と合っているかはサーバーが確かめる */
   var wasAll=allDone();
   S.scanned.push(base); save();
   var label={start:'ガチャへの道 スタート！',f3_exp:'3階「体験」クリア！',f3_talk:'3階「話を聞く」クリア！',f3_see:'3階「知る」クリア！',f4_exp:'4階「体験」クリア！',f4_talk:'4階「話を聞く」クリア！',f4_see:'4階「知る」クリア！',jigyosho:'事業所を訪問！',talk_A:'職員Aと会話！',talk_B:'職員Bと会話！',talk_C:'職員Cと会話！',check:'適性診断クリア！',event_1:'イベント参加①！',event_2:'イベント参加②！'}[base]||'スキャン！';
@@ -1988,6 +1988,7 @@ if ('serviceWorker' in navigator) {
       V.balance = d.balance|0; V.cost = Math.max(1, d.cost|0); V.vouchers = d.vouchers || []; V.bases = d.bases || []; V.grand = !!d.grand; /* fq-grand-v1 */
       // クエストの「達成」表示は、サーバーに届いたQRで合わせる（端末を変えても戻る）
       (d.bases||[]).forEach(function(b){ if(S.scanned.indexOf(b)===-1) S.scanned.push(b); });
+      S.scanned = S.scanned.filter(function(b){ return !/^f[34]_/.test(b) || (d.bases||[]).indexOf(b) !== -1; });   /* fq-booth-fix-v1: サーバーに無いブースは消す */
       save(); saveV(); render();
     }).catch(function(e){ stBusy=false; console.warn('fq_state失敗', e); });
   }
@@ -2003,7 +2004,12 @@ if ('serviceWorker' in navigator) {
     var code=q[0];
     sb.rpc('fq_scan', {p_recog:String(DID), p_secret:SECRET, p_code:String(code), p_nick:(S.name||'')}).then(function(res){
       flushing=false;
-      var d=res && res.data; if(!d) return;                     // 返事が無い＝通信の不調。次の機会に
+      var d=res && res.data;
+      if(!d && res && res.error && res.error.code){   /* fq-booth-fix-v1: サーバーでエラー → このQRは外して、つぎへ（先頭に残ると後ろがずっと送られない） */
+        console.warn('fq_scan エラー', res.error); pset(pget().filter(function(c){ return c!==code; }));
+        toast('このQRは読めませんでした。もう一度読んでね'); if(pget().length) setTimeout(flushCodes, 400); return;
+      }
+      if(!d) return;                     // 返事が無い＝通信の不調。次の機会に
       if(!d.ok && d.reason==='auth'){ forgetDevice(); ensureDevice().then(function(ok){ if(ok) flushCodes(); }); return; }
       pset(pget().filter(function(c){ return c!==code; }));
       if(d.ok){ V.balance=d.balance|0; saveV(); render(); refreshRanking(); }
@@ -3409,7 +3415,12 @@ if ('serviceWorker' in navigator) {
 
   /* == fq-free-gacha-v1 : おたのしみガチャ（景品なし・サーバーに通信しない） == */
   function freeOk(){ try{ return localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){ return false; } }
-  function paintFree(){ var bx = $('freeBox'); if(bx) bx.style.display = freeOk() ? '' : 'none'; }
+  function paintFree(){ var bx = $('freeBox'); if(bx) bx.style.display = freeOk() ? '' : 'none';
+    /* fq-booth-fix-v1: 「ガチャに挑戦」の箱は、おたのしみガチャの人だけ。ガチャをまわすボタンは上の箱にあるので出さない */
+    var sec = bx && bx.closest('section'); if(sec) sec.classList.toggle('fq-gone', !freeOk());
+    ['sndBtn','gachaBtn','gachaHint'].forEach(function(id){ var e=$(id); if(e) e.style.display='none'; });
+    var st = sec && sec.querySelector('.gacha-stage'); if(st) st.style.display='none';
+    var hd = sec && sec.querySelector('.sec-h'); if(hd) hd.style.display='none'; }
   paintFree(); setInterval(paintFree, 2000);
   var fb = $('freeBtn');
   if (fb) fb.addEventListener('click', function(){
