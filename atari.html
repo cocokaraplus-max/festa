@@ -41,7 +41,8 @@
   .hero.big .lab{ font-size:6vh; letter-spacing:.3em; }
   .it .n .nk{ display:block; font-size:2.3vh; color:var(--cream); font-weight:800; max-width:7.5em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .it .pn{ display:inline-block; font-size:2vh; font-weight:900; color:#1b1430; background:var(--gold); border-radius:.8vh; padding:0 .5vw; margin-right:.4vw; }
-  .it.done{ opacity:.55; }
+  .it.done{ opacity:.72; }   /* fq-atari-handed-v1 */
+  .it .n .hd{ display:table; margin-top:.4vh; background:#3ccf7a; color:#08311c; border-radius:.7vh; padding:.1vh .5vw; font-size:1.8vh; font-weight:900; white-space:nowrap; }
   .main{ grid-template-columns:minmax(0,2fr) minmax(0,1fr); }
   .hero .pz.long{ font-size:6.4vh; }
   .hero .pz.xlong{ font-size:5vh; }
@@ -503,9 +504,9 @@
     $('list').innerHTML = recent.length ? recent.slice(0, 100).map(function(w){   /* fq-atari-scroll-v1 */
       var k = w.recog_no + '|' + w.drawn_at;
       return '<div class="it' + (k === newKey ? ' new' : '') + (w.handed ? ' done' : '') + '"><div class="n">' + esc(w.recog_no) + '<small>さん</small>'   /* fq-atari-v2 */
-        + (w.nickname ? '<span class="nk">' + esc(w.nickname) + '</span>' : '') + '</div>'
+        + (w.nickname ? '<span class="nk">' + esc(w.nickname) + '</span>' : '') + (w.handed ? '<span class="hd">✅ 渡し済み</span>' : '') + '</div>'
         + '<div class="p">' + (w.prize_no != null ? '<span class="pn">' + esc(w.prize_no) + '番</span>' : '') + esc(w.prize_name || '景品') + '</div>'
-        + '<div class="t">' + esc(hm(w.drawn_at)) + (w.handed ? '<br>渡し済み' : '') + '</div></div>';
+        + '<div class="t">' + esc(hm(w.drawn_at)) + '</div></div>';   /* fq-atari-handed-v1: 渡し済みは番号の下に */
     }).join('') : '<div class="empty">まだありません</div>';
   }
   function paintHero(w, anim){
@@ -536,6 +537,16 @@
   }
 
   var timer = null, first = true;
+  /* fq-atari-handed-v1: 渡したかどうかを 10秒ごとに読み直す */
+  function refreshHanded(){
+    rpc('fq_staff_wins', {p_staff: getStaff(), p_after: null}).then(function(d){
+      if (!d || !d.ok) return;
+      var m = {}; (d.list || []).forEach(function(w){ m[w.recog_no + '|' + w.drawn_at] = !!w.handed; });
+      var ch = false;
+      recent.forEach(function(w){ var k = w.recog_no + '|' + w.drawn_at; if (k in m && m[k] !== !!w.handed) { w.handed = m[k]; ch = true; } });
+      if (ch) { var l = $('list'), st = l.scrollTop; paintList(''); l.scrollTop = st; }
+    }).catch(function(){}).then(function(){ setTimeout(refreshHanded, 10000); });
+  }
   function poll(){
     clearTimeout(timer);
     rpc('fq_staff_wins', {p_staff: getStaff(), p_after: last}).then(function(d){
@@ -550,6 +561,7 @@
       if (first) {
         /* 開いたときは、これまでの当たりを一覧に並べるだけ（演出はしない） */
         first = false;
+        setTimeout(refreshHanded, 10000);   /* fq-atari-handed-v1 */
         recent = L.slice().reverse(); paintList('');
         if (recent.length) paintHero(recent[0], false);
       } else if (L.length) {
