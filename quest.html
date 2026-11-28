@@ -3576,6 +3576,18 @@ if ('serviceWorker' in navigator) {
   /* == fq-gacha-play-v1 ==
      ★演出の段階（m）は、景品の「演出」の設定（rarity）で決まる。1＝通常 2＝虹色・反転停止 3＝フリーズ・覚醒 4＝ネガ反転・ひび割れ */
   var playFrame = null;
+  /* fq-play-resume-v1: リロードしたら、とちゅうのガチャを もう一度開く（結果は同じ） */
+  (function(){
+    var p = null; try{ p = JSON.parse(localStorage.getItem('fq_play_pending_v1') || 'null'); }catch(e){}
+    if(!p || !p.d || Date.now() - (p.at || 0) > 15 * 60 * 1000){ try{ localStorage.removeItem('fq_play_pending_v1'); }catch(e){} return; }
+    var tries = 0;
+    (function go(){
+      if(!window.DID || !window.fqPlay){ if(++tries < 60) setTimeout(go, 250); return; }
+      if(String(window.DID) !== String(p.did)){ try{ localStorage.removeItem('fq_play_pending_v1'); }catch(e){} return; }
+      p.d.resume = true; p.d.resumeAt = p.at; busy = true; window.busy = true;
+      if(!window.fqPlay(p.d)){ busy = false; window.busy = false; }
+    })();
+  })();
   window.fqPlay = function(d){
     if(playFrame) return false;
     var r = d.win ? (d.rarity|0) : 0;
@@ -3588,12 +3600,15 @@ if ('serviceWorker' in navigator) {
     if (d.free) url += '&f=1';
     if (d.free && window.fqFreeAuto) url += '&auto=1';   /* fq-free-auto-v1 */
     if (d.win && !d.free && d.fx) url += '&lv=' + (d.fx|0);   /* fq-fx-phone-v1 */
+    if (d.resume) url += '&rs=1';   /* fq-play-resume-v1 */
+    try{ localStorage.setItem('fq_play_pending_v1', JSON.stringify({ did: String(window.DID), at: d.resume ? (d.resumeAt || Date.now()) : Date.now(), d: d })); }catch(e){}
     var ok = false;
     var fr = document.createElement('iframe');
     fr.src = url; fr.title = 'ガチャ';
     fr.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:200;background:#000;';
     playFrame = fr;
     function finish(){
+      try{ localStorage.removeItem('fq_play_pending_v1'); }catch(e){}   /* fq-play-resume-v1 */
       window.removeEventListener('message', onMsg);
       if(fr.parentNode) fr.parentNode.removeChild(fr);
       playFrame = null; busy = false; window.busy = false;
