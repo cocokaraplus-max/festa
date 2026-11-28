@@ -2440,6 +2440,8 @@ const FQ = {
      ★スマホでは絵が枠いっぱいに広がって主役に見えるので、絵の幅に上限をつけている。 */
   .gc-ph{position:relative;display:block;margin:7px auto 6px;max-width:min(80%,270px);
          container-type:inline-size;}
+  .gc-ph{margin-top:var(--gcTop,52px);}   /* fq-gc-bubble-v1: 吹き出し（写真の上に はみ出す分）が説明の文字にかからないように */
+
   .gc-ph picture{display:block;}
   /* ★★吹き出しの大きさは **絵の幅に対する割合** で決めたい。
      だが font-size に % は使えない（% は親の **字の大きさ** に対する割合になる）。
