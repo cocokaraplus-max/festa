@@ -852,7 +852,7 @@ window.__FQ_Q0 = location.search;</script>
     <div class="free-box" id="freeBox" style="display:none">
       <div class="free-t">🎮 おたのしみガチャ <small>（景品なし）</small></div>
       <div class="free-s"><span class="ib">8か所 ぜんぶ まわった ごほうび！</span><br><span class="ib"><b>何度でも</b> 遊べます。</span><br><span class="ib">遊ぶたびに、図鑑の なかまか</span><span class="ib"><b>福祉モンスター</b>が 1体 出るよ。</span><br><span class="ib">出るのは <b>まだ持っていない子</b> だけ。</span><br><span class="ib">ハズレも あるよ。</span><span class="ib">ぜんぶ そろえて <b>コンプリート</b>しよう！</span></div><!-- fq-free-nodup-v1 --><!-- fq-free-text-v1 -->
-      <div class="rw-tease2"><span class="ib">🎨 コンプリートで</span> <span class="ib"><b>326さんの似顔絵の権利</b>！</span><small class="rwTeaseN"></small></div>
+      <div class="rw-tease2"><span class="ib">🎨 コンプリートで 326さん直筆の</span> <span class="ib"><b>似顔絵入りトートバッグ</b>！</span><small class="rwTeaseN"></small></div>
       <button type="button" class="free-b" id="freeBtn">おたのしみガチャで遊ぶ</button>
     </div>
   </section>
@@ -890,7 +890,7 @@ window.__FQ_Q0 = location.search;</script>
       <div class="zk-way"><i>🏪</i><b>ブース</b><span>体験・お話・見学の<br>あとに 読むQR</span></div>
       <div class="zk-way"><i>🎰</i><b>ガチャ</b><span>ガチャを<br>まわしたとき</span><!-- fq-self-draw-v1 --></div>
     </div>
-    <div class="rw-tease" id="rwTease"><span class="ib">🎨 図鑑を <b>コンプリート</b>すると…</span><br><span class="ib"><b>326さんに 似顔絵を</b></span><br><span class="ib"><b>描いてもらえる権利</b>を</span> <span class="ib">プレゼント！</span><small class="rwTeaseN"></small></div><!-- fq-rw-text-v1 --><!-- fq-rewards-v1 -->
+    <div class="rw-tease" id="rwTease"><span class="ib">🎨 図鑑を <b>コンプリート</b>すると…</span><br><span class="ib"><b>326さん直筆の</b></span><br><span class="ib"><b>「あなたの似顔絵入り</b></span><span class="ib"><b>トートバッグ」</b></span><br><span class="ib">プレゼント！</span><!-- fq-tote-v1 --><small class="rwTeaseN"></small></div><!-- fq-rw-text-v1 --><!-- fq-rewards-v1 -->
     <div class="zk-head">
       <div class="zk-count"><b id="zkOwned">0</b>/<span id="zkTotal">86</span></div>
       <div class="zk-bar"><i id="zkBar"></i></div>
@@ -3573,8 +3573,8 @@ if ('serviceWorker' in navigator) {
     var tz = $('rwTease'); if (tz) tz.style.display = d.portrait ? 'none' : '';
     var bx = $('rwBox'); if (!bx) return;
     var hh = '';
-    if (d.portrait) hh += rwItem('🎨', '326さんに 似顔絵を<br>描いてもらえる権利 GET！', d.portrait);
-    else if (d.complete && d.portrait_full) hh += '<div class="rw-it done"><div class="rw-t">🎨 図鑑コンプリート おめでとう！</div><div class="rw-s">似顔絵の権利は 先着' + d.portrait_limit + '名で 終了しました。</div></div>';
+    if (d.portrait) hh += rwItem('🎨', '326さん直筆の<br>「あなたの似顔絵入り<br>トートバッグ」GET！', d.portrait);   /* fq-tote-v1 */
+    else if (d.complete && d.portrait_full) hh += '<div class="rw-it done"><div class="rw-t">🎨 図鑑コンプリート おめでとう！</div><div class="rw-s">似顔絵入りトートバッグは<br>先着' + d.portrait_limit + '名で 終了しました。</div></div>';
     if (d.sticker) hh += rwItem('🎁', 'ステッカー プレゼント！', d.sticker);
     if (bx.getAttribute('data-k') !== hh) { bx.innerHTML = hh; bx.setAttribute('data-k', hh); }
     bx.style.display = hh ? '' : 'none';
@@ -3594,7 +3594,7 @@ if ('serviceWorker' in navigator) {
       rwPaint(); paintFree();
       if (before && !before.portrait && d.portrait) {   /* いま 似顔絵の権利を とった */
         if (typeof confetti === 'function') confetti(4);
-        toast('🎨 <b>326さんの似顔絵の権利</b> GET！');
+        toast('🎨 <b>326さん直筆の 似顔絵入りトートバッグ</b> GET！');
         if (window.FQ_TAB) window.FQ_TAB('quest', true);
         setTimeout(function(){ var b = $('rwBox'); if (b && b.scrollIntoView) b.scrollIntoView({behavior: 'smooth', block: 'center'}); }, 400);
       }

@@ -126,7 +126,7 @@
       ・ガチャはお客さんが<b>自分のスマホ</b>でまわします。受付は<b>当たりの受け取り</b>だけです。<!-- fq-self-draw-v1 --><br>
       ・上の<b>「📷 受け取りのQRを読む」</b>を押して、お客さんの<b>「受け取りのQR」</b>を読んでください（端末のふつうのカメラで読んでも同じです）。<br><!-- fq-uke-cam-v1 -->
       ・ここに<b>番号と景品</b>が出ます。その番号の景品を渡して「景品を渡しました」を押してください。<br>
-      ・<b>ステッカー</b>（8か所ぜんぶ）と<b>326さんの似顔絵の権利</b>（図鑑コンプリート・先着）のQRも、同じように読んで「渡しました」を押してください。<br><!-- fq-rewards-v1 -->
+      ・<b>ステッカー</b>（8か所ぜんぶ）と<b>326さんの似顔絵入りトートバッグ</b>（図鑑コンプリート・先着）のQRも、同じように読んで「渡しました」を押してください。<br><!-- fq-rewards-v1 -->
       ・<b>認識番号だけで渡さないでください。</b>他人の番号を言われると、他人の当たりを渡してしまいます。<br>
       ・<b>いつも同じブラウザ</b>で開いてください（ほかのブラウザでは、もう一度暗証番号が要ります）。
     </p>
@@ -331,7 +331,7 @@
 
   /* == fq-rewards-v1 : ステッカー・326さんの似顔絵 == */
   function rPaint(r){
-    var lbl = r.kind === 'portrait' ? '🎨 326さんの似顔絵の権利' : '🎁 ステッカー';
+    var lbl = r.kind === 'portrait' ? '🎨 326さんの似顔絵入りトートバッグ' : '🎁 ステッカー';   /* fq-tote-v1 */
     $('rRows').innerHTML = '<div class="row"><div class="k">認識番号</div><div class="v">' + esc(r.recog_no) + '</div></div>'
       + '<div class="row"><div class="k">なまえ</div><div class="v">' + (esc(r.nickname) || '（なし）') + '</div></div>';
     show('rHand', false); show('rUnhand', false);
@@ -340,7 +340,7 @@
       $('rNote').innerHTML = '<b>もう渡してあります。</b>'; show('rUnhand', true);
     } else {
       $('rBig').className = 'big win'; $('rBig').innerHTML = lbl;
-      $('rNote').innerHTML = r.kind === 'portrait' ? '<b>326さんの似顔絵</b>の権利です。案内して、下のボタンを押してください。' : '<b>ステッカー</b>を渡して、下のボタンを押してください。';
+      $('rNote').innerHTML = r.kind === 'portrait' ? '<b>326さん直筆の「似顔絵入りトートバッグ」</b>です。326さんのところへ案内して、下のボタンを押してください。' : '<b>ステッカー</b>を渡して、下のボタンを押してください。';
       show('rHand', true);
     }
   }

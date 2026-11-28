@@ -627,9 +627,9 @@ boot();
         <span class="vsmall" id="vRate"></span>
       </div>
       <p class="lpnote">当たる確率 ＝ 景品の残りの数 ÷（景品の残りの数 ＋ ハズレ玉の数）。ハズレ玉を増やすほど当たりにくくなります。</p>
-      <h3>326さんの似顔絵・ステッカー</h3><!-- fq-rewards-v1 -->
+      <h3>326さんの似顔絵入りトートバッグ・ステッカー</h3><!-- fq-rewards-v1 --><!-- fq-tote-v1 -->
       <div class="lprow">
-        <label>似顔絵の権利は 先着</label><input type="number" id="vPtLimit" class="lpin" min="0" max="1000" style="width:80px;"><span>名</span>
+        <label>トートバッグは 先着</label><input type="number" id="vPtLimit" class="lpin" min="0" max="1000" style="width:80px;"><span>名</span>
         <button class="lpbtn sm" id="vPtSave">保存</button>
         <span class="vsmall" id="vPtNow"></span>
       </div>
@@ -761,7 +761,7 @@ boot();
   }
   /* fq-rewards-v1: 似顔絵の人数 */
   function ptShow(d){ if (!d || !d.ok) return; $('vPtLimit').value = d.limit;
-    $('vPtNow').textContent = '似顔絵：権利 ' + d.issued + '人（渡した ' + d.handed + '）／ステッカー：' + d.stickers + '人（渡した ' + d.stickers_handed + '）'; }
+    $('vPtNow').textContent = 'トートバッグ：' + d.issued + '人（渡した ' + d.handed + '）／ステッカー：' + d.stickers + '人（渡した ' + d.stickers_handed + '）'; }
   function ptLoad(){ rpc('fq_admin_portrait', {p_pass: pass.value, p_limit: null}).then(ptShow).catch(function(){ $('vPtNow').textContent = '（fq_rewards.sql を流すと出ます）'; }); }
   $('vPtSave').addEventListener('click', function(){
     var n = parseInt($('vPtLimit').value, 10); if (!(n >= 0)) { say('人数を入れてください。', 'ng'); return; }
