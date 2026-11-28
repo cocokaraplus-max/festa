@@ -921,11 +921,12 @@ window.__FQ_Q0 = location.search;</script>
     <div class="sec-h hand"><span class="em">😊</span>笑顔コンテスト</div>
     <!-- fq-smile-qr-v1: 写真はアプリに入れない。会場の写真の横のQRを読んで投票する -->
     <p class="sec-sub" id="smSub">会場にならんだ笑顔の写真から、いちばんの1枚の<b>QR</b>を<b>スマホのカメラ</b>で読むと投票できます。<b>おひとり1票</b>です。</p>
+    <button type="button" class="qrcam-btn" id="smCam" data-smcam="1" style="display:none"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><rect x="8" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="8" y="13" width="3" height="3"/><path d="M13 13h3v3"/></svg><span>QRを読んで 投票する<small>カメラがひらきます</small></span></button><!-- fq-smile-cam-v1 -->
     <div id="smClosed" class="sm-closed" style="display:none">いまは投票を受け付けていません。</div>
     <div id="smMine" style="display:none;margin:8px 0 4px;text-align:center;background:#fff;border:3px solid var(--mustard);border-radius:var(--r);padding:12px 10px;">
       <div style="font-size:13px;font-weight:900;color:var(--muted)">あなたの1票</div>
       <div style="font-size:40px;font-weight:900;color:var(--red);line-height:1.2"><span id="smMineNo">—</span>番</div>
-      <div style="font-size:12px;font-weight:700;color:var(--muted)">締め切りまでなら、別の番号のQRを読むと入れ直せます</div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted)" id="smMineNote">別の番号のQRを読むと、変更するか聞かれます</div>
     </div>
     <div class="sm-msg" id="smMsg"></div>
   </section>
@@ -3136,9 +3137,14 @@ if ('serviceWorker' in navigator) {
     $('smSub').innerHTML = d.open
       ? '会場にならんだ笑顔の写真から、いちばんの1枚の<b>QR</b>を<b>スマホのカメラ</b>で読むと投票できます。<b>おひとり1票</b>です。'
       : '結果は会場で発表します。';
-    $('smMine').style.display = d.mine_no ? '' : 'none';
-    $('smMineNo').textContent = d.mine_no || '—';
+    /* fq-smile-cam-v1: 受付中は カメラのボタンと「あなたの1票」をいつも出す */
+    $('smCam').style.display = d.open ? '' : 'none';
+    $('smMine').style.display = (d.mine_no || d.open) ? '' : 'none';
+    $('smMineNo').parentNode.innerHTML = d.mine_no ? '<span id="smMineNo">' + d.mine_no + '</span>番' : '<span id="smMineNo" style="font-size:22px;color:var(--muted)">まだ投票していません</span>';
+    $('smMineNote').style.display = d.mine_no && d.open ? '' : 'none';
   }
+  var smc = document.getElementById('smCam');   /* fq-smile-cam-v1 */
+  if (smc) smc.addEventListener('click', function(){ if (window.fqQrCamOpen) window.fqQrCamOpen(); });
   function load(){
     var sc = secret(); if (!sc || !window.DID) return;
     return sb.rpc('fq_smile_list', {p_recog:String(window.DID), p_secret:sc}).then(function(r){
