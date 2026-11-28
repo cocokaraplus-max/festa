@@ -628,7 +628,7 @@
   .lp-goalrw b{color:var(--red);}
   /* fq-lp-guide-v1 */
   .lgr-pair{display:flex;justify-content:center;gap:4px;margin:4px 0 2px;}
-  .lgr-pair img{width:54px;height:58px;object-fit:contain;filter:brightness(0) opacity(.75);}
+  .lgr-pair .lgr-q{width:46px;height:52px;border-radius:10px;background:#3b2f55;color:#ffd84a;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 rgba(0,0,0,.2);}   /* fq-lp-guide-v2 */
   .lgr-st{display:inline-block;margin-top:3px;background:#e2463b;color:#fff !important;border-radius:999px;padding:2px 10px;font-size:13.5px;}
   .lp-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 10px;}
   .lp-steps div{background:#f3ecfa;border-radius:10px;padding:7px 4px;text-align:center;font-size:11.5px;font-weight:800;line-height:1.45;color:var(--ink);}
@@ -900,11 +900,11 @@ window.__FQ_Q0 = location.search;</script>
         <div class="lp-prog"><b id="lpVisited">0</b>/<span id="lpTotal">8</span> か所</div>
         <div class="lp-bar"><i id="lpBar"></i></div>
       </div>
-      <div class="lp-steps" id="lpSteps" style="display:none"><div><i>🔍</i><b>①さがす</b>ヒントの<br>場所へ行く</div><div><i>📷</i><b>②読む</b>そこの キャラの<br>QRを読む</div><div><i>🏁</i><b>③8か所で</b>ゴール！<br>ごほうび</div></div><!-- fq-lp-guide-v1 -->
+      <div class="lp-steps" id="lpSteps" style="display:none"><div><i>🔍</i><b>①さがす</b>ヒントの<br>場所へ<br>行く</div><div><i>📷</i><b>②読む</b>そこの<br>QRコードを<br>読む</div><div><i>🏁</i><b>③8か所で</b>ゴール！<br>ごほうび<br>ゲット</div></div><!-- fq-lp-guide-v1 -->
       <div class="lp-hint" id="lpHint">…</div>
       <div class="lp-ans" id="lpAnsWrap"><button class="linkbtn" data-act="lpAns">こたえを見る</button></div>
       <div class="lp-name" id="lpName" style="display:none"></div>
-      <div class="lp-goalrw" id="lpGoalRw">🎁 8か所 ぜんぶ まわると…<div class="lgr-pair"><img src="img/zukan/z_85.png" alt=""><img src="img/zukan/z_86.png" alt=""></div><b>シークレットキャラ 2体</b>が なかまに！<br><span class="lgr-st">＋ ステッカー プレゼント！</span></div><!-- fq-lp-guide-v1 --><!-- fq-goal294-v1 -->
+      <div class="lp-goalrw" id="lpGoalRw">🎁 8か所 ぜんぶ まわると…<div class="lgr-pair"><span class="lgr-q">？</span><span class="lgr-q">？</span></div><b>シークレットキャラ 2体</b>が なかまに！<br><span class="lgr-st">＋ ステッカー プレゼント！</span></div><!-- fq-lp-guide-v1 --><!-- fq-goal294-v1 -->
       <div class="lp-note" id="lpNote">見つけたら、そこの<b>QR</b>を読み取ろう。<br>
         行き先は<b>人によってちがいます</b>。<b>チームの仲間</b>とは同じです。</div>
     </div>
@@ -1014,13 +1014,13 @@ window.__FQ_Q0 = location.search;</script>
   <div class="modal-card lpi-card">
     <div style="font-size:38px;line-height:1">🧭</div>
     <h3 class="hand">8か所めぐり スタート！</h3>
-    <div style="font-size:13px;font-weight:800;color:var(--muted)">会場に かくれている キャラを さがそう</div>
+    <div style="font-size:13px;font-weight:800;color:var(--muted)">会場に かくれている QRコードを さがそう</div>
     <div class="lpi-steps">
       <div><span>1</span><div>図鑑の<b>「つぎの ぼうけん」</b>に出る<br><b>ヒント</b>の場所へ行く</div></div>
-      <div><span>2</span><div>そこにいる キャラの<b>QR</b>を<br><b>「QRを読む」</b>で読む</div></div>
+      <div><span>2</span><div>そこにある <b>QRコード</b>を<br><b>「QRを読む」</b>で読む</div></div>
       <div><span>3</span><div>つぎのヒントが出るよ。<br><b>8か所</b>まわったら ゴール！</div></div>
     </div>
-    <div class="lpi-rw">🎁 ゴールの ごほうび<div class="lgr-pair"><img src="img/zukan/z_85.png" alt=""><img src="img/zukan/z_86.png" alt=""></div><span class="ib">シークレットキャラ <b>2体</b></span> <span class="ib">＋ <b>ステッカー プレゼント！</b></span></div>
+    <div class="lpi-rw">🎁 ゴールの ごほうび<div class="lgr-pair"><span class="lgr-q">？</span><span class="lgr-q">？</span></div><span class="ib">シークレットキャラ <b>2体</b></span> <span class="ib">＋ <b>ステッカー プレゼント！</b></span></div>
     <button class="btn" data-act="lpGo" style="margin-top:12px">はじめる ▶</button>
   </div>
 </div>
@@ -2943,6 +2943,8 @@ if ('serviceWorker' in navigator) {
     var gr = $('lpGoalRw'); if(gr) gr.style.display = st.done ? 'none' : '';   /* fq-goal294-v1 */
     var sp = $('lpSteps'); if(sp) sp.style.display = (st.done || st.locked) ? 'none' : '';   /* fq-lp-guide-v1 */
     if(!st.done && !st.locked && window.fqLpIntro) window.fqLpIntro();   /* fq-lp-guide-v1: はじめて入ったときの説明 */
+    window.fqLpOpen = !st.locked;   /* fq-lp-guide-v1: 8か所めぐりに入ったら、なかまの増やし方の3つの札は出さない */
+    var wy2 = document.querySelector('.zk-ways'); if(wy2 && window.fqLpOpen) wy2.style.display = 'none';
     if(st.done){
       box.classList.add('done');
       $('lpHead').textContent = 'ぼうけん、ぜんぶ まわった！';
@@ -3479,7 +3481,7 @@ if ('serviceWorker' in navigator) {
         s='<span class="ib">8か所 ぜんぶ まわったね！</span><br><span class="ib">何度でも 遊べるよ（景品なし）</span><br><button type="button" class="g2-free-go" data-fqfree="1">おたのしみガチャへ ▶</button>';
       } else {
       v='<span class="ib">🧭 会場の</span><span class="ib">8か所めぐり！</span>';   /* fq-lp-guide-v1 */
-      s='<span class="ib">会場に かくれた キャラを さがして、</span><span class="ib"><b>QRを読もう</b>。</span><br>'
+      s='<span class="ib">会場に かくれた <b>QRコード</b>を さがして、</span><span class="ib">読もう。</span><br>'
         +'<span class="ib">8か所 ぜんぶで <b>シークレットキャラ2体</b></span><span class="ib">＋ <b>ステッカー プレゼント！</b></span><br>'
         +'<button type="button" class="g2-free-go" data-lpgo="1">8か所めぐりを はじめる ▶</button>';
       }
@@ -3655,7 +3657,7 @@ if ('serviceWorker' in navigator) {
     var hd = sec && sec.querySelector('.sec-h'); if(hd) hd.style.display='none'; }
   /* fq-goal-nocam-v1: ゴールした人には「QRを読む」を出さない */
   function paintCam(){ var g = freeOk(); [].forEach.call(document.querySelectorAll('.qrcam-btn[data-qrcam]'), function(b){ b.style.display = g ? 'none' : ''; });
-    var wy = document.querySelector('.zk-ways'); if(wy) wy.style.display = g ? 'none' : '';   /* fq-zkbig-v1 */ }
+    var wy = document.querySelector('.zk-ways'); if(wy) wy.style.display = (g || window.fqLpOpen) ? 'none' : '';   /* fq-zkbig-v1 */ /* fq-lp-guide-v1 */ }
   paintCam(); setInterval(paintCam, 2000);
   paintFree(); setInterval(paintFree, 2000);
   /* == fq-rewards-v1 : ステッカー・326さんの似顔絵 == */
