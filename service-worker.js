@@ -13,7 +13,8 @@
        つながらない時だけキャッシュを出す（＝オフラインでも開ける）。
      - アイコン・manifest だけ「キャッシュ優先」（変わらないので速さ優先）。
    ------------------------------------------------------------------ */
-const CACHE = 'fq326-v82';  // fq-nogrand-text-v1: 「大抽選会の対象」の文を消した
+const CACHE = 'fq326-v83';  // fq-smile-change-v1: 笑顔コンテストは1人1票・変更は確認してから
+// (旧) const CACHE = 'fq326-v82';  // fq-nogrand-text-v1: 「大抽選会の対象」の文を消した
 // (旧) const CACHE = 'fq326-v81';  // fq-tote-v1: コンプリートは「326さん直筆の似顔絵入りトートバッグ」
 // (旧) const CACHE = 'fq326-v80';  // fq-sponsor-matsumoto-v1: 協賛に 松本産業株式会社
 // (旧) const CACHE = 'fq326-v79';  // fq-rw-text-v1: 似顔絵の案内の文字をきれいに改行

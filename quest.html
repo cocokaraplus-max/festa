@@ -3151,14 +3151,19 @@ if ('serviceWorker' in navigator) {
   var code = ''; try{ code = new URLSearchParams(location.search).get('v') || ''; }catch(e){}
   if (code) {
     try{ if (history.replaceState) history.replaceState(null, '', location.pathname); }catch(e){}
-    (function vote(n){
-      if (!secret() || !window.DID) { if (n < 25) setTimeout(function(){ vote(n + 1); }, 800); else toast('電波の良いところで、もう一度QRを読んでね'); return; }
-      sb.rpc('fq_smile_vote_code', {p_recog:String(window.DID), p_secret:secret(), p_code:String(code)}).then(function(r){
+    (function vote(n, chg){   /* fq-smile-change-v1: chg＝変更してよいと答えた */
+      if (!secret() || !window.DID) { if (n < 25) setTimeout(function(){ vote(n + 1, chg); }, 800); else toast('電波の良いところで、もう一度QRを読んでね'); return; }
+      sb.rpc('fq_smile_vote_code', {p_recog:String(window.DID), p_secret:secret(), p_code:String(code), p_change:!!chg}).then(function(r){
         var d = (r && r.data) || {};
         if (r.error) { toast('うまく送れませんでした。もう一度QRを読んでね'); return; }
         if (d.ok) {
-          var t = (d.prev_no && d.prev_no !== d.no) ? ('😊 ' + d.prev_no + '番から <b>' + d.no + '番</b> に入れ直しました') : ('😊 <b>' + d.no + '番</b> に投票しました！');
+          var t = (d.prev_no && d.prev_no !== d.no) ? ('😊 <b>' + d.no + '番</b> への投票に 変更しました') : ('😊 <b>' + d.no + '番</b> に投票しました！');
           toast(t); say('ありがとうございます！');
+          if (d.zukan && window.fqZukanGot) setTimeout(function(){ window.fqZukanGot(d.zukan); }, 1200);   /* fq-smile-change-v1: はじめての投票で なかま */
+        } else if (d.reason === 'already') toast('😊 もう <b>' + d.no + '番</b> に投票しているよ（1人1票）');   /* fq-smile-change-v1 */
+        else if (d.reason === 'confirm') {
+          if (confirm('いまは ' + d.prev_no + '番に投票しています。\n' + d.no + '番への投票に変更しますか？（1人1票）')) { vote(0, true); return; }
+          toast('😊 ' + d.prev_no + '番への投票のままにしました');
         } else if (d.reason === 'closed') toast('いまは笑顔コンテストの投票を受け付けていません');
         else if (d.reason === 'not_found') toast('このQRは使えませんでした');
         else toast('うまく送れませんでした。もう一度QRを読んでね');
@@ -3166,7 +3171,7 @@ if ('serviceWorker' in navigator) {
         if (window.FQ_TAB) window.FQ_TAB('quest');
         setTimeout(function(){ if (sec.style.display !== 'none' && sec.scrollIntoView) sec.scrollIntoView({behavior:'smooth', block:'center'}); }, 400);
       }).catch(function(){ toast('うまく送れませんでした。もう一度QRを読んでね'); });
-    })(0);
+    })(0, false);
   }
 
   /* fq-smile-fix-v1: 認識番号が届くまで 2秒ごとに読みに行く */
