@@ -1125,7 +1125,9 @@ boot();
         <input type="number" id="smCount" min="1" max="300" placeholder="例：24" style="width:96px;">
         <button class="lpbtn sm" id="smSetup">番号をそろえる</button>
         <button class="lpbtn sm" id="smPrint">番号のQRカードを印刷</button>
+        <button class="lpbtn sm" id="smLive" style="background:#23864b;color:#fff;border-color:#23864b">本番用のQRを作る</button><!-- fq-smile-live-v1 -->
       </div>
+      <p class="lpnote" id="smLiveNote"></p>
       <div id="smList"></div>
       <div class="lprow" style="margin-top:12px;display:none;"><!-- fq-grand-smile-v1 / fq-smile-qr-v1: 表彰はアナログなので隠す -->
         <button class="lpbtn" id="smScreenOpen">大抽選会モニターを開く</button>
@@ -1196,7 +1198,8 @@ boot();
     var BASE = location.origin + location.pathname.replace(/[^\/]*$/, '');
     var cards = rows.map(function(r){
       var q = qrcode(0, 'M'); q.addData(BASE + '?v=' + encodeURIComponent(r.code)); q.make();
-      return '<div class="c">' + (window.FQ_QR_MODE === 'test' ? '<div class="tb">テスト用</div>' : window.FQ_QR_MODE === 'live' ? '<div class="tb" style="border-color:#23864b;color:#23864b">本番用</div>' : '')   /* fq-qr-label-v1 */ + '<div class="t">笑顔コンテスト</div><div class="n">' + esc(r.no) + '<small>番</small></div>'
+      var SM = window.FQ_SMILE_MODE === 'live' ? 'live' : window.FQ_QR_MODE;   /* fq-smile-live-v1: 笑顔だけ本番用のとき */
+      return '<div class="c">' + (SM === 'test' ? '<div class="tb">テスト用</div>' : SM === 'live' ? '<div class="tb" style="border-color:#23864b;color:#23864b">本番用</div>' : '')   /* fq-qr-label-v1 */ + '<div class="t">笑顔コンテスト</div><div class="n">' + esc(r.no) + '<small>番</small></div>'
            + '<div class="q">' + q.createSvgTag({cellSize: 5, margin: 2, scalable: true}) + '</div>'
            + '<div class="h">この写真に1票！<br>スマホのカメラで読んでね</div></div>';
     }).join('');
@@ -1212,6 +1215,25 @@ boot();
     w.document.close();
   });
 
+  /* == fq-smile-live-v1 : 笑顔コンテストのQRだけ本番用にする == */
+  window.fqSmilePaintMode = function(){
+    var n = $('smLiveNote'); if (!n) return;
+    if (window.FQ_SMILE_MODE === 'live') { n.innerHTML = '笑顔コンテストのQR：<b style="color:#23864b">本番用</b>（' + esc(window.FQ_SMILE_AT || '') + ' 作成）。このQRを印刷して使ってください。'; $('smLive').textContent = '本番用のQRを作り直す'; }
+    else n.innerHTML = '笑顔コンテストのQR：' + (window.FQ_QR_MODE === 'test' ? '<b style="color:#c2381f">テスト用</b>' : window.FQ_QR_MODE === 'live' ? '<b style="color:#23864b">本番用</b>' : 'まだ分けていません') + '。本番用を先に印刷したいときは「本番用のQRを作る」。';
+  };
+  $('smLive').addEventListener('click', function(){
+    var again = window.FQ_SMILE_MODE === 'live';
+    if (!confirm((again ? '笑顔コンテストの本番用のQRを、もう一度作り直します。\n前に印刷した本番用のQRは使えなくなります。\n\n' : '笑顔コンテストの番号のQRを「本番用」に作り直します。\n')
+                 + 'テスト用に印刷したQRは使えなくなり、テストで入った票は消えます。\n（ほかのQRはテスト用のまま変わりません）\n\nよろしいですか？')) return;
+    rpc('fq_admin_smile_qr_live', {p_pass: pass.value}).then(function(d){
+      if (!d.ok) { say(d.message || 'できませんでした。', 'ng'); return; }
+      window.FQ_SMILE_MODE = 'live'; window.FQ_SMILE_AT = d.made_at || '';
+      window.fqSmilePaintMode();
+      var okMsg = '笑顔コンテストの本番用のQRを作りました（' + (d.made_at || '') + '）。「番号のQRカードを印刷」で印刷してください。' + (d.votes_deleted ? 'テストの票 ' + d.votes_deleted + '票は消しました。' : '');
+      load().then(function(){ say(okMsg); });
+    }).catch(function(e){ say('できませんでした（' + (e.message || e) + '）。fq_smile_live.sql は流しましたか？', 'ng'); });
+  });
+  setTimeout(function(){ if (window.fqSmilePaintMode) window.fqSmilePaintMode(); }, 0);
   $('smToggle').addEventListener('click', function(){
     var next = !OPEN;
     if (next && !confirm('投票の受付を開けます。よろしいですか？')) return;
@@ -1410,6 +1432,8 @@ boot();
       var codes = (r[0] && r[0].codes) || [], spots = (r[1] && r[1].spots) || [];
       var qi = r[2] || {}; QM.mode = qi.ok ? (qi.mode || '') : ''; QM.at = qi.ok ? (qi.made_at || '') : '';
       window.FQ_QR_MODE = QM.mode; drawMode(qi);   /* fq-qr-remake-v1 */
+      window.FQ_SMILE_MODE = qi.ok ? (qi.smile_mode || '') : ''; window.FQ_SMILE_AT = qi.ok ? (qi.smile_made_at || '') : '';   /* fq-smile-live-v1 */
+      if (window.fqSmilePaintMode) window.fqSmilePaintMode();
       function booth(fl){ return codes.filter(function(c){ return c.base.indexOf('f' + fl + '_') === 0; })
                                       .sort(function(a, b){ return (a.sort|0) - (b.sort|0); })
                                       .map(function(c){ return { label: c.label, url: BASE + '?q=' + c.code, kind: 'booth' }; }); }
