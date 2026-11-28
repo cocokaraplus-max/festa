@@ -670,7 +670,8 @@
     var c = parseInt(h.c, 10), mon = parseInt(h.mon, 10), img = '', cl = '';
     if (c >= 1 && c <= 86) { img = 'img/zukan/z_' + (c < 10 ? '0' : '') + c + '.png'; cl = 'なかま No.' + (c < 10 ? '0' : '') + c; }
     else if (mon >= 1 && mon <= 7) { img = 'img/mon_' + mon + '.png'; cl = '福祉モンスター' + (h.mn ? '「' + h.mn + '」' : ''); }
-    return { mode: m, prize: p, name: nm, no: (h.n || ''), img: img, cl: cl, isNew: h.nw !== '0', free: h.f === '1' };
+    var lv = parseInt(h.lv, 10); if (!(lv >= 1 && lv <= 10)) lv = 0;   /* fq-fx-phone-v1: 景品の「演出」1〜10 */
+    return { mode: m, prize: p, name: nm, no: (h.n || ''), img: img, cl: cl, isNew: h.nw !== '0', free: h.f === '1', lv: lv };
   })();
   var FORCE = 'fq';
   var fqStarted = false;
@@ -736,6 +737,8 @@
     var cb=$('result-close'); cb.disabled=true; cb.style.opacity='0.5';
     setTimeout(function(){ cb.disabled=false; cb.style.opacity='1'; }, 1000);
     $('result-overlay').classList.add('active');
+    /* fq-fx-phone-v1: 当たり（景品あり）のときは、本部で決めた演出の段階どおりに 花火・紙ふぶき・鐘など */
+    if (!lose && FQ.mode > 0 && !FQ.free && !loseP && FQ.lv && window.fqCelebrate) setTimeout(function(){ window.fqCelebrate(FQ.lv); }, 150);
   }
   var onClosed = null;
   $('result-close').addEventListener('click', function(){
@@ -1326,5 +1329,6 @@
 </script>
 
 <script>/* fq-gacha-play-v1 */try{ parent.postMessage({fq: 'g2ready'}, location.origin); }catch(e){}</script>
+<script src="fq_fx.js"></script><!-- fq-fx-phone-v1 -->
 </body>
 </html>

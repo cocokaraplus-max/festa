@@ -3502,6 +3502,7 @@ if ('serviceWorker' in navigator) {
     else if (zk.mon) url += '&mon=' + (zk.mon|0) + '&mn=' + encodeURIComponent(zk.name || '');
     if (zk.is_new === false) url += '&nw=0';
     if (d.free) url += '&f=1';
+    if (d.win && !d.free && d.fx) url += '&lv=' + (d.fx|0);   /* fq-fx-phone-v1 */
     var ok = false;
     var fr = document.createElement('iframe');
     fr.src = url; fr.title = 'ガチャ';
@@ -3512,7 +3513,7 @@ if ('serviceWorker' in navigator) {
       if(fr.parentNode) fr.parentNode.removeChild(fr);
       playFrame = null; busy = false; window.busy = false;
       if(d.win && !d.free && typeof toast === 'function') toast('🎁 1Fの受付で<b>「' + esc(d.prize_name || '景品') + '」</b>' + (d.prize_no != null ? '（' + d.prize_no + '番）' : '') + 'と交換してね。「受け取りのQRを見せる」を押すとQRが出るよ');   /* fq-self-draw-v1 */   /* fq-prize-big-v1 */
-      if(d.win && !d.free && (d.fx|0) >= 9 && window.fqBigFx) window.fqBigFx(d);   /* fq-fx10-v1: 1等・特賞はスマホにも花火 */
+      /* fq-fx-phone-v1: 1等・特賞の花火は ガチャの結果の画面で出すので、ここでは出さない */   /* fq-fx10-v1: 1等・特賞はスマホにも花火 */
       refresh();
     }
     function onMsg(ev){
