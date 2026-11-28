@@ -637,6 +637,11 @@
   #fqHead{ color:#ffd700; font-weight:900; font-size:18px; text-align:center; margin:4px 0 2px;
            font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif; text-shadow:0 0 8px #ff0055; }
   #nav-menu.fq-locked{ pointer-events:none; opacity:.45; }
+  /* fq-slot-stop-v1 */
+  .action-btn.fq-stop{ background:linear-gradient(135deg,#ff4d6d,#c4002b); color:#fff; border-color:#fff;
+    box-shadow:0 5px 0 #7a001a, 0 8px 15px rgba(0,0,0,.4); font-size:24px; letter-spacing:.12em; animation:fqStopPulse .5s infinite alternate; }
+  @keyframes fqStopPulse{ from{ transform:scale(1); } to{ transform:scale(1.06); } }
+  #slot-header.fq-reach{ color:#fff !important; text-shadow:0 0 12px #ff0055, 0 0 24px #ff0055 !important; animation:fqStopPulse .25s infinite alternate; }
 
   /* == fq-prize-big-v1 : 景品の名前を大きく、番号を小さく == */
   #fqPrize{ text-align:center; margin:10px 0 4px; }
@@ -671,7 +676,7 @@
     if (c >= 1 && c <= 86) { img = 'img/zukan/z_' + (c < 10 ? '0' : '') + c + '.png'; cl = 'なかま No.' + (c < 10 ? '0' : '') + c; }
     else if (mon >= 1 && mon <= 7) { img = 'img/mon_' + mon + '.png'; cl = '福祉モンスター' + (h.mn ? '「' + h.mn + '」' : ''); }
     var lv = parseInt(h.lv, 10); if (!(lv >= 1 && lv <= 10)) lv = 0;   /* fq-fx-phone-v1: 景品の「演出」1〜10 */
-    return { mode: m, prize: p, name: nm, no: (h.n || ''), img: img, cl: cl, isNew: h.nw !== '0', free: h.f === '1', lv: lv };
+    return { mode: m, prize: p, name: nm, no: (h.n || ''), img: img, cl: cl, isNew: h.nw !== '0', free: h.f === '1', lv: lv, auto: h.auto === '1' };   /* fq-free-auto-v1 */
   })();
   var FORCE = 'fq';
   var fqStarted = false;
@@ -737,6 +742,7 @@
     var cb=$('result-close'); cb.disabled=true; cb.style.opacity='0.5';
     setTimeout(function(){ cb.disabled=false; cb.style.opacity='1'; }, 1000);
     $('result-overlay').classList.add('active');
+    if (FQ.auto && AUTO_ON) setTimeout(function(){ if (AUTO_ON && $('result-overlay').classList.contains('active') && !$('result-close').disabled) $('result-close').click(); }, 2400);   /* fq-free-auto-v1 */
     /* fq-fx-phone-v1: 当たり（景品あり）のときは、本部で決めた演出の段階どおりに 花火・紙ふぶき・鐘など */
     if (!lose && FQ.mode > 0 && !FQ.free && !loseP && FQ.lv && window.fqCelebrate) setTimeout(function(){ window.fqCelebrate(FQ.lv); }, 150);
   }
@@ -766,6 +772,7 @@
         img.src=pick(); img.className='symbol'; img.alt=''; img.decoding='async';
         strip.appendChild(img);
       }
+      var ss = strip.children; for (var j = 0; j < 15; j++) ss[j + 20].src = ss[j].src;   /* fq-slot-stop-v1 */
     });
     /* ★回していないときも、絵柄が枠にぴたりと収まって見えるようにしておく */
     var h=symH();
@@ -784,8 +791,74 @@
     return -(STOP_AT*h) + (rh - h)/2;
   }
 
+  /* == fq-slot-stop-v1 : リールは自分で止める（STOPを3回）==
+     ★止まる絵柄は、押したときに決まった絵柄（サーバーが決めたもの）を 少し先のコマに置いて、そこへ滑らせて止める。
+       どのタイミングで押しても 当たりはずれは変わらない
+     ★8秒たっても押さないときは、自動で1つずつ止まる */
+  var PS = null, SPAN = 20, LASTK = [STOP_AT, STOP_AT, STOP_AT];
+  var AUTO_ON = true;   /* fq-free-auto-v1 */
+  function snd(k, a){ try{ if (window.fqSnd) window.fqSnd[k](a); }catch(e){} }
+  function playerSpin(faces, slow, done){
+    var h = symH(), rh = $('strip1').parentElement.getBoundingClientRect().height || 250, off = (rh - h) / 2;
+    var btn = $('slot-btn');
+    PS = { n: 0, pos: [], cur: [], h: h, off: off, v: h * 20, faces: faces, slow: !!slow, done: done, t0: performance.now(), last: 0, lock: false, tap: 0 };
+    [1,2,3].forEach(function(n, i){
+      $('strip' + n).style.transition = 'none';
+      PS.pos[i] = PS.cur[i] = (STOP_AT - SPAN) * h - off;   /* 今 見えている所から そのまま回りだす */
+    });
+    btn.textContent = 'STOP'; btn.classList.add('fq-stop'); btn.disabled = false;
+    snd('start'); snd('spin', 3);
+    function frame(now){
+      if (!PS || PS.lock && PS.n > 2) return;
+      var dt = PS.last ? Math.min(0.05, (now - PS.last) / 1000) : 0; PS.last = now;
+      var ramp = Math.min(1, (now - PS.t0) / 400), P = SPAN * h;
+      for (var i = PS.n; i < 3; i++) {
+        PS.pos[i] += PS.v * ramp * dt;
+        var p = ((PS.pos[i] % P) + P) % P; PS.cur[i] = p;
+        $('strip' + (i + 1)).style.top = (-p) + 'px';
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    function auto(){ if (!PS || PS.n > 2) return; psStop(true); PS && (PS.autoT = setTimeout(auto, (FQ.auto && AUTO_ON) ? 380 : 700)); }
+    PS.autoT = setTimeout(auto, (FQ.auto && AUTO_ON) ? 900 : 8000);   /* fq-free-auto-v1: オートはすぐ止まる */
+  }
+  function psStop(isAuto){
+    if (!PS || PS.n > 2) return;
+    var now = performance.now();
+    if (!isAuto && now - PS.tap < 180) return;   /* 2度押し よけ */
+    PS.tap = now;
+    var i = PS.n, h = PS.h, cur = PS.cur[i];
+    var reachLast = (i === 2 && PS.slow && PS.faces[0] === PS.faces[1]);
+    var k = Math.ceil(cur / h + 0.05) + (reachLast ? 8 : 3);
+    var strip = $('strip' + (i + 1)), sym = strip.querySelectorAll('.symbol');
+    sym[k].src = PS.faces[i]; LASTK[i] = k;
+    var end = -(k * h) + PS.off, dist = k * h - PS.off - cur;
+    var dur = reachLast ? 2.6 : Math.max(0.22, 2 * dist / PS.v);
+    PS.n++;
+    strip.style.transition = 'none'; strip.style.top = (-cur) + 'px'; void strip.offsetHeight;
+    strip.style.transition = 'top ' + dur + 's ' + (reachLast ? 'cubic-bezier(0.1,0.85,0.15,1.0)' : 'cubic-bezier(0.25,0.5,0.4,1)');
+    strip.style.top = end + 'px';
+    setTimeout(function(){ snd('stop', i); }, Math.max(0, dur * 1000 - 60));
+    snd('spin', 3 - PS.n);
+    var btn = $('slot-btn');
+    if (i === 1 && PS.slow && PS.faces[0] === PS.faces[1]) {   /* リーチ！ */
+      $('slot-header').textContent = 'リーチ！'; $('slot-header').classList.add('fq-reach'); snd('reach');
+    }
+    if (PS.n === 3) {
+      clearTimeout(PS.autoT); PS.lock = true;
+      btn.disabled = true; btn.classList.remove('fq-stop'); btn.textContent = 'SPIN!';
+      var d = PS.done;
+      setTimeout(function(){
+        snd('stopBgm'); PS = null;
+        $('slot-header').textContent = 'FEVER SLOT'; $('slot-header').classList.remove('fq-reach');
+        d();
+      }, dur * 1000 + 80);
+    }
+  }
   var slotBusy=false;
   $('slot-btn').addEventListener('click', function(){
+    if(PS){ psStop(false); return; }   /* fq-slot-stop-v1 */
     if(slotBusy) return; slotBusy=true;
     var btn=$('slot-btn'), frame=$('slot-frame');
     btn.disabled=true; frame.classList.remove('rainbow-border','hit');
@@ -807,7 +880,7 @@
       });
     } else if(res.mode===2){
       frame.classList.add('rainbow-border');
-      runReels(res, winChar, true, 2.6, 0.7);
+      runReels(res, winChar, true, 2.6, 0.7);   /* fq-slot-stop-v1: 虹色のふち＋かならずリーチ */
     } else {
       runReels(res, winChar, false, 2.6, 0.7);
     }
@@ -815,25 +888,13 @@
 
   /* 2つ揃いのリーチ → 3つめが外れて止まる（フリーズ系の前半） */
   var DUR = [1.8, 2.4, 3.8];     /* リーチの回りかた。3つめだけ ゆっくり長く滑らせる */
-  function spinAndStop(winChar, done){
-    var h=symH(), end=endTop(h);
+  function spinAndStop(winChar, done){   /* fq-slot-stop-v1: 自分で止める。3つめはハズレ目で止まる */
     var loseChar=winChar; while(loseChar===winChar) loseChar=pick();
-    var faces=[winChar, winChar, loseChar];
-    [1,2,3].forEach(function(n,idx){
-      var strip=$('strip'+n);
-      strip.querySelectorAll('.symbol')[STOP_AT].src=faces[idx];
-      strip.style.transition='none'; strip.style.top='0px';
-      void strip.offsetHeight;
-      setTimeout(function(){
-        strip.style.transition='top '+DUR[idx]+'s cubic-bezier(0.1,0.85,0.15,1.0)';
-        strip.style.top=end+'px';
-      }, 50);
-    });
-    setTimeout(function(){ done(); }, (DUR[2]+1.2)*1000);   /* 止まってから1.2秒の静寂 */
+    playerSpin([winChar, winChar, loseChar], true, function(){ setTimeout(done, 1200); });   /* 止まってから1.2秒の静寂 */
   }
   /* 3つめを当たり図柄に書きかえて揃える */
   function fillWin(winChar){
-    $('strip3').querySelectorAll('.symbol')[STOP_AT].src=winChar;
+    $('strip3').querySelectorAll('.symbol')[LASTK[2]].src=winChar;   /* fq-slot-stop-v1: 止めたコマ */
   }
 
   /* 【ロングフリーズ】画面を落として ためてから 発動 */
@@ -842,14 +903,14 @@
     ov.style.display='flex';                       /* ハズレ目のまま画面が落ちる */
     setTimeout(function(){ tx.style.opacity='1'; }, 800);
     setTimeout(function(){
-      tx.textContent='⚡ LONG FREEZE ⚡\n極限フリーズ発生！';
+      tx.textContent='⚡ LONG FREEZE ⚡\n極限フリーズ発生！'; snd('boom');
       tx.style.color='#ffd700';
       $('game-stage').classList.add('shake-screen');
     }, 2600);
     setTimeout(function(){                         /* 明けたら3つ揃いに書きかわっている */
       $('game-stage').classList.remove('shake-screen');
       ov.style.display='none';
-      fillWin(winChar);
+      fillWin(winChar); snd('win');
       $('slot-frame').classList.add('rainbow-border','hit');
     }, 5600);
     setTimeout(function(){
@@ -866,10 +927,10 @@
     stage.classList.add('shake-screen');
     setTimeout(function(){
       crack.style.display='block';
-      setTimeout(function(){ crack.classList.add('crack-active'); }, 200);
+      setTimeout(function(){ crack.classList.add('crack-active'); snd('crack'); }, 200);
     }, 1300);
     setTimeout(function(){                   /* 光がピークで3つめが書きかわる */
-      fillWin(winChar);
+      fillWin(winChar); snd('boom'); setTimeout(function(){ snd('win'); }, 300);
       frame.classList.add('rainbow-border','hit');
       panel.classList.remove('nega-mode');   /* 色を戻して */
       crack.classList.add('reveal');         /* 光を引かせて 揃った絵を見せる */
@@ -904,31 +965,20 @@
       do{ z=pick(); }while(z===x);
       faces=[x,y,z];
     }
-    var D = reach ? DUR : [dur, dur+step, dur+2*step];
-    [1,2,3].forEach(function(n,idx){
-      var strip=$('strip'+n), sym=strip.querySelectorAll('.symbol');
-      sym[STOP_AT].src = faces[idx];
-      var end = endTop(h);
-      strip.style.transition='none';
-      strip.style.top = reverse ? (end-(STOP_AT-1)*h)+'px' : '0px';   /* 反転は逆からまわす */
-      void strip.offsetHeight;
-      setTimeout(function(){
-        strip.style.transition='top '+D[idx]+'s cubic-bezier(0.1,0.85,0.15,1.0)';
-        strip.style.top = end+'px';
-      }, 50);
-    });
+    playerSpin(faces, reach || reverse, function(){   /* fq-slot-stop-v1 */
     setTimeout(function(){
       onClosed=function(){ $('slot-btn').disabled=false; slotBusy=false; initSlot(); };
       if(res.win || FQ.img){   /* fq-slot-only-v1 */
-        $('slot-frame').classList.add('hit');
+        $('slot-frame').classList.add('hit'); snd('win');
         if(!res.win){ showResult('', winChar, '', true); return; }
         showResult('🎉 大当たり!! 🎉', winChar,
           (reach?'リーチから揃った！ ':'3つ揃った！ ')+res.prize+' をGET！', false);
       } else {
+        snd('lose');
         showResult('💀 惜しい！ハズレ 💀', pick(),
           (reach?'あと1つだった…　また 挑戦してね！':'また 挑戦してね！　最後までお楽しみに！'), true);
       }
-    }, (D[2] + 1.2)*1000);   /* 3つめが止まってから1.2秒。フリーズのときと同じ間です */
+    }, 1200); });   /* 3つめが止まってから1.2秒。フリーズのときと同じ間です */   /* 3つめが止まってから1.2秒。フリーズのときと同じ間です */
   }
 
 
@@ -1324,11 +1374,20 @@
   });
 
   initSlot();   /* fq-slot-only-v1: スロットだけ */
+  /* fq-free-auto-v1: オートのときは 自分で SPIN して、止めて、閉じる。「オートをやめる」で いつでも止まる */
+  if (FQ.auto && AUTO_ON) {
+    var ab = document.createElement('button'); ab.type = 'button'; ab.id = 'fqAutoOff'; ab.textContent = '⏹ オートをやめる';
+    ab.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:2147483002;padding:10px 20px;border-radius:999px;border:2px solid #fff;background:#6B3FA0;color:#fff;font-weight:900;font-size:16px;font-family:inherit;';
+    ab.addEventListener('click', function(){ AUTO_ON = false; ab.remove(); try{ parent.postMessage({fq: 'autoOff'}, location.origin); }catch(e){} });
+    document.body.appendChild(ab);
+    setTimeout(function(){ if (AUTO_ON && !slotBusy) $('slot-btn').click(); }, 700);
+  }
   addEventListener('resize', function(){ if(!slotBusy) initSlot(); });
 })();
 </script>
 
 <script>/* fq-gacha-play-v1 */try{ parent.postMessage({fq: 'g2ready'}, location.origin); }catch(e){}</script>
+<script src="fq_slot_snd.js"></script><!-- fq-slot-stop-v1 -->
 <script src="fq_fx.js"></script><!-- fq-fx-phone-v1 -->
 </body>
 </html>
