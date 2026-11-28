@@ -650,6 +650,26 @@
               text-shadow:0 0 10px rgba(255,0,85,.55); font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif; }
   #fqPrize small{ display:block; margin-top:4px; font-size:14px; font-weight:800; color:#fff; opacity:.9;
                   font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif; }
+  /* == fq-result-fit-v1 : 結果は画面ぜんたいに。入りきらなければスクロール、「閉じる」はいつも見える == */
+  #result-overlay{ position:fixed !important; inset:0 !important; width:auto !important; height:auto !important; z-index:2147482000 !important;
+    overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; justify-content:flex-start !important; box-sizing:border-box;
+    padding:calc(env(safe-area-inset-top) + 14px) 12px calc(env(safe-area-inset-bottom) + 14px); }
+  #result-overlay > *{ flex-shrink:0; }
+  #result-overlay > #result-title{ margin-top:auto; }
+  #result-overlay > #result-close{ position:sticky; bottom:calc(env(safe-area-inset-bottom) + 8px); margin-top:14px; margin-bottom:auto; z-index:3;
+    box-shadow:0 5px 0 #b36200, 0 8px 22px rgba(0,0,0,.7); }
+  #result-desc{ margin:6px 0; }
+  @media (max-height:740px){
+    #result-img{ width:min(130px,34vw) !important; height:min(130px,34vw) !important; margin:6px 0 !important; }
+    #result-title{ font-size:clamp(22px,6.6vw,36px) !important; }
+    #fqChar{ font-size:19px !important; }
+    #result-desc{ font-size:15px !important; }
+    #fqPrize b{ font-size:24px !important; }
+  }
+  @media (max-height:600px){
+    #result-img{ width:min(100px,28vw) !important; height:min(100px,28vw) !important; }
+    #fqPrize b{ font-size:21px !important; }
+  }
 </style>
 
 <script>
@@ -1375,6 +1395,7 @@
     });
   });
 
+  try { document.body.appendChild(document.getElementById('result-overlay')); } catch(e) {}   /* fq-result-fit-v1: 枠の外へ */
   initSlot();   /* fq-slot-only-v1: スロットだけ */
   if (/[#&]card=1(&|$)/.test(location.hash)) { var hc = document.getElementById('fqHead'); if (hc) hc.textContent = 'スロットを まわそう！'; }   /* fq-card-v1 */
   if (/[#&]rs=1(&|$)/.test(location.hash)) { var hd = document.getElementById('fqHead'); if (hd) hd.textContent = 'さっきの ガチャの つづき！'; }   /* fq-play-resume-v1 */
