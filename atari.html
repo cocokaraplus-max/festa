@@ -71,7 +71,10 @@
   .idle .msg2{ font-size:3vh; font-weight:800; color:var(--muted); margin-top:1vh; }
   .side{ border-radius:3vh; background:rgba(0,0,0,.2); border:2px solid var(--line); padding:2.4vh 1.6vw; display:flex; flex-direction:column; min-height:0; }
   .side h2{ margin:0 0 1.4vh; font-size:3vh; color:var(--gold); letter-spacing:.1em; }
-  .list{ flex:1; overflow:hidden; display:flex; flex-direction:column; gap:1.1vh; }
+  .list{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; display:flex; flex-direction:column; gap:1.1vh; padding-right:.4vw; }   /* fq-atari-scroll-v1 */
+  .list .it{ flex:0 0 auto; }
+  .list::-webkit-scrollbar{ width:1vh; } .list::-webkit-scrollbar-thumb{ background:rgba(255,216,74,.45); border-radius:1vh; } .list::-webkit-scrollbar-track{ background:rgba(255,255,255,.05); border-radius:1vh; }
+  .side h2 small{ font-size:1.7vh; color:var(--muted); margin-left:.6vw; letter-spacing:0; font-weight:700; }
   .it{ display:flex; align-items:center; gap:1vw; background:rgba(255,255,255,.06); border-radius:1.6vh; padding:1.2vh 1vw; }
   .it .n{ font-size:3.4vh; font-weight:900; font-variant-numeric:tabular-nums; min-width:5.5em; color:var(--cream); }
   .it .n small{ font-size:1.8vh; color:var(--muted); margin-left:.3em; }
@@ -117,7 +120,7 @@
     <div class="msg2">「体験」「話を聞く」「知る」をそろえて、ガチャをまわそう</div><!-- fq-shiru-v1 -->
   </div>
   <div class="side">
-    <h2>さっきの当たり</h2>
+    <h2>さっきの当たり<small>スクロールで前の当たり</small></h2>
     <div class="list" id="list"><div class="empty">まだありません</div></div>
   </div>
 </div>
@@ -497,7 +500,7 @@
   /* ---- 表示 ---- */
   var recent = [], queue = [], showing = false, last = null;
   function paintList(newKey){
-    $('list').innerHTML = recent.length ? recent.slice(0, 8).map(function(w){
+    $('list').innerHTML = recent.length ? recent.slice(0, 100).map(function(w){   /* fq-atari-scroll-v1 */
       var k = w.recog_no + '|' + w.drawn_at;
       return '<div class="it' + (k === newKey ? ' new' : '') + (w.handed ? ' done' : '') + '"><div class="n">' + esc(w.recog_no) + '<small>さん</small>'   /* fq-atari-v2 */
         + (w.nickname ? '<span class="nk">' + esc(w.nickname) + '</span>' : '') + '</div>'
@@ -525,8 +528,9 @@
     if (!queue.length) { showing = false; return; }
     showing = true;
     var w = queue.shift();
-    recent.unshift(w); recent = recent.slice(0, 12);
+    recent.unshift(w); recent = recent.slice(0, 100);   /* fq-atari-scroll-v1 */
     paintList(w.recog_no + '|' + w.drawn_at);
+    try { $('list').scrollTop = 0; } catch(e) {}
     paintHero(w, true);
     setTimeout(next, ((LV[lvOf(w)] || {}).hold || 6) * 1000);   /* fq-atari-v2: 派手なものほど長く見せる */
   }
