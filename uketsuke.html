@@ -62,6 +62,17 @@
   .lk-it .st{ font-size:14px; font-weight:800; margin-top:4px; line-height:1.6; }
   .lk-it .st.ok{ color:var(--ok); } .lk-it .st.wait{ color:#C2410C; }
   .lk-it button.un{ border-color:#8A7F72; color:#5C5248; }   /* fq-self-draw-v1 */
+  /* fq-card-v1 */
+  .cd-row{ display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); font-weight:800; font-size:15px; }
+  .cd-row .w{ color:var(--pink); } .cd-row .ok{ color:var(--ok); }
+  .cd-chk{ margin:12px 0 6px; padding:12px; border:3px solid var(--ink); border-radius:12px; background:#fff8d6; font-weight:800; line-height:1.7; font-size:15px; }
+  .cd-go{ display:block; width:100%; margin-top:6px; padding:16px; border:3px solid var(--ink); border-radius:14px; background:var(--yellow); font-family:inherit; font-size:19px; font-weight:900; color:var(--ink); }
+  .cd-go:disabled{ opacity:.5; }
+  .cd-no{ margin:10px 0; padding:14px; border-radius:14px; background:var(--ink); color:#fff; text-align:center; font-weight:900; font-size:16px; line-height:1.6; }
+  .cd-no b{ display:block; font-size:44px; color:var(--yellow); letter-spacing:.05em; }
+  .cd-win{ margin-top:12px; padding:12px; border-radius:12px; background:#fff0f4; border:3px solid var(--pink); text-align:center; }
+  .cd-win .pnm{ font-size:24px; font-weight:900; line-height:1.3; } .cd-win .pno{ font-size:15px; font-weight:900; color:var(--pink); }
+  .cd-win button{ margin-top:10px; width:100%; padding:14px; border:0; border-radius:12px; background:var(--pink); color:#fff; font-family:inherit; font-size:19px; font-weight:900; }
   .lk-it button{ margin-top:6px; border:2px solid var(--pink); background:#fff; color:var(--pink); font-weight:900;
                  border-radius:10px; padding:8px 12px; font-family:inherit; font-size:14px; }
 </style>
@@ -108,6 +119,27 @@
   <div class="card hide" id="pBox">
     <div style="font-weight:900;font-size:16px;margin-bottom:6px">まだ渡していない当たり</div>
     <div id="pList"><p class="note">ありません。</p></div>
+  </div>
+
+  <!-- == fq-card-v1 : 紙のスタンプカード == -->
+  <div class="card hide" id="cBox">
+    <div style="font-weight:900;font-size:17px;margin-bottom:6px">📮 スタンプカードの方（スマホなし）</div>
+    <div id="cTop">
+      <button type="button" class="cd-go" id="cNew">はじめての方：スタンプOK → ガチャ</button>
+      <p class="note" style="margin:6px 0 12px">カードの <b>1回目</b> のスタンプ（体験・話を聞く・知る）が3つそろっているか確かめてから押してください。まわすと<b>カードの番号</b>が出ます。</p>
+      <div style="font-weight:800;font-size:14px;margin-bottom:4px">2回目の方・当たりを渡すとき：カードに書いた番号</div>
+      <div class="lk-row">
+        <input id="cNo" type="text" inputmode="numeric" autocomplete="off" placeholder="例：12" maxlength="5">
+        <button type="button" id="cOpen">ひらく</button>
+      </div>
+      <p class="note" id="cLast" style="margin-top:8px"></p>
+    </div>
+    <div id="cView" style="display:none">
+      <div id="cBig" style="font-size:22px;font-weight:900;text-align:center;margin:4px 0 6px"></div>
+      <div id="cBody"></div>
+      <button type="button" class="btn sub" id="cBack" style="margin-top:12px;width:100%">もどる（つぎの方へ）</button>
+    </div>
+    <div class="msg" id="cMsg"></div>
   </div>
 
   <!-- == fq-staff-lookup-v1 : 認識番号で調べる ==
@@ -351,6 +383,76 @@
   }
   $('rsBtn').addEventListener('click', rsMake);
   $('rsNo').addEventListener('keydown', function(e){ if (e.key === 'Enter') rsMake(); });
+  /* == fq-card-v1 : 紙のスタンプカード（番号を手書き） == */
+  var cardNo = 0, cardFresh = false;
+  function cdMsg(t, c){ $('cMsg').className = 'msg' + (c ? ' ' + c : ''); $('cMsg').innerHTML = t || ''; }
+  function cdTop(){ cardNo = 0; cardFresh = false; $('cView').style.display = 'none'; $('cTop').style.display = ''; $('cNo').value = ''; cdMsg(''); cdLast(); }
+  function cdLast(){ var v = ''; try{ v = localStorage.getItem('fq_card_last') || ''; }catch(e){} $('cLast').innerHTML = v ? 'さっき「はじめての方」に出した番号：<b style="font-size:18px">' + esc(v) + '</b>' : ''; }
+  cdLast();
+  function cdNum(v){ var s = String(v || '').replace(/[０-９]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) - 65248); }).replace(/[^0-9]/g, ''); return parseInt(s, 10) || 0; }
+  function loadCard(){
+    return rpc('fq_card_state', {p_staff: getStaff(), p_no: cardNo}).then(function(d){
+      if (!d.ok) { if (d.reason === 'staff') return staffLost(); cdMsg('カード番号 ' + cardNo + ' は 見つかりません。番号を確かめてください。', 'err'); cdTop(); return; }
+      $('cTop').style.display = 'none'; $('cView').style.display = '';
+      paintCard(d);
+    }).catch(function(e){ cdMsg('つながりませんでした（' + esc(e.message || e) + '）', 'err'); });
+  }
+  function paintCard(d){
+    var L = d.list || [], n = L.length, pend = L.filter(function(t){ return t.is_win && !t.handed_at; })[0];
+    $('cBig').innerHTML = '📮 カード番号 <b>' + esc(d.no) + '</b>';
+    var h = cardFresh ? '<div class="cd-no">カードに この番号を 書いてください<b>' + esc(d.no) + '</b>2回目のときに使います</div>' : '';
+    h += L.map(function(t){
+      return '<div class="cd-row"><span>ガチャ ' + esc(t.round) + '回目</span>'
+        + (t.is_win ? '<span class="w">' + esc(t.prize_name || '景品') + (t.prize_no != null ? '（' + esc(t.prize_no) + '番）' : '') + (t.handed_at ? '　<span class="ok">✅ 渡し済み</span>' : '') + '</span>' : '<span>はずれ</span>') + '</div>';
+    }).join('');
+    if (pend) {
+      h += '<div class="cd-win"><div>🎉 あたり！</div><div class="pnm">' + esc(pend.prize_name || '景品') + '</div>'
+         + '<div class="pno">' + (pend.prize_no != null ? '景品番号 ' + esc(pend.prize_no) + '番' : '') + '</div>'
+         + '<button type="button" data-chand="' + esc(pend.token) + '">景品を渡しました</button></div>';
+    } else if (n >= (d.max || 2)) {
+      h += '<p class="cd-chk" style="background:#eee">このカードのガチャは <b>おしまい</b> です（' + n + '回 まわしました）。</p>';
+    } else if (!cardFresh) {
+      h += '<div class="cd-chk">カードの <b>' + (n + 1) + '回目</b> の スタンプ<br>（<b>体験・話を聞く・知る</b>）が <b>3つ そろっているか</b> 確かめてください。</div>'
+         + '<button type="button" class="cd-go" id="cDraw">スタンプOK → ガチャをまわす</button>';
+    }
+    $('cBody').innerHTML = h;
+  }
+  function cardPlay(d){
+    var r = d.win ? Math.max(1, Math.min(10, d.rarity|0)) : 0;
+    var m = !d.win ? 0 : (r <= 3 ? 1 : r <= 5 ? 2 : r <= 7 ? 3 : 4);
+    var url = 'gacha_play.html#m=' + m + '&p=' + encodeURIComponent(d.prize_name || '') + '&n=' + encodeURIComponent(d.prize_no == null ? '' : d.prize_no) + '&card=1' + (d.win ? '&lv=' + r : '');
+    var fr = document.createElement('iframe'); fr.src = url; fr.title = 'ガチャ';
+    fr.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9000;background:#000;';
+    function done(){ window.removeEventListener('message', onMsg); if (fr.parentNode) fr.parentNode.removeChild(fr); loadCard(); loadPending(); }
+    function onMsg(ev){ if (ev.origin !== location.origin || !ev.data || ev.data.fq !== 'g2done') return; done(); }
+    window.addEventListener('message', onMsg);
+    document.body.appendChild(fr);
+  }
+  function cardDraw(btn, no){
+    btn.disabled = true; cdMsg('');
+    rpc('fq_card_draw', {p_staff: getStaff(), p_no: no}).then(function(d){
+      btn.disabled = false;
+      if (!d.ok) {
+        if (d.reason === 'staff') return staffLost();
+        cdMsg(d.reason === 'claim_first' ? '前の当たりを まだ渡していません。先に「景品を渡しました」を押してください。' : d.reason === 'done' ? 'このカードは 2回 まわしました。' : d.reason === 'bad_card' ? 'その番号のカードは ありません。' : 'まわせませんでした。', 'err');
+        if (no) loadCard(); return;
+      }
+      cardFresh = !no; cardNo = d.no;
+      if (!no) { try{ localStorage.setItem('fq_card_last', String(d.no)); }catch(e){} cdLast(); }
+      cardPlay(d);
+    }).catch(function(e){ btn.disabled = false; cdMsg('つながりませんでした（' + esc(e.message || e) + '）', 'err'); });
+  }
+  $('cNew').addEventListener('click', function(){ cardDraw(this, 0); });
+  function cdOpen(){ var n = cdNum($('cNo').value); if (!n) { cdMsg('カードの番号を入れてください。', 'err'); return; } cardNo = n; cardFresh = false; cdMsg(''); loadCard(); }
+  $('cOpen').addEventListener('click', cdOpen);
+  $('cNo').addEventListener('keydown', function(e){ if (e.key === 'Enter') cdOpen(); });
+  $('cBack').addEventListener('click', cdTop);
+  $('cBox').addEventListener('click', function(ev){
+    var g = ev.target.closest && ev.target.closest('#cDraw');
+    if (g) { cardDraw(g, cardNo); return; }
+    var hb = ev.target.closest && ev.target.closest('[data-chand]');
+    if (hb) { hb.disabled = true; hand(hb.getAttribute('data-chand'), function(){ cdMsg('渡しました。', 'good'); loadCard(); }); }
+  });
   $('lkBtn').addEventListener('click', lookup);
   $('lkNo').addEventListener('keydown', function(e){ if (e.key === 'Enter') lookup(); });
   $('lkOut').addEventListener('click', function(ev){
@@ -395,6 +497,7 @@
   $('rUnhand').addEventListener('click', function(){ rHand(true); });
   function start(){
     show('loginBox', false); show('helpBox', true);
+    show('cBox', true);   /* fq-card-v1 */
     show('lBox', true);   /* fq-staff-lookup-v1 */
     show('rsBox', true);   /* fq-restore-v1 */
     show('camBtn', true);   /* fq-uke-cam-v1 */

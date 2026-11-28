@@ -1376,6 +1376,7 @@
   });
 
   initSlot();   /* fq-slot-only-v1: スロットだけ */
+  if (/[#&]card=1(&|$)/.test(location.hash)) { var hc = document.getElementById('fqHead'); if (hc) hc.textContent = 'スロットを まわそう！'; }   /* fq-card-v1 */
   if (/[#&]rs=1(&|$)/.test(location.hash)) { var hd = document.getElementById('fqHead'); if (hd) hd.textContent = 'さっきの ガチャの つづき！'; }   /* fq-play-resume-v1 */
   /* fq-free-auto-v1: オートのときは 自分で SPIN して、止めて、閉じる。「オートをやめる」で いつでも止まる */
   if (FQ.auto && AUTO_ON) {
