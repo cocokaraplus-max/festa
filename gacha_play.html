@@ -718,7 +718,7 @@
     }
     var fl = document.getElementById('fqLose');
     if (!fl) { fl = document.createElement('div'); fl.id = 'fqLose'; $('result-desc').parentNode.insertBefore(fl, $('result-desc').nextSibling); }
-    fl.textContent = loseP ? '景品は ざんねん、ハズレ…　でも 大抽選会の対象だよ！' : '';
+    fl.textContent = loseP ? '景品は ざんねん、ハズレ…　また 挑戦してね！' : '';   /* fq-nogrand-text-v1 */
     $('result-title').textContent = title;
     $('result-title').classList.toggle('lose-title', !!lose);
     var im=$('result-img'); im.src=img; im.classList.toggle('lose-img', !!lose);
@@ -923,7 +923,7 @@
           (reach?'リーチから揃った！ ':'3つ揃った！ ')+res.prize+' をGET！', false);
       } else {
         showResult('💀 惜しい！ハズレ 💀', pick(),
-          (reach?'あと1つだった…　でも大抽選会の対象だよ！':'でも大抽選会の対象だよ！　最後までお楽しみに！'), true);
+          (reach?'あと1つだった…　また 挑戦してね！':'また 挑戦してね！　最後までお楽しみに！'), true);
       }
     }, (D[2] + 1.2)*1000);   /* 3つめが止まってから1.2秒。フリーズのときと同じ間です */
   }
@@ -1001,7 +1001,7 @@
     };
     if(res.win) showResult(viaRevival?'⚡ OVERRIDE ULTRA RARE ⚡':'🎉 GET!! 🎉', winChar,
       (viaRevival?'【極限復活】ハズレカプセルが粉砕！ ':'カプセルが開いた！ ')+res.prize+' をGET！', false);
-    else showResult('💀 惜しい！ハズレ 💀', pick(), 'カプセルは空っぽだった…　でも大抽選会の対象だよ！', true);
+    else showResult('💀 惜しい！ハズレ 💀', pick(), 'カプセルは空っぽだった…　また 挑戦してね！', true);
     if(viaRevival) $('result-img').classList.add('revival');
   }
   function revivalReset(){
@@ -1146,7 +1146,7 @@
       if(fishRes.win) showResult(fishBoss?'🎣 超大物を釣り上げた！！ 🎣':'🎣 釣り上げた！！ 🎣', winChar,
         '激しい引きに打ち勝った！ '+fishRes.prize+' をGET！', false);
       else            showResult('💀 惜しい！ハズレ 💀', pick(),
-        fishBoss?'あと少しでバラしてしまった…　でも大抽選会の対象だよ！':'バラしてしまった…　でも大抽選会の対象だよ！', true);
+        fishBoss?'あと少しでバラしてしまった…　また 挑戦してね！':'バラしてしまった…　また 挑戦してね！', true);
     }, 350);
   }
   $('hook-btn').addEventListener('click', function(){
@@ -1221,7 +1221,7 @@
           raceChars[ME],
           (kaku?'目が光り 猛ダッシュでごぼう抜き！ ':baku?'邪魔者を吹き飛ばして堂々の1位！ ':'見事1位でゴールイン！ ')
           +res.prize+' をGET！', false);
-        else showResult('💀 惜しくも敗北 💀', raceChars[ME], 'ライバルに届かなかった…　でも大抽選会の対象だよ！', true);
+        else showResult('💀 惜しくも敗北 💀', raceChars[ME], 'ライバルに届かなかった…　また 挑戦してね！', true);
       }, 450);
     }
 

@@ -2153,7 +2153,7 @@ if ('serviceWorker' in navigator) {
     if(gEl){
       gEl.style.display = 'none';   /* fq-nogrand-v1: 大抽選会の行は出さない（前は ここで表示に戻していた） */
       gEl.style.color = V.grand ? 'var(--red)' : '';
-      gEl.textContent = V.grand ? '🎉 大抽選会の対象です（認識番号 '+DID+'）' : 'ガチャを1回まわすと、大抽選会の対象になります';
+      gEl.textContent = '';   /* fq-nogrand-text-v1: 大抽選会はアプリではやらない */
     }
     var box=document.getElementById('prizes');
     if(box){
