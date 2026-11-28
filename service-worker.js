@@ -13,7 +13,8 @@
        つながらない時だけキャッシュを出す（＝オフラインでも開ける）。
      - アイコン・manifest だけ「キャッシュ優先」（変わらないので速さ優先）。
    ------------------------------------------------------------------ */
-const CACHE = 'fq326-v99';  // fq-atari-handed-v1: 景品モニターに渡し済み
+const CACHE = 'fq326-v100';  // fq-atari-tidy-v1: 景品モニターを1行でスッキリ
+// (旧) const CACHE = 'fq326-v99';  // fq-atari-handed-v1: 景品モニターに渡し済み
 // (旧) const CACHE = 'fq326-v98';  // fq-atari-scroll-v1: 景品モニターの一覧をスクロール
 // (旧) const CACHE = 'fq326-v97';  // fq-photo-qr-v1: 写真からQR（オンの端末だけ）
 // (旧) const CACHE = 'fq326-v96';  // fq-card-v1: 紙のスタンプカード

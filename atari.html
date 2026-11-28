@@ -104,6 +104,17 @@
   .lbox button{ width:100%; margin-top:14px; border:3px solid #36271E; background:#F5E83A; color:#36271E; border-radius:12px; padding:13px;
                 font-size:17px; font-weight:900; font-family:inherit; cursor:pointer; }
   .lbox .err{ color:#C2410C; font-weight:800; margin-top:8px; min-height:1.2em; font-size:14px; }
+  /* == fq-atari-tidy-v1 : 1行にそろえる == */
+  .list .it{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:1vw; height:6.6vh; padding:0 1.2vw; }
+  .list .it .n{ min-width:0; font-size:3.2vh; white-space:nowrap; }
+  .list .it .n small{ font-size:1.7vh; }
+  .list .it .p{ display:flex; align-items:center; gap:.5vw; min-width:0; font-size:2.6vh; white-space:nowrap; }
+  .list .it .pn{ flex:0 0 auto; margin:0; }
+  .list .it .pt{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .list .it .t{ white-space:nowrap; font-size:2vh; text-align:right; }
+  .list .it .hd{ display:inline-block; background:#3ccf7a; color:#08311c; border-radius:.8vh; padding:.3vh .6vw; font-size:1.8vh; font-weight:900; }
+  .list .it.done{ opacity:.7; }
+  .hero .pz, .hero .nm{ white-space:nowrap; word-break:normal; }
 </style>
 </head>
 <body>
@@ -500,14 +511,22 @@
 
   /* ---- 表示 ---- */
   var recent = [], queue = [], showing = false, last = null;
-  function paintList(newKey){
-    $('list').innerHTML = recent.length ? recent.slice(0, 100).map(function(w){   /* fq-atari-scroll-v1 */
+  function paintList(newKey){   /* fq-atari-tidy-v1: 1行にそろえる */
+    $('list').innerHTML = recent.length ? recent.slice(0, 100).map(function(w){
       var k = w.recog_no + '|' + w.drawn_at;
-      return '<div class="it' + (k === newKey ? ' new' : '') + (w.handed ? ' done' : '') + '"><div class="n">' + esc(w.recog_no) + '<small>さん</small>'   /* fq-atari-v2 */
-        + (w.nickname ? '<span class="nk">' + esc(w.nickname) + '</span>' : '') + (w.handed ? '<span class="hd">✅ 渡し済み</span>' : '') + '</div>'
-        + '<div class="p">' + (w.prize_no != null ? '<span class="pn">' + esc(w.prize_no) + '番</span>' : '') + esc(w.prize_name || '景品') + '</div>'
-        + '<div class="t">' + esc(hm(w.drawn_at)) + '</div></div>';   /* fq-atari-handed-v1: 渡し済みは番号の下に */
+      return '<div class="it' + (k === newKey ? ' new' : '') + (w.handed ? ' done' : '') + '">'
+        + '<div class="n">' + esc(w.recog_no) + '<small>さん</small></div>'
+        + '<div class="p">' + (w.prize_no != null ? '<span class="pn">' + esc(w.prize_no) + '番</span>' : '') + '<span class="pt">' + esc(w.prize_name || '景品') + '</span></div>'
+        + '<div class="t">' + (w.handed ? '<span class="hd">✅ 渡し済み</span>' : esc(hm(w.drawn_at))) + '</div></div>';
     }).join('') : '<div class="empty">まだありません</div>';
+  }
+  /* 長い文字は、小さくして1行に収める */
+  function fit(el, minPx){
+    if (!el) return;
+    el.style.fontSize = ''; el.style.whiteSpace = 'nowrap';
+    var fs = parseFloat(getComputedStyle(el).fontSize), w = el.parentNode.clientWidth * 0.94;
+    while (el.scrollWidth > w && fs > minPx) { fs -= 2; el.style.fontSize = fs + 'px'; }
+    if (el.scrollWidth > w) { el.style.overflow = 'hidden'; el.style.textOverflow = 'ellipsis'; el.style.maxWidth = '94%'; }
   }
   function paintHero(w, anim){
     var h = $('hero'), L = lvOf(w), s = LV[L], big = L >= 10;   /* fq-atari-v2: 演出は10段階 */
@@ -522,6 +541,7 @@
         + '<div class="tm">' + esc(hm(w.drawn_at)) + '</div>';
     }
     real();   /* じらさずに、すぐ出す。ちがいは派手さだけ */
+    var hh = $('hero'); fit(hh.querySelector('.pz'), 26); fit(hh.querySelector('.nm'), 22);   /* fq-atari-tidy-v1 */
     if (anim) { void h.offsetWidth; h.classList.add('pop'); celebrate(w); }
   }
   /* 同時にいくつか来ても、1つずつ 6 秒は見せる */
