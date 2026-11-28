@@ -626,6 +626,26 @@
   .lp-goalrw{margin-top:10px;padding:8px 10px;border:2px dashed #c9a227;border-radius:12px;background:#fff8e1;
     font-size:12.5px;font-weight:800;line-height:1.6;text-align:center;color:var(--ink);}
   .lp-goalrw b{color:var(--red);}
+  /* fq-lp-guide-v1 */
+  .lgr-pair{display:flex;justify-content:center;gap:4px;margin:4px 0 2px;}
+  .lgr-pair img{width:54px;height:58px;object-fit:contain;filter:brightness(0) opacity(.75);}
+  .lgr-st{display:inline-block;margin-top:3px;background:#e2463b;color:#fff !important;border-radius:999px;padding:2px 10px;font-size:13.5px;}
+  .lp-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 10px;}
+  .lp-steps div{background:#f3ecfa;border-radius:10px;padding:7px 4px;text-align:center;font-size:11.5px;font-weight:800;line-height:1.45;color:var(--ink);}
+  .lp-steps i{display:block;font-style:normal;font-size:20px;line-height:1.2;}
+  .lp-steps b{display:block;color:#6B3FA0;font-size:12px;}
+  .lp-box.fq-flash,.rw-box.fq-flash{animation:fqFlash .8s ease-in-out 3;}
+  .lp-sticker{margin:12px 0 4px;padding:10px;border-radius:14px;background:#fff3f1;border:2.5px solid #e2463b;font-size:13px;font-weight:800;line-height:1.6;color:var(--ink);}
+  .lp-sticker b{display:block;font-size:19px;color:#e2463b;}
+  .lp-modal .btn-sub{background:#6B3FA0 !important;color:#fff !important;font-size:15px;}
+  .lpi-card{max-width:350px;text-align:center;}
+  .lpi-card h3{margin:4px 0 8px;font-size:22px;}
+  .lpi-steps{display:flex;flex-direction:column;gap:7px;text-align:left;margin:6px 0 10px;}
+  .lpi-steps>div{display:flex;gap:10px;align-items:center;background:#f6f1e4;border-radius:12px;padding:8px 10px;font-size:13.5px;font-weight:800;line-height:1.5;}
+  .lpi-steps>div>div{display:block;flex:1 1 auto;}
+  .lpi-steps>div>span{flex:0 0 30px;height:30px;border-radius:50%;background:#6B3FA0;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .lpi-rw{border:2.5px dashed #c9a227;background:#fff8e1;border-radius:14px;padding:8px 10px;font-size:13px;font-weight:800;line-height:1.6;}
+  .lpi-rw b{color:#e2463b;}
   .lp-modal .lp-pair{display:flex;justify-content:center;gap:2px;}
   .lp-modal .lp-pair .zk-img{width:140px;height:150px;margin:8px 0 0;}
   .lp-title{display:flex;align-items:center;justify-content:center;gap:6px;
@@ -880,10 +900,11 @@ window.__FQ_Q0 = location.search;</script>
         <div class="lp-prog"><b id="lpVisited">0</b>/<span id="lpTotal">8</span> か所</div>
         <div class="lp-bar"><i id="lpBar"></i></div>
       </div>
+      <div class="lp-steps" id="lpSteps" style="display:none"><div><i>🔍</i><b>①さがす</b>ヒントの<br>場所へ行く</div><div><i>📷</i><b>②読む</b>そこの キャラの<br>QRを読む</div><div><i>🏁</i><b>③8か所で</b>ゴール！<br>ごほうび</div></div><!-- fq-lp-guide-v1 -->
       <div class="lp-hint" id="lpHint">…</div>
       <div class="lp-ans" id="lpAnsWrap"><button class="linkbtn" data-act="lpAns">こたえを見る</button></div>
       <div class="lp-name" id="lpName" style="display:none"></div>
-      <div class="lp-goalrw" id="lpGoalRw">🎁 8か所ぜんぶ まわると…<br><b>シークレットキャラ</b>が <b>2体</b> 出現するよ</div><!-- fq-goal294-v1 -->
+      <div class="lp-goalrw" id="lpGoalRw">🎁 8か所 ぜんぶ まわると…<div class="lgr-pair"><img src="img/zukan/z_85.png" alt=""><img src="img/zukan/z_86.png" alt=""></div><b>シークレットキャラ 2体</b>が なかまに！<br><span class="lgr-st">＋ ステッカー プレゼント！</span></div><!-- fq-lp-guide-v1 --><!-- fq-goal294-v1 -->
       <div class="lp-note" id="lpNote">見つけたら、そこの<b>QR</b>を読み取ろう。<br>
         行き先は<b>人によってちがいます</b>。<b>チームの仲間</b>とは同じです。</div>
     </div>
@@ -989,6 +1010,21 @@ window.__FQ_Q0 = location.search;</script>
 </div>
 
 <!-- == fq-logpose-v1 goal == -->
+<div class="modal" id="lpIntro"><!-- fq-lp-guide-v1: 8か所めぐり スタートの説明 -->
+  <div class="modal-card lpi-card">
+    <div style="font-size:38px;line-height:1">🧭</div>
+    <h3 class="hand">8か所めぐり スタート！</h3>
+    <div style="font-size:13px;font-weight:800;color:var(--muted)">会場に かくれている キャラを さがそう</div>
+    <div class="lpi-steps">
+      <div><span>1</span><div>図鑑の<b>「つぎの ぼうけん」</b>に出る<br><b>ヒント</b>の場所へ行く</div></div>
+      <div><span>2</span><div>そこにいる キャラの<b>QR</b>を<br><b>「QRを読む」</b>で読む</div></div>
+      <div><span>3</span><div>つぎのヒントが出るよ。<br><b>8か所</b>まわったら ゴール！</div></div>
+    </div>
+    <div class="lpi-rw">🎁 ゴールの ごほうび<div class="lgr-pair"><img src="img/zukan/z_85.png" alt=""><img src="img/zukan/z_86.png" alt=""></div><span class="ib">シークレットキャラ <b>2体</b></span> <span class="ib">＋ <b>ステッカー プレゼント！</b></span></div>
+    <button class="btn" data-act="lpGo" style="margin-top:12px">はじめる ▶</button>
+  </div>
+</div>
+
 <div class="modal lp-modal" id="lpModal">
   <div class="modal-card">
     <div class="lp-gem">🧭</div>
@@ -996,7 +1032,9 @@ window.__FQ_Q0 = location.search;</script>
     <div class="lp-pair"><img class="zk-img" id="lpImg" src="img/zukan/z_85.png" alt="294くん"><img class="zk-img" id="lpImg2" src="img/zukan/z_86.png" alt="294ちゃん"></div>
     <h3 class="hand">シークレットキャラ<br>ゲット！</h3><!-- fq-goalorder-v1 -->
     <div class="lp-award" id="lpAward"><ruby>294くん<rt>つくしくん</rt></ruby> と <ruby>294ちゃん<rt>ふくしちゃん</rt></ruby> が なかまになった！<br>称号「<span id="lpAwardTx">夢を掴む冒険者</span>」</div>
-    <button class="btn" data-act="lpFree">🎮 おたのしみガチャへ</button><!-- fq-goal-free-v1 -->
+    <div class="lp-sticker"><b>🎁 ステッカー プレゼント！</b>1Fの受付（景品交換所）で<br>受け取りのQRを 見せてね</div><!-- fq-lp-guide-v1 -->
+    <button class="btn" data-act="lpSticker">🎁 受け取りのQRを見る</button>
+    <button class="btn btn-sub" data-act="lpFree" style="margin-top:8px">🎮 おたのしみガチャへ</button><!-- fq-goal-free-v1 -->
     <button type="button" class="lp-later" data-act="lpClose">あとで</button>
   </div>
 </div>
@@ -2540,6 +2578,12 @@ if ('serviceWorker' in navigator) {
     if(!zq.length) return;
     if(window.busy || document.querySelector('.modal.show, .modal-fx.show')){ setTimeout(zqRun, 700); return; }
     var z = zq.shift();
+    if(z.quiet){   /* fq-zk-quiet-v1: ガチャの画面で もう見せた子は、図鑑に入れるだけ */
+      if(z.mon){ try{ paintMon(); }catch(e){} }
+      else { owned[z.char] = 1; saveLocal(); paint(z.char); }
+      if(zq.length) setTimeout(zqRun, 50);
+      return;
+    }
     if(z.mon){   /* fq-mon-v1: 福祉モンスター（おたのしみガチャ） */
       var mo = document.getElementById('zukanModal');
       if(mo){
@@ -2588,7 +2632,7 @@ if ('serviceWorker' in navigator) {
   window.fqZukanGot = function(z){
     if(!z || (!z.char && !z.mon)) return;   /* fq-mon-v1: 福祉モンスターも受ける */
     if(z.total) TOTAL = z.total;
-    zq.push(z); setTimeout(zqRun, 900);
+    zq.push(z); setTimeout(zqRun, z.quiet ? 50 : 900);
   };
 
   /* == fq-zukan86-v1 : 8か所ゴールのごほうび ＝ あなたのモンスター（福祉タイプ診断）。86体の数には入れない ==
@@ -2897,6 +2941,8 @@ if ('serviceWorker' in navigator) {
     $('lpBar').style.width = Math.round(v/Math.max(1,tot)*100)+'%';
 
     var gr = $('lpGoalRw'); if(gr) gr.style.display = st.done ? 'none' : '';   /* fq-goal294-v1 */
+    var sp = $('lpSteps'); if(sp) sp.style.display = (st.done || st.locked) ? 'none' : '';   /* fq-lp-guide-v1 */
+    if(!st.done && !st.locked && window.fqLpIntro) window.fqLpIntro();   /* fq-lp-guide-v1: はじめて入ったときの説明 */
     if(st.done){
       box.classList.add('done');
       $('lpHead').textContent = 'ぼうけん、ぜんぶ まわった！';
@@ -2920,7 +2966,7 @@ if ('serviceWorker' in navigator) {
     $('lpHead').textContent = 'つぎの ぼうけん';
     var nx = st.next || {};
     $('lpHint').textContent = nx.hint || (nx.name || 'つぎの場所をさがそう');
-    $('lpNote').innerHTML = '見つけたら、そこの<b>QR</b>を読み取ろう。<br>'
+    $('lpNote').innerHTML = '見つけたら、そこの<b>QR</b>を「QRを読む」で読み取ろう。<br>'
       + '行き先は<b>人によってちがいます</b>。<b>チームの仲間</b>とは同じです。';
 
     /* 行き先が変わったら「こたえ」は隠しなおす */
@@ -2946,6 +2992,23 @@ if ('serviceWorker' in navigator) {
     }).catch(function(){});
   }
 
+  /* fq-lp-guide-v1: はじめて8か所めぐりに入ったら 1回だけ説明。ガチャや図鑑の画面を閉じてから出す */
+  var lpIntroBusy = false;
+  window.fqLpIntro = function(){
+    if(lpIntroBusy) return; try{ if(localStorage.getItem('fq_lp_intro_v1') === '1') return; }catch(e){ return; }
+    lpIntroBusy = true;
+    (function wait(){
+      var busyUi = document.querySelector('iframe[title="ガチャ"]') || document.querySelector('.modal.show');
+      if(busyUi){ setTimeout(wait, 800); return; }
+      try{ localStorage.setItem('fq_lp_intro_v1', '1'); }catch(e){}
+      var mo = $('lpIntro'); if(mo) mo.classList.add('show');
+    })();
+  };
+  window.fqGoLp = function(){
+    if(window.FQ_TAB) window.FQ_TAB('zukan', true);
+    setTimeout(function(){ var b = $('lpBox'); if(!b) return; if(b.scrollIntoView) b.scrollIntoView({behavior:'smooth', block:'start'});
+      b.classList.add('fq-flash'); setTimeout(function(){ b.classList.remove('fq-flash'); }, 2400); }, 350);
+  };
   window.fqLpRefresh = refresh;   /* fq-daycheck-v1: チームが変わったら取り直す */
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') refresh(); });
   /* ---- ゴールしたとき ---- */
@@ -2956,7 +3019,7 @@ if ('serviceWorker' in navigator) {
     /* fq-goal294-v1: ごほうびは 294くん（No.85）と 294ちゃん（No.86） */
     var aw = $('lpAward');
     if(aw) aw.innerHTML = '<b><ruby>294くん<rt>つくしくん</rt></ruby></b> と <b><ruby>294ちゃん<rt>ふくしちゃん</rt></ruby></b> が<br>図鑑の なかまに なった！<br>称号「' + GOAL_TITLE + '」'
-        + '<br><small>「おたのしみガチャ」で 何度でも遊べるよ（景品なし）</small>';   /* fq-goal-free-v1 */
+        ;   /* fq-lp-guide-v1: おたのしみガチャの案内は ステッカーのあとに */
     mo.classList.add('show');
     if(typeof confetti==='function') confetti(3);
     paintTitle(lastOwned);          /* ★称号に「ぼうけんしゃ」を足す */
@@ -2990,6 +3053,12 @@ if ('serviceWorker' in navigator) {
       if(lastState) paintState(lastState); else refresh();
     } else if(a==='lpClose'){
       var mo=$('lpModal'); if(mo) mo.classList.remove('show');
+    } else if(a==='lpSticker'){   /* fq-lp-guide-v1: ステッカーの受け取りQRへ */
+      var mo3=$('lpModal'); if(mo3) mo3.classList.remove('show');
+      if(window.fqGoSticker) window.fqGoSticker();
+    } else if(a==='lpGo'){
+      var mo4=$('lpIntro'); if(mo4) mo4.classList.remove('show');
+      if(window.fqGoLp) window.fqGoLp();
     } else if(a==='lpFree'){   /* fq-goal-free-v1: おたのしみガチャへ */
       var mo2=$('lpModal'); if(mo2) mo2.classList.remove('show');
       if(window.fqGoFree) window.fqGoFree();
@@ -3399,12 +3468,20 @@ if ('serviceWorker' in navigator) {
       s=G.self_draw ? '下の<b>「ガチャをまわす」</b>を押してね。当たったら、1Fの受付で景品と交換できます。' : '受付で<b>ガチャ券</b>を見せると、ガチャがまわせます。';
     } else {
       var lpGoal=false; try{ lpGoal = localStorage.getItem('fukushi_quest_326_lp_goal') === '1'; }catch(e){}
-      if(lpGoal){   /* fq-goal-free-v1: 8か所ぜんぶ まわった人 */
+      var rws = window.fqRWState ? window.fqRWState() : null;   /* fq-lp-guide-v1 */
+      if(lpGoal && rws && rws.sticker && !rws.sticker.handed){   /* fq-lp-guide-v1: まずステッカー */
+        v='<span class="ib">🎁 ステッカーを</span><span class="ib">もらおう！</span>';
+        s='<span class="ib">8か所 ぜんぶ まわったね！</span><br><span class="ib"><b>1Fの受付（景品交換所）</b>で</span><span class="ib">受け取りのQRを 見せてね</span><br>'
+          +'<button type="button" class="g2-free-go" data-lpsticker="1" style="background:#e2463b">受け取りのQRを見る ▶</button><br>'
+          +'<small><span class="ib">そのあと おたのしみガチャで</span><span class="ib">何度でも 遊べるよ</span></small> <button type="button" class="linkbtn" data-fqfree="1">おたのしみガチャへ</button>';
+      } else if(lpGoal){   /* fq-goal-free-v1: 8か所ぜんぶ まわった人 */
         v='<span class="ib">🎮 おたのしみガチャで</span><span class="ib">遊ぼう！</span>';   /* fq-free-text-v1 */
         s='<span class="ib">8か所 ぜんぶ まわったね！</span><br><span class="ib">何度でも 遊べるよ（景品なし）</span><br><button type="button" class="g2-free-go" data-fqfree="1">おたのしみガチャへ ▶</button>';
       } else {
-      v='📖 図鑑の8か所めぐりへ！';
-      s='ガチャは1人2回まで。会場のキャラのQRを集めよう。<br><button type="button" class="linkbtn" data-g2="zukan">図鑑をひらく</button>';
+      v='<span class="ib">🧭 会場の</span><span class="ib">8か所めぐり！</span>';   /* fq-lp-guide-v1 */
+      s='<span class="ib">会場に かくれた キャラを さがして、</span><span class="ib"><b>QRを読もう</b>。</span><br>'
+        +'<span class="ib">8か所 ぜんぶで <b>シークレットキャラ2体</b></span><span class="ib">＋ <b>ステッカー プレゼント！</b></span><br>'
+        +'<button type="button" class="g2-free-go" data-lpgo="1">8か所めぐりを はじめる ▶</button>';
       }
     }
     if(started && G.claim_wait){   /* fq-self-draw-v1: 景品を受け取るまで、つぎに進めない */
@@ -3479,6 +3556,7 @@ if ('serviceWorker' in navigator) {
       if(!d){ throw (res && res.error) || new Error('no data'); }
       if(!d.ok){ busy=false; window.busy=false; toast(d.reason==='claim_first'?'先に、当たった景品を1Fの受付で受け取ってね':d.reason==='not_unlocked'?'受付でガチャ券を見せてね':'もう一度ためしてね');   /* fq-self-draw-v1 */ refresh(); return; }
       if(d.win){ d.fx = Math.max(1, Math.min(10, d.rarity|0)); d.rarity = d.fx<=3?1 : d.fx<=5?2 : d.fx<=7?3 : 4; }   /* fq-fx10-v1: 10段階 → スマホの4種類 */
+      if(d.zukan && window.fqPlay) d.zukan.quiet = true;   /* fq-zk-quiet-v1: スロットの画面で見せる */
       if(d.zukan && window.fqZukanGot) window.fqZukanGot(d.zukan);   /* fq-zukan2-v1: 演出が終わってから図鑑に1体 */
       /* == fq-gacha-play-v1 : お客さんが遊びを選ぶ演出（gacha_play.html）。開けないときは今までの演出 == */
       if(window.fqPlay && window.fqPlay(d)) return;
@@ -3582,6 +3660,18 @@ if ('serviceWorker' in navigator) {
   paintFree(); setInterval(paintFree, 2000);
   /* == fq-rewards-v1 : ステッカー・326さんの似顔絵 == */
   var RW = null, rwBusy = false;
+  window.fqRWState = function(){ return RW; };   /* fq-lp-guide-v1 */
+  window.fqGoSticker = function(){
+    if (window.FQ_TAB) window.FQ_TAB('quest', true);
+    rwRefresh();
+    setTimeout(function(){ var b = $('rwBox'); if (!b) return; if (b.scrollIntoView) b.scrollIntoView({behavior: 'smooth', block: 'center'});
+      b.classList.add('fq-flash'); setTimeout(function(){ b.classList.remove('fq-flash'); }, 2400); }, 500);
+  };
+  document.addEventListener('click', function(ev){
+    var t = ev.target && ev.target.closest; if (!t) return;
+    if (ev.target.closest('[data-lpsticker]')) { ev.preventDefault(); window.fqGoSticker(); }
+    else if (ev.target.closest('[data-lpgo]')) { ev.preventDefault(); if (window.fqGoLp) window.fqGoLp(); }
+  });
   function rwItem(em, t, r){
     if (r.handed) return '<div class="rw-it done"><div class="rw-t">' + em + ' ' + t + '</div><div class="rw-s">✅ 受け取りました</div></div>';
     return '<div class="rw-it"><div class="rw-t">' + em + ' ' + t + '</div>'
@@ -3613,6 +3703,8 @@ if ('serviceWorker' in navigator) {
       rwBusy = false;
       var d = res && res.data; if (!d || !d.ok) return;
       var before = RW; RW = d;
+      var stK = function(x){ return x && x.sticker ? (x.sticker.handed ? 2 : 1) : 0; };   /* fq-lp-guide-v1: ステッカーの様子が変わったら「つぎは」を描きなおす */
+      if (stK(before) !== stK(d) && window.fqG2Refresh) window.fqG2Refresh();
       if (d.mons && window.fqMonSet) window.fqMonSet(d.mons);
       rwPaint(); paintFree();
       if (before && !before.portrait && d.portrait) {   /* いま 似顔絵の権利を とった */
@@ -3669,6 +3761,7 @@ if ('serviceWorker' in navigator) {
       if (z.mon) mode = Math.max(mode, 3);
       var nn = z.mon ? '' : ((z.char < 10 ? '0' : '') + z.char);
       var dd = { free: true, win: true, rarity: mode, prize_name: z.mon ? ('福祉モンスター「' + z.name + '」') : ('なかま No.' + nn), prize_no: null, zukan: z };
+      z.quiet = true;   /* fq-zk-quiet-v1 */
       if (window.fqZukanGot) window.fqZukanGot(z);
       if (!window.fqPlay(dd)) freeEnd();
       if (d.complete && window.fqRewardRefresh) setTimeout(window.fqRewardRefresh, 8000);
