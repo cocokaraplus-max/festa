@@ -1957,6 +1957,14 @@ const FQ = {
             box-shadow:5px 6px 0 var(--ink);}
   .h-pink{color:var(--pink);}  .h-blue{color:var(--blue);}
   .h-green{color:var(--green);} .h-orange{color:var(--orange);}
+  /* fq-floor-v1: フロアガイド */
+  .fg-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+  .fg-b{font-family:inherit;font-size:22px;font-weight:900;line-height:1.1;padding:10px 4px 8px;border-radius:14px;border:2.5px solid #36271e;background:#fff;color:#36271e;cursor:pointer;}
+  .fg-b small{display:block;font-size:11px;font-weight:800;margin-top:3px;opacity:.8;}
+  .fg-b.on{background:#36271e;color:#fff;}
+  .fg-img{display:block;border-radius:14px;overflow:hidden;border:2.5px solid #36271e;background:#fff;}
+  .fg-img img{display:block;width:100%;height:auto;}
+  .fg-note{font-size:12px;font-weight:700;color:#7a6a5c;text-align:center;margin-top:6px;}
 
   /* ★fq-guest-v1: SPECIAL GUEST の見出しだけ、チラシと同じ「青い帯に白文字」。
      ほかの見出し（白い箱＋色の文字）はそのままです。
@@ -3077,6 +3085,17 @@ const FQ = {
 
 <!-- ══ 会場 ══ -->
 <div class="pane" id="pane-place">
+<!-- fq-floor-v1: フロアガイド（パンフレットより） -->
+<section class="wrap fg">
+  <div class="sec-h"><h2 class="h-green">フロアガイド</h2></div>
+  <div class="fg-tabs" role="tablist" aria-label="階をえらぶ">
+    <button type="button" role="tab" class="fg-b on" data-fl="1f" aria-selected="true">1F<small>受付・マルシェ</small></button>
+    <button type="button" role="tab" class="fg-b" data-fl="3f" aria-selected="false">3F<small>体験・知る</small></button>
+    <button type="button" role="tab" class="fg-b" data-fl="4f" aria-selected="false">4F<small>知る・体験・参加</small></button>
+  </div>
+  <a class="fg-img" id="fgLink" href="img/floor/floor_1f.webp" target="_blank" rel="noopener"><img id="fgImg" src="img/floor/floor_1f.webp" alt="1階のフロアガイド" width="1200" height="1696" loading="lazy"></a>
+  <p class="fg-note">絵を押すと、大きく開きます（指で広げて見られます）</p>
+</section>
 <section class="wrap">
   <div class="sec-h"><h2 class="h-green">アクセス</h2></div>
   <div class="acc" id="acc"></div>
@@ -3868,6 +3887,19 @@ const FQ = {
     addEventListener('scroll', upd, { passive: true });
     upd();
   })();
+})();
+</script>
+<script>
+/* fq-floor-v1: フロアガイドの階をえらぶ */
+(function(){
+  var bs = document.querySelectorAll('.fg-b'), im = document.getElementById('fgImg'), ln = document.getElementById('fgLink');
+  var NM = {'1f':'1階','3f':'3階','4f':'4階'};
+  [].forEach.call(bs, function(b){ b.addEventListener('click', function(){
+    var f = b.getAttribute('data-fl'), src = 'img/floor/floor_' + f + '.webp';
+    [].forEach.call(bs, function(x){ var on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-selected', on ? 'true' : 'false'); });
+    if (im) { im.src = src; im.alt = NM[f] + 'のフロアガイド'; }
+    if (ln) ln.href = src;
+  }); });
 })();
 </script>
 </body>
