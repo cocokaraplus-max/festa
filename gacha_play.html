@@ -821,7 +821,8 @@
     }
     requestAnimationFrame(frame);
     function auto(){ if (!PS || PS.n > 2) return; psStop(true); PS && (PS.autoT = setTimeout(auto, (FQ.auto && AUTO_ON) ? 380 : 700)); }
-    PS.autoT = setTimeout(auto, (FQ.auto && AUTO_ON) ? 900 : 8000);   /* fq-free-auto-v1: オートはすぐ止まる */
+    PS.auto = auto;   /* fq-slot-stop-v2 */
+    PS.autoT = setTimeout(auto, (FQ.auto && AUTO_ON) ? 900 : 10000);   /* fq-free-auto-v1: オートはすぐ止まる */
   }
   function psStop(isAuto){
     if (!PS || PS.n > 2) return;
@@ -834,6 +835,7 @@
     var strip = $('strip' + (i + 1)), sym = strip.querySelectorAll('.symbol');
     sym[k].src = PS.faces[i]; LASTK[i] = k;
     var end = -(k * h) + PS.off, dist = k * h - PS.off - cur;
+    if (!isAuto && !(FQ.auto && AUTO_ON)) { clearTimeout(PS.autoT); PS.autoT = setTimeout(PS.auto, 10000); }   /* fq-slot-stop-v2: 自分で止めたら 数えなおす */
     var dur = reachLast ? 2.6 : Math.max(0.22, 2 * dist / PS.v);
     PS.n++;
     strip.style.transition = 'none'; strip.style.top = (-cur) + 'px'; void strip.offsetHeight;
