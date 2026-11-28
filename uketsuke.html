@@ -121,6 +121,17 @@
     <div id="lkOut"></div>
   </div>
 
+  <!-- == fq-restore-v1 : 記録をもどす（引きつぎ） == -->
+  <div class="card hide" id="rsBox">
+    <div style="font-weight:900;font-size:16px;margin-bottom:4px">記録をもどす（スマホを変えた・記録が消えた）</div>
+    <p class="note" style="margin-bottom:8px">前の<b>認識番号</b>を聞いて入れると「もどすQR」が出ます。お客さんのスマホのカメラで読んでもらってください。</p>
+    <div class="lk-row">
+      <input id="rsNo" type="text" inputmode="numeric" autocomplete="off" placeholder="例：12" maxlength="8">
+      <button type="button" id="rsBtn">QRを作る</button>
+    </div>
+    <div id="rsOut"></div>
+  </div>
+
   <div class="card hide" id="helpBox">
     <p class="note">
       ・ガチャはお客さんが<b>自分のスマホ</b>でまわします。受付は<b>当たりの受け取り</b>だけです。<!-- fq-self-draw-v1 --><br>
@@ -136,6 +147,7 @@
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="lib/qrcode.min.js"></script><!-- fq-restore-v1 -->
 <script>
 (function(){
   'use strict';
@@ -319,6 +331,26 @@
     var tok = b.getAttribute('data-lkunhand');
     unhand(tok, b.getAttribute('data-pz') || '景品', function(t){ if (tok === token) paint(t); lookup(); });
   });
+  /* == fq-restore-v1 : もどすQR == */
+  function rsMake(){
+    var no = $('rsNo').value.trim(), out = $('rsOut');
+    if (!no) { out.innerHTML = '<p class="msg err">認識番号を入れてください。</p>'; return; }
+    out.innerHTML = '<p class="note" style="margin-top:10px">作っています…</p>';
+    rpc('fq_restore_make', {p_staff: getStaff(), p_recog: no}).then(function(d){
+      if (!d.ok) {
+        if (d.reason === 'staff') return staffLost();
+        out.innerHTML = '<p class="msg err">' + (d.reason === 'none' ? '認識番号 ' + esc(d.recog) + ' は 見つかりません。番号を確かめてください。' : '認識番号を入れてください。') + '</p>'; return;
+      }
+      var url = location.origin + location.pathname.replace(/[^\/]*$/, '') + 'quest.html?restore=' + encodeURIComponent(d.token);
+      var svg = ''; try { var q = qrcode(0, 'M'); q.addData(url); q.make(); svg = q.createSvgTag({cellSize: 6, margin: 2, scalable: true}); } catch (e) { svg = '<p class="msg err">QRを出せませんでした</p>'; }
+      out.innerHTML = '<div class="lk-head">認識番号 ' + esc(d.recog) + (d.nickname ? '（' + esc(d.nickname) + '）' : '') + '</div>'
+        + '<p class="note">なかま ' + (d.zukan|0) + '体 ・ ガチャ ' + (d.drawn|0) + '回' + (d.goal ? ' ・ 8か所ゴール済み' : '') + '</p>'
+        + '<div style="max-width:260px;margin:10px auto">' + svg + '</div>'
+        + '<p class="note"><b>お客さんのスマホのカメラ</b>で読んでもらってください。<br>このQRは <b>10分間・1回だけ</b>使えます。<br>なまえ（なかまの数）がお客さんの話と合っているか確かめてから見せてください。</p>';
+    }).catch(function(e){ out.innerHTML = '<p class="msg err">つながりませんでした（' + esc(e.message || e) + '）</p>'; });
+  }
+  $('rsBtn').addEventListener('click', rsMake);
+  $('rsNo').addEventListener('keydown', function(e){ if (e.key === 'Enter') rsMake(); });
   $('lkBtn').addEventListener('click', lookup);
   $('lkNo').addEventListener('keydown', function(e){ if (e.key === 'Enter') lookup(); });
   $('lkOut').addEventListener('click', function(ev){
@@ -364,6 +396,7 @@
   function start(){
     show('loginBox', false); show('helpBox', true);
     show('lBox', true);   /* fq-staff-lookup-v1 */
+    show('rsBox', true);   /* fq-restore-v1 */
     show('camBtn', true);   /* fq-uke-cam-v1 */
     var l = ''; try{ l = localStorage.getItem(LKEY) || ''; }catch(e){}
     $('who').textContent = 'この端末：' + (l || '受付'); show('who', true);

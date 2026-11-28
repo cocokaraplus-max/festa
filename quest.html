@@ -2027,6 +2027,36 @@ if ('serviceWorker' in navigator) {
   if(!REAL){ return; } // 未設定：オフラインの正本演出をそのまま使う
 
   var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  /* == fq-restore-v1 : 受付で作った「もどすQR」（?restore=…）から来たら、前の認識番号の記録に戻す == */
+  var RST = ''; try{ RST = new URLSearchParams(window.__FQ_Q0 || location.search).get('restore') || ''; }catch(e){}
+  if(RST){
+    (function(){
+      function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+      function p(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+      function clean(){ try{ history.replaceState(null, '', location.pathname); }catch(e){} }
+      var ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:#fffaf0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;font-weight:900;font-size:18px;line-height:1.8;color:#3b2f2a;';
+      ov.innerHTML = '記録を もどしています…'; document.body.appendChild(ov);
+      function fail(t){ ov.innerHTML = '<div>' + t + '</div><button type="button" style="margin-top:18px;border:0;border-radius:12px;background:#6B3FA0;color:#fff;font-weight:900;font-size:16px;padding:12px 22px;font-family:inherit">とじる</button>';
+        ov.querySelector('button').onclick = function(){ clean(); location.reload(); }; }
+      sb.rpc('fq_restore_peek', {p_token: RST}).then(function(r){
+        var d = r && r.data;
+        if(!d || !d.ok){ fail('この「もどすQR」は もう使えません。<br><small>（10分すぎた・1回 使った）<br>受付で もう一度 作ってもらってね</small>'); return; }
+        var cur = g('fukushi_quest_326_did'), had = !!g('fq_secret_v1') && g('fukushi_quest_326_did_srv') === '1';
+        if(had && cur && cur !== d.recog && !confirm('認識番号 ' + d.recog + ' の記録に もどします。\nいま このスマホに入っている記録（認識番号 ' + cur + '）は 使えなくなります。\nよろしいですか？')){ clean(); location.reload(); return; }
+        return sb.rpc('fq_restore_use', {p_token: RST}).then(function(r2){
+          var e = r2 && r2.data;
+          if(!e || !e.ok || !e.secret){ fail('もどせませんでした。<br><small>受付で もう一度 作ってもらってね</small>'); return; }
+          ['fq_g2_solo_v1', 'fq_vstate_v1', 'fq_pending_codes_v1', 'fukushi_quest_326_zukan', 'fukushi_quest_326_zk_pending', 'fukushi_quest_326_lp_goal',
+           'fq_free_zukan_v1', 'fq_free_zukan86_v1', 'fq_free_mon_v1', 'fq_free_dry_v1', 'fq_play_pending_v1', 'fq_lp_intro_v1'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(x){} });
+          p('fukushi_quest_326_did', e.recog); p('fq_secret_v1', e.secret); p('fukushi_quest_326_did_srv', '1');
+          ov.innerHTML = '<div>✅ 認識番号 <b style="font-size:26px">' + e.recog + '</b> の<br>記録に もどしました！' + (d.zukan ? '<br><small>なかま ' + d.zukan + '体</small>' : '') + '</div>';
+          setTimeout(function(){ clean(); location.reload(); }, 1600);
+        });
+      }).catch(function(){ fail('つながりませんでした。<br><small>電波の良い場所で もう一度 QRを読んでね</small>'); });
+    })();
+    return;
+  }
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function emojiByRarity(r){ return ({1:'🎁',2:'🎀',3:'🎫',4:'🌈'})[r]||'🎁'; }
